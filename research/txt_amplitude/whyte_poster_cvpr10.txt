@@ -1,0 +1,113 @@
+=== PAGE 1 ===
+Non-uniform Deblurring for Shaken Images 
+Oliver Whyte1       Josef Sivic1       Andrew Zisserman2,3       Jean Ponce2 
+1INRIA       2Ecole Normale Supérieure       3University of Oxford 
+Approximately uniform blur 
+Non-uniform blur 
+Goal 
+To model and deblur camera shake  
+images with non-uniform blur 
+Application I: Blind deblurring 
+[Fergus et al. 2006, Miskin & MacKay 2000] 
+•  Kernel estimation: Variational approximation of posterior 
+•  Deblurring: Richardson-Lucy algorithm 
+Application II: Noisy/blurry pairs 
+[Yuan et al. 2007] 
+•  Kernel estimation: Least squares, using noisy image as 
+estimate of sharp image 
+•  Deblurring: Augmented Richardson-Lucy algorithm, using 
+noisy image to suppress “ringing” artifacts 
+Camera orientations: 
+3-vector 
+cameraʼs internal 
+calibration matrix 
+3 x 3 matrix 
+Rotation matrices: 
+Homographies: 
+Geometric model 
+We model the blur as being caused by the  
+3D rotation of the camera during exposure 
+blurry image 
+sharp image 
+homography at time instant  
+noise 
+Blurry image is the sum of a sequence of  
+projectively-transformed versions of the sharp image  
+Time-agnostic model 
+Replace the temporal integral with a  
+weighted integral over a set of camera orientations 
+weight function (non-zero 
+along cameraʼs trajectory) 
+   homography induced at  
+camera orientation    
+integrate over 
+camera orientations 
+0 
+0 
+0 
+⅓ 
+⅓ 
+⅓ 
+0 
+0 
+0 
+0 
++ 0 
++ 0 
++ ⅓ 
++ 0 
++ 0 
++ 0 
++ ⅓ 
++ ⅓ 
+Weights 
+“Blur kernel” 
+Blur kernel 
+Y 
+X 
+Z 
+Orientation of axes 
+Blurry image with equivalent point  
+spread functions (PSFs) overlaid 
+Blurry input image 
+Fergus et al. – uniform 
+Our result – non-uniform 
+Equivalent PSFs 
+Discrete model 
+Replace integral with a sum over a discrete  
+set of camera orientations                               d 
+Noisy input image 
+Blurry input image 
+Uniform result 
+Non-uniform result 
+Conclusion 
+•  Geometrically-derived model of camera shake blur 
+•  Compact, global, representation of blur 
+•  Modiﬁcation of two existing deblurring algorithms to use 
+our model, allowing them to handle non-uniform blur 
+    blurry pixel with 
+    homogeneous 
+coordinate vector 
+      weight for camera 
+orientation 
+interpolated point 
+in sharp image 
+interpolation coefﬁcients 
+(given by geometry) 
+sum over sharp pixels 
+Both are bilinear in the sharp image and the blur kernel 
+gi =
+!
+k
+"!
+j
+Cijkfj
+#
+wk + ε
+gi =
+!
+k
+fxi−uk,yi−vkwk + ε
+Convolution 
+Our model 
+Both blurs are possible under camera shake 

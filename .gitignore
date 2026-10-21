@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+env/
+
+# Project-specific: Generated outputs
+output/
+productions/
+.hf_home/
+.torch_home/
+
+# Project-specific: Large model files
+models/
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+*.bin
+
+# Environment & configs
+.env
+.env.local
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary research files
+_shake_research/
+
+# Virtual environments
+.ltx_env/
+
+# Large dataset files
+*.zip
+dataset/
+workspace/
+.wheels/
+colab_upload/
+kaggle_upload/
+compare_kaggle2/
+compare_v7_v8/
+project/
+transformer_latent_diffusion/
+
+# Generated files
+autoregressive_visualizer.html
+visualizer.html
+*.ipynb

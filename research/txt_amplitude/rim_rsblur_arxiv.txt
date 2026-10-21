@@ -1,0 +1,2290 @@
+=== PAGE 1 ===
+1
+Balanced Clique Computation in Signed
+Networks: Concepts and Algorithms
+Zi Chen, Long Yuan∗, Xuemin Lin, Lu Qin, Wenjie Zhang
+Abstract—Clique is one of the most fundamental models for cohesive subgraph mining in network analysis. Existing clique model
+mainly focuses on unsigned networks. However, in real world, many applications are modeled as signed networks with positive and
+negative edges. As the signed networks hold their own properties different from the unsigned networks, the existing clique model is
+inapplicable for the signed networks. Motivated by this, we propose the balanced clique model that considers the most fundamental
+and dominant theory, structural balance theory, for signed networks. Following the balanced clique model, we study the maximal
+balanced clique enumeration problem (MBCE) which computes all the maximal balanced cliques in a given signed network. Moreover,
+in some applications, users prefer a unique and representative balanced clique with maximum size rather than all balanced cliques.
+Thus, we also study the maximum balanced clique search problem (MBCS) which computes the balanced clique with maximum size.
+We show that MBCE problem and MBCS problem are both NP-Hard. For the MBCE problem, a straightforward solution is to treat the
+signed network as two unsigned networks and leverage the off-the-shelf techniques for unsigned networks. However, such a solution is
+inefﬁcient for large signed networks. To address this problem, in this paper, we ﬁrst propose a new maximal balanced clique
+enumeration algorithm by exploiting the unique properties of signed networks. Based on the new proposed algorithm, we devise two
+optimization strategies to further improve the efﬁciency of the enumeration. For the MBCS problem, we ﬁrst propose a baseline
+solution. To overcome the huge search space problem of the baseline solution, we propose a new search framework based on search
+space partition. To further improve the efﬁciency of the new framework, we propose multiple optimization strategies regarding to
+redundant search branches and invalid candidates. We conduct extensive experiments on large real datasets. The experimental results
+demonstrate the efﬁciency, effectiveness and scalability of our proposed algorithms for MBCE problem and MBCS problem.
+Index Terms—Balanced Clique, Structural Balance Theory, Signed Network, Graph Algorithm
+!
+1
+INTRODUCTION
+W
+ITH the proliferation of graph applications, research
+efforts have been devoted to many fundamental
+problems in analyzing graph data [1], [2], [3], [4], [5], [6],
+[7], [8]. Clique is one of the most fundamental cohesive
+subgraph models in graph analysis, which requires each
+pair of vertices has an edge. Due to the completeness
+requirement, clique model owns many interesting cohesive-
+ness properties, such as the distance of any two vertices
+in a clique is one, every one vertex in a clique forms a
+dominate set of the clique and the diameter of a clique
+is one [9]. As a result, clique model has wide application
+scenarios in social network mining, ﬁnancial analysis and
+computational biology and has been extensively investi-
+gated for decades. Existing studies on clique mainly focus
+on the unsigned networks, i.e., all the edges in the graph
+share the same property [10], [11], [12], [13]. Unfortunately,
+relationships between two entities in many real-world ap-
+plications have completely opposite properties, such as
+friend-foe relationships between users in social networks
+* Zi Chen and Long Yuan are the joint ﬁrst authors. Long Yuan is the
+corresponding author.
+•
+Z. Chen is with the Software Engineering Institute, East China Normal
+University, Shanghai, China.
+E-mail: zchen@sei.ecnu.edu.cn.
+•
+L. Yuan is with the School of Computer Science and Engineering, Nanjing
+University of Science and Technology, Nanjing, China.
+E-mail: longyuan@njust.edu.cn.
+•
+X. Lin and W. Zhang are with University of New South Wales, Sydney,
+Australia.
+E-mail: {lxue,zhangw}@cse.unsw.edu.au
+•
+L. Qin is with Centre for QCIS, University of Technology, Sydney,
+Australia.
+E-mail: lu.qin@uts.edu.au.
+2
+3
+4
+1
+5
+6
+(a) G
+2
+3
+4
+1
+5
+6
+(b) G′
+Fig. 1: Imbalanced Graph and Balanced Graph
+[14], [15], support-dissent opinions in opinion networks
+[16], trust-distrust relationships in trust networks [17] and
+partnership-antagonism in protein-protein interaction net-
+works [18]. Modelling these applications as signed networks
+with positive and negative edges allows them to capture
+more sophisticated semantics than unsigned networks [17],
+[19], [20], [21], [22], [23]. Consequently, existing studies on
+clique ignoring the sign associated with each edge may be
+inappropriate to characterize the cohesive subgraphs in a
+signed network and there is an urgent need to deﬁne an
+exclusive clique model tailored for the signed networks.
+For the signed networks, the most fundamental and
+dominant theory revealing the dynamics and construction
+of the signed networks is the structural balance theory [14],
+[17], [19], [20], [21], [22], [23], [24], [25]. The intuition under-
+lying the structural balance theory can be described as the
+aphorisms: “The friend (resp. enemy) of my friend (resp.
+enemy) is my friend, the friend (resp. enemy) of my enemy
+(resp. friend) is my enemy”. Speciﬁcally, a signed network
+G is structural balanced if G can be split into two subgraphs
+such that the edges in the same subgraph are positive and
+arXiv:2204.00515v1  [cs.DS]  1 Apr 2022
+
+=== PAGE 2 ===
+2
+the edges between subgraphs are negative [25]. In a signed
+network, an imbalanced sub-structure is unstable and tends
+to evolve into a balanced state. Consider the graph G
+shown in Figure 1 (a). The negative edge between v1 and
+v2 makes G imbalanced. v1 and v2 have a mutual “friend”
+v3 and mutual “enemies” v4, v5 and v6. It means v1 and v2
+share more common grounds than differences. According to
+structural balance theory, v1 and v2 tend to be allies as time
+goes by. G′ shown in Figure 1 (b) is the evolved balanced
+counterpart of G. In G′, the sign of the edge between v1
+and v2 becomes positive. {v1, v2, v3} and {v4, v5, v6} form
+two alliances and the edges in the same alliance are positive
+and the edges connecting different alliances are negative.
+As illustrated in this example, structural balance reﬂects the
+key characteristics of the signed networks.
+According to the above analysis, clique model is a fun-
+damental cohesive subgraph model in graph analysis, but
+there is no appropriate counterpart in the signed networks.
+Meanwhile, the structure of the signed networks is expected
+to be balanced based on the structure balance theory. Mo-
+tivated by this, we propose a maximal balanced clique
+model in this paper. Formally, given a signed network G,
+a maximal balanced clique C is a maximal subgraph of G
+such that (1) C is complete, i.e., every pair of vertices in
+C has an edge. (2) C is balanced, i.e., C can be divided
+into two parts such that the edges in the same part are
+positive and the edges connecting two parts are negative.
+This deﬁnition not only catches the essence of the clique
+model in the unsigned networks but also guarantees that
+a detected clique is stable in the signed networks. In this
+paper, we aim to devise efﬁcient algorithms to enumerate
+all maximal balanced cliques in a given signed network.
+Moreover, in real signed networks, the number of maxi-
+mal balanced cliques could be extremely large. For instance,
+in ”Douban” network which is a Chinese score service
+website, there are more than a million balanced cliques in it.
+However, in some applications, users prefer a unique and
+representative balanced clique with maximum size rather
+than all balanced cliques. Maximum clique search problem
+is a fundamental and hot research topic in graph analysis.
+In the literature, numerous studies have been conducted,
+such as maximum clique search [26], [27], maximum quasi-
+clique search [28], maximum bi-clique search [29], k*-partite
+clique with maximum edges [30], clique with maximum
+edge/vertex weight on weighted graph [31], [32]. Motivated
+by this, we aim to devise a maximum balanced clique search
+algorithm to ﬁnd out the balanced clique with maximum
+vertex size, which can scale to large-scale real signed net-
+works (with more than 100 million edges).
+Applications. Balanced clique computation can be used in
+many applications, for example:
+(1) Opinion leaders detection in opinion networks. Opinion
+leaders are people who are active in a community capturing
+the most representative opinions in the social networks [33].
+In an opinion network, each vertex represents a user and
+there is a positive/negative edge between two vertices if
+one user support/dissent another user. A maximal balanced
+clique in an opinion network represents a group of users,
+such that these users actively involve in the opinion net-
+works and have their clear standpoints. Hence, the users
+in the maximal balanced cliques are good candidates of
+opinion leaders in the opinion network.
+(2) Finding international alliances-rivalries groups. The inter-
+national relationships between nations can be modeled as
+a signed network, where each vertex represents a nation,
+positive and negative edges indicate alliances and rivalries,
+respectively. Computing the maximal balanced cliques in
+such networks reveals hostile groups of allied forces [14],
+[34]. We can extend it to ﬁnd the alliances-rivalries commer-
+cial groups among business organizations similarly, such as
+{Pepsi, KFC} vs {Coke, McDonald} [35].
+(3) Synonym and antonym groups discovery. In a word net-
+work, each vertex represents a word and there is a positive
+edge between two synonyms and a negative edge between
+two antonyms [36]. In such signed networks, our model
+can discover synonym groups that are antonymous with
+each other, such as, {interior, internal, intimate} and {away,
+foreign, outer, outside, remote}. These discovered groups
+may be further used in applications such as automatic
+question generation [37] and semantic expansion [38].
+Contributions. In this paper, we make the following contri-
+butions:
+(1) The ﬁrst work to study the maximal balanced clique model.
+We formalize the balanced clique model in signed networks
+based on the structural balance theory. To the best of our
+knowledge, this is the ﬁrst work considering the structural
+balance of the cliques in signed networks. We also prove the
+NP-Hardness of the problem.
+(2) A new framework tailored for maximal balanced clique
+enumeration in signed networks. After investigating the draw-
+backs of the straightforward approach, we propose a new
+framework for the maximal balanced clique enumeration.
+Our new framework enumerates the maximal balanced
+cliques based on the signed network directly and its mem-
+ory consumption is linear to the size of the input signed
+network.
+(3) Two effective optimization strategies to further improve the
+enumeration performance. We explore two optimization strate-
+gies, in-enumeration optimization and pre-enumeration op-
+timization, to further improve the enumeration perfor-
+mance. The in-enumeration optimization can avoid the ex-
+ploration for unpromising vertices during the enumeration
+while the pre-enumeration techniques can prune unpromis-
+ing vertices and edges before enumeration.
+(4) An efﬁcient maximum balanced clique search algorithm.
+To address the maximum balanced clique search problem,
+we ﬁrst propose a baseline algorithm. In order to reduce
+the search space during the search process of baseline, we
+propose a search space partition-based algorithm MBCSear-
+SSP by partitioning the whole search space into multiple
+search regions. In each search region, two size thresholds
+κ and κ are used to search the result matching the size re-
+quirement speciﬁc to this search region, such that the search
+space is limited into a small area. To further improve the
+efﬁciency of MBCSear-SSP algorithm, we also explore three
+optimization strategies to prune invalid search branches and
+candidates during the search process.
+(5) Extensive performance studies on real datasets. We ﬁrst eval-
+uate the performance of MBCE algorithms by conducting
+extensive experimental studies on real datasets. As shown in
+
+=== PAGE 3 ===
+3
+our experiments, the baseline approach only works on small
+datasets while our approach can complete the enumeration
+efﬁciently on both small and large datasets. Then, we evalu-
+ate the performance of our proposed MBCS algorithm. The
+baseline algorithm can not get the result within a reason-
+able time on large datasets, while our optimized algorithm
+shows high efﬁciency, effectiveness and scalability.
+2
+RELATED WORK
+Signed network analysis. Structural balance theory is origi-
+nally introduced in [24] and generalized in the graph forma-
+tion in [19], [25]. After that, structural balance theory is de-
+veloped extensively [17], [20], [21], [22], [23]. In these works,
+it is interesting to mention that the authors in [22] model the
+evolving procedure of a signed network and theoretically
+prove that the network would evolve into a balanced clique
+when the mean value of the initial friendliness among the
+vertices µ ≤0. [39] provides a comprehensive survey on
+structural balanced theory.
+Besides, a large body of literature on mining signed
+networks has been emerged. Among them, the most closely
+related work to ours is [40] in which an (α, k)-clique model
+is proposed. Compared with our model, (α, k)-clique model
+only considers the amount of positive and negative edges
+in the clique and the structural balance of the clique is
+totally ignored, which makes (α, k)-clique model essentially
+different from our model. In [41], a k-balanced trusted clique
+model is proposed. Although the k-balanced trusted clique
+model has a similar name with our model, it ignores the
+negative edges in the clique, which means the information
+of the negative edges are totally missed.
+Clique on unsigned networks. Clique model is one of the
+most fundamental cohesive subgraph models. [10] proposes
+an efﬁcient algorithm for maximal clique enumeration based
+on backtracking search. [42] ﬁrst considers the memory con-
+sumption during the maximal clique enumeration. Based
+on [10], more efﬁcient algorithms are investigated [11], [12],
+[43]. [11] proposes a novel branch pruning strategy, which
+can efﬁciently reduce the search space by ignoring the
+search process from the neighbors of the pivot. [44] reviews
+recently advances in maximal clique enumeration. Based on
+clique, other cohesive subgraph models are also studied,
+such as k-core [45], k-truss [46], [47], k-edge connected
+component [48], [49], [50], and (r, s)-nuclei [51], [52].
+3
+PROBLEM STATEMENT
+In this paper, we consider an undirected and unweighted
+signed network G = (V, E+, E−), where V denotes the set
+of vertices, E+ denotes the positive edges and E−denotes
+the negative edges connecting the vertices in G. We denote
+the number of vertices and number of edges by n and m,
+respectively. For each vertex v ∈G, let N +
+G (v) represents
+the positive neighbors of v, and let N −
+G (v) represents the
+negative neighbors of v. We use d+
+G(v) and d−
+G(v) to denote
+the positive and negative degree of v, respectively. We also
+use NG(v) and dG(v) to denote the neighbors and degree
+of v, i.e., NG(v) = N −
+G (v) ∪N +
+G (v) and dG(v) = d+
+G(v) +
+d−
+G(v). For simplicity, we omit G in the above notations if
+the context is self-evident.
+Deﬁnition 3.1: (Balanced Network [25]) Given a signed net-
+work G = (V, E+, E−), it’s balanced iff it can be split into
+13
+0
+15
+14
+3
+1
+2
+4
+19
+16
+17
+18
+8
+9
+6
+7
+5
+10
+11
+12
+ 
+C3
+C4
+C1
+C2
+Fig. 2: Maximal Balanced Clique in G (k = 2)
+two subgraphs GL and GR, s.t. ∀(u, v) ∈E+ →u, v ∈GL
+or u, v ∈GR, and ∀(u, v) ∈E−→u ∈GL, v ∈GR or
+u ∈GR, v ∈GL.
+2
+Deﬁnition 3.2: (Maximal Balanced Clique) Given a signed
+network G = (V, E+, E−), a maximal balanced clique C
+is a maximal subgraph of G that satisﬁes the following
+constraints:
+• Complete: C is complete, i.e, ∀u, v ∈C →(u, v) ∈
+E+ ∪E−.
+• Balanced: C is balanced, i.e, it can be split into two sub-
+cliques CL and CR, s.t. ∀u, v ∈CL or u, v ∈CR →
+(u, v) ∈E+, and ∀u ∈CL, v ∈CR or u ∈CR, v ∈
+CL →(u, v) ∈E−.
+2
+Deﬁnition 3.3: (Maximum Balanced Clique) Given a signed
+network G = (V, E+, E−), a maximum balanced clique C∗
+in G is a balanced clique with the maximum vertex size. 2
+Since many real applications require that the number of
+vertices in CL and CR is not less than a ﬁxed threshold,
+we add a size constraint on |CL| and |CR| s.t. |CL| ≥k
+and |CR| ≥k. With the size constraint, users can control the
+size of the returned maximal balanced cliques based on their
+speciﬁc requirements. We formalize the studied problems in
+the paper as follows:
+Problem Statement. Given a signed network G and an
+integer k,
+• the maximal balanced clique enumeration (MBCE)
+problem aims to compute all the maximal balanced
+cliques C in G s.t. |CL| ≥k and |CR| ≥k for C.
+• the maximum balanced clique search (MBCS) problem
+aims to compute the balanced clique C∗in G s.t. |C∗
+L| ≥
+k, |C∗
+R| ≥k and |C∗
+L| + |C∗
+R| is maximum.
+Example 3.1: Consider the signed network G in Figure 2
+in which positive/negative edges are denoted by solid/-
+dashed lines. Assume k = 2, there are 4 maximal balanced
+cliques in G, namely, C1 = {{v1, v2, v3}, {v5, v7}}, C2 =
+{{v0, v1, v3}, {v5, v6, v7}}, C3
+=
+{{v0, v1}, {v5, v6, v8}},
+C4 = {{v0, v14}, {v13, v15}}, where vertices in CL and CR
+are marked with different colors. Among them, C2 is the
+maximum balanced clique.
+2
+Problem Hardness.The MBCE problem is NP-Hard, which
+can be proved following the NP-Hardness of maximal clique
+enumeration problem [53], [54]. Given an unsigned network
+G = (V, E), we can transfer G to a signed network G′
+as follows: we ﬁrst keep all the vertices of G in G′ and
+
+=== PAGE 4 ===
+4
+all the edges of G as positive edges in G′; then, we add
+a new vertex v to G′ and connect v to all vertices in G′
+with negative edges. It’s clear that each maximal clique
+C in G corresponds a maximal balanced clique {{v}, C}
+in G′ (assume k = 1), which means the maximal clique
+enumeration problem in G can be reduced to the MBCE
+problem in G′. As the maximal clique enumeration problem
+is NP-Hard [53], [54], our MBCE problem is also NP-Hard.
+Similarly, reconsidering G and G′, the maximum clique
+C∗
+in G corresponds the maximum balanced clique
+{{v}, C∗} in G′, and vice versa. As the maximum clique
+search problem is NP-Hard [26], [27], our MBCS problem is
+also NP-Hard.
+4
+A BASELINE ALGORITHM FOR MBCE PROBLEM
+We ﬁrst propose a baseline algorithm to address MBCE
+problem based on existing methods for maximal clique
+enumeration [12] and maximal biclique enumeration [55] in
+unsigned networks. For a signed network G = (V, E+, E−),
+we can treat it as the combination of two unsigned networks
+G+ = (V, E+) and G−= (V, E−). For any maximal
+balanced clique C = {CL, CR} in G, it is clear that CL
+(resp. CR) is a clique in G+ and the subgraph induced by
+vertices in CL and CR in G−is a biclique. Therefore, we
+can enumerate the maximal balanced cliques in G in two
+steps: 1) compute all the maximal cliques in G+ with [12];
+2) for each pair of the computed maximal cliques Ci and
+Cj in G+, compute the maximal bicliques in the bipartite
+subgraph induced by the vertices in Ci and Cj in G−with
+[55]. The returned maximal bicliques in G−are the maximal
+balanced cliques in G.
+Drawbacks of baseline. Since Baseline does not consider the
+uniqueness of the signed networks and processes MBCE
+with the techniques for the unsigned networks, it has two
+drawbacks:
+• Memory consumption. Baseline has to store all the
+maximal cliques in G+ in memory. The number of
+maximal cliques could be exponential to the number
+of vertices [11], which makes Baseline unable to handle
+large networks.
+• Efﬁciency. In baseline, all the maximal cliques in G+
+are enumerated and every pair of maximal cliques are
+explored. The time complexity of Baseline is O(TCli+η2·
+TBiCli), where TBiCli/TCli represent the time complexity
+of maximal (bi)clique enumeration, and η is the number
+of enumerated maximal cliques in G+. Considering the
+maximal (bi)clique enumeration is time-consuming and
+the number of maximal cliques could be very large, it
+is inefﬁcient for MBCE problem.
+5
+A NEW ENUMERATION FRAMEWORK
+Revisiting baseline, the root leading to its drawbacks dis-
+cussed above is that it treats the signed network as a speciﬁc
+combination of two unsigned networks and utilizes the
+existing techniques designed for the unsigned networks.
+Therefore, we have to explore new techniques by consid-
+ering the uniqueness of signed networks to overcome the
+drawbacks of Baseline and improve the efﬁciency of the
+enumeration. In this section, we present a new enumeration
+framework which aims to address the memory consumption
+Algorithm 1 MBCEnum (G = (V, E+, E−), k)
+1: Flag ←true;
+2: for each vi ∈{v0, v1, · · · , vn−1} ∈V do
+3:
+CL ←{vi}, CR ←∅
+4:
+PL ←N +
+G (vi) ∩{vi+1, · · · , vn−1};
+5:
+PR ←N −
+G (vi) ∩{vi+1, · · · , vn−1};
+6:
+QL ←N +
+G (vi) ∩{v0, · · · , vi−1};
+7:
+QR ←N −
+G (vi) ∩{v0, · · · , vi−1};
+8:
+MBCEnumUtil (CL, CR, PL, PR, QL, QR);
+9: Procedure MBCEnumUtil (CL, CR, PL, PR, QL, QR)
+10: if PL = ∅and PR = ∅and QL = ∅and QR = ∅then
+11:
+if |CL| ≥k and |CR| ≥k then
+12:
+output C = {CL, CR};
+13:
+return
+14: Flag ←!Flag;
+15: if Flag then
+16:
+for each v ∈PL do
+17:
+MBCEnumUtil(CL ∪{v}, CR, N +
+G (v) ∩PL, N −
+G (v) ∩
+PR, N +
+G (v) ∩QL, N −
+G (v) ∩QR);
+18:
+PL ←PL \ {v}; QL ←QL ∪{v};
+19:
+for each v ∈PR do
+20:
+MBCEnumUtil(CL, CR ∪{v}, N −
+G (v) ∩PL, N +
+G (v) ∩
+PR, N −
+G (v) ∩QL, N +
+G (v) ∩QR);
+21:
+PR ←PR \ {v}; QR ←QR ∪{v};
+22: else
+23:
+line 19-21; line 16-18;
+problem. In next section, we further optimize the enumera-
+tion framework to improve the efﬁciency.
+Lemma 5.1: Given a signed network G, for a balanced clique
+C = {CL, CR} in G, if there is a vertex v in G such that ∀u ∈
+CL →(v, u) ∈E+ and ∀w ∈CR →(v, w) ∈E−, then
+C′ = {CL ∪{v}, CR} is also a balanced clique in G.
+According to Lemma 5.1, if we maintain a balanced
+clique C = {CL, CR}, let PL be the set of vertices that are
+positive neighbors of all the vertices in CL and negative
+neighbors of all the vertices in CR, let PR be the set of
+vertices that are positive neighbors of all the vertices in
+CR and negative neighbors of all the vertices in CL, we
+can enlarge C by adding vertices from PL and PR into CL
+and CR, respectively. Furthermore, if we update the PL and
+PR based on the new CL and CR accordingly and repeat
+the above enlargement procedure, we can obtain a maximal
+balanced clique when no more vertices can be added into
+CL or CR.
+Algorithm of MBCEnum. Following the above idea, our al-
+gorithm for MBCE is shown in Algorithm 1. For each vertex
+vi in G (line 2), we enumerate all the maximal balanced
+cliques containing vi (line 3-8). Note that v0, v1, . . . , vn are
+in the degeneracy order [56] of G. We use CL and CR to
+maintain the balanced clique, which are initialized with vi
+and ∅, respectively (line 3). Similarly, we also initialize PL
+and PR as discussed above (line 4-5). Moreover, we use QL
+and QR to record the vertices that have been processed to
+avoid outputting duplicate maximal balanced cliques (line
+6-7). After initializing these six sets, we invoke procedure
+MBCEnumUtil
+to enumerate all the maximal balanced
+cliques containing vi (line 8).
+Procedure MBCEnumUtil performs the maximal bal-
+anced clique enumeration based on the given six sets. If PL,
+PR, QL and QR are empty, which means current balanced
+clique C = {CL, CR} cannot be enlarged and it is a maximal
+
+=== PAGE 5 ===
+5
+ 𝑺𝟏
+ 𝑺𝟐
+ 𝑺𝟒
+1
+3
+5
+6
+7
+8
+L:
+R:
+𝑪𝑹
+𝑷𝑳
+Others
+Q
+ 𝑺𝟑
+ 𝑺𝟓
+0
+1
+3
+5
+6
+7
+8
+L:
+R:
+0
+1
+3
+5
+6
+7
+8
+L:
+R:
+0
+1
+3
+5
+6
+7
+8
+L:
+R:
+0
+1
+3
+5
+6
+8
+7
+L:
+R:
+0
++𝒗𝟕
++𝒗𝟑
++𝒗𝟕
++𝒗𝟖
+𝑪𝑳
+𝑷𝑹
+Fig. 3: Search Tree for MBCEnum
+balanced clique, MBCEnumUtil checks whether CL and CR
+satisfy the size constraint. If the size constraint is satisﬁed, it
+outputs the maximal balanced clique C (line 11-12). Other-
+wise, MBCEnumUtil adds a vertex from PL to CL, updates
+the corresponding PL, PR, QL and QR, and recursively
+invokes itself to further enlarge the balanced clique (line
+17). When v ∈PL is processed, v is removed from PL and
+added in QL (line 18). Similar processing steps are applied
+on vertices in PR (line 19-21). Variable Flag (line 1) is used
+to control the order of adding new vertex into CL or CR.
+With the switch operation in line 14, we can guarantee that
+we add vertex into CL, then into CR, recursively.
+Example 5.1: The enumeration procedure of MBCEnum can
+be illustrated as a search tree. Figure 3 shows part of the
+search tree when we conduct the MBCE on G in Figure 2
+through MBCEnum. S1, S2, . . . represent different search
+states during the enumeration. At S1, we assume that we
+have a balanced clique with CL={v0, v1}, CR={v5, v6}},
+PL={v3} and PR={v7, v8} at this state. We ﬁrst grow
+search branch by adding v3 into CL. At S2, PL is empty,
+PR = {v7}, hence, we add v7 into CR at S3 and obtain
+C2 = {{v0, v1, v3}, {v5, v6, v7}}. Now, the search branch
+from v3 is ﬁnished, we return to S1 state. Since v3 has been
+explored, it is removed to QL, PL is empty now. Then, we
+add v7 from PR to CR at S4. Due to C2 has been found at S3,
+current result at S4 is not maximal and can not be output.
+Next, we return to S1 and ﬁnd C3 = {{v0, v1}, {v5, v6, v8}}
+by adding v8 into CR. Here, the search procedure at this
+search tree is ﬁnished. Other maximal balanced cliques can
+be found in a similar way.
+2
+Based on Algorithm 1, it is clear that the memory con-
+sumption of our enumeration framework is linear to the
+size of the input signed network. Therefore, the drawback
+of large memory consumption in Baseline is avoided.
+6
+ENUMERATION OPTIMIZATION STRATEGIES
+Although Algorithm 1 addresses the memory consumption
+problem in MBCE, the efﬁciency of Algorithm 1 is dis-
+appointing. In this section, we present two optimization
+strategies, namely in-enumeration optimization and pre-
+enumeration optimization, to further improve the efﬁciency
+of the enumeration.
+6.1
+In-Enumeration Optimization
+Branch Pruning. Branch pruning aims to prune the unfruit-
+ful branches in the search tree of Algorithm 1 to improve
+the performance.
+Pivot Choosing. Consider the maximal balanced clique
+search procedure of Algorithm 1, assume that we currently
+have CL, CR, PL and PR, and we add a vertex v from PL
+to CL in line 17. After ﬁnishing the search starting from v,
+we do not need to further explore the positive neighbors
+of v in the for loop of line 16 and the negative neighbors
+of v in the for loop of line 19. The reasons are as follows:
+w.o.l.g, let v′ be a positive neighbor of v, although we skip
+the maximal balanced clique search starting from v′, these
+maximal balanced cliques containing v′ must be explored
+by the searching branches starting v or neighbors of v′.
+Therefore skipping the search starting from v’s neighbors
+does not affect the correctness of Algorithm 1.
+In this paper, to maximum the beneﬁts of pivot tech-
+nology, we deﬁne the local degree for a vertex v ∈PL ∪
+QL(PR∪QR) as dl(v) = |N +(−)(v)∩PL|+|N −(+)(v)∩PR|,
+and we choose the vertex v that satisﬁes maxv∈V ′{dl(v)} as
+the pivot, where V ′ = PL ∪PR ∪QL ∪QR.
+Candidate Selection. In the search procedure of Algo-
+rithm 1, heuristically, search starting from a vertex with
+small local degree will have a short and narrow search
+branch, which means the search starting from the vertex
+will be ﬁnished very fast. Moreover, due to the search ﬁnish
+of the vertex, the vertex will be added into the excluded set
+and it can be used to further prune other search branches.
+Therefore, instead of adding vertices from PL and PR into
+CL and CR randomly in line 16 and 19 of Algorithm 1, we
+add vertices in the increasing order of their local degrees.
+Early Termination. We consider different conditions that
+we can terminate the search early in Algorithm 1. For a
+balanced clique C = {CL, CR}, the maximal possible size of
+CL (CR) for the ﬁnal maximal balanced clique is |CL|+|PL|
+(|CR| + |PR|). Based on the size constraint of k, we have the
+following rule:
+• ET Rule 1: If |CL| + |PL| < k or |CR| + |PR| < k, we
+can terminate current search directly.
+In Algorithm 1, we use QL and QR to store such vertices
+that the maximal balanced cliques containing them have
+been enumerated. Therefore, during the enumeration, if
+there exists a vertex v ∈QL(QR) such that PL(PR) ⊆
+N +
+G (v) and PR(PL) ⊆N −
+G (v), then we can conclude that the
+maximal balanced cliques have been enumerated. Following
+this, we have our second rule:
+• ET Rule 2: If ∃v ∈QL, s.t., PL ⊆N +
+G (v) and PR ⊆
+N −
+G (v) or ∃v ∈QR, s.t., PR ⊆N +
+G (v) and PL ⊆N −
+G (v),
+then we can terminate current search directly.
+In a certain search of Algorithm 1, if all the vertices in
+PL (PR) consist a clique formed by positive edges and every
+vertex in PL (PR) has negative edges to all the vertices in
+PR (PL), then PL and PR consist a balanced clique. Then,
+based on Deﬁnition 3.2, CL ∪PL and CR ∪PR consist a
+maximal balanced clique. Therefore, we have our third early
+termination rule:
+• ET Rule 3: If ∀pl ∈PL, s.t., PL ⊆{{pl} ∪N +
+G (pl)}
+and PR ⊆N −
+G (pl) and ∀pr ∈PR, s.t., PR ⊆{{pr} ∪
+N +
+G (pr)} and PL ⊆N −
+G (pr), we can output C = (CL ∪
+PL, CR ∪PR) and terminate current search directly.
+Note that, in order to avoid outputting duplicate max-
+imal balanced cliques, ET Rule 3 must be applied after ET
+Rule 2.
+
+=== PAGE 6 ===
+6
+𝑢𝑢
+𝑣𝑣
+𝑤𝑤
+(a)
+𝑢𝑢
+𝑣𝑣
+𝑤𝑤
+(b)
+𝑢𝑢
+𝑣𝑣
+𝑤𝑤
+(c)
+𝑢𝑢
+𝑣𝑣
+𝑤𝑤
+(d)
+Fig. 4: Different types of common neighbors for (u, v)
+Algorithm of MBCEnum∗. Utilizing the in-enumeration op-
+timization strategies, we propose the optimized algorithm
+MBCEnum∗. The pseudocode is omitted here due to space
+constraints.
+Theorem 6.1: Given a signed network G, the time complexity of
+MBCEnum∗is O(σn · 3σ/3), where σ is the degeneracy number
+of G.
+6.2
+Pre-Enumeration Optimization
+In pre-enumeration optimization, we aim to remove the
+unpromising vertices and edges that not contained in any
+maximal balanced clique. We explore two optimization
+strategies based on the neighbors of a vertex and the com-
+mon neighbors of an edge.
+Vertex Reduction. To reduce the size of a signed network,
+we ﬁrst consider the neighbors of each vertex v, i.e., N +
+G (v)
+and N −
+G (v) to remove the unpromising vertices. We ﬁrst
+deﬁne:
+Deﬁnition 6.1: ((l, r)-signed core) Given a signed network
+G = (V, E+, E−), two integers l and r, a (l, r)-signed core
+is a maximal subgraph C of G, s.t., minv∈C{d+
+C (v)} = l,
+minv∈C{d−
+C (v)} = r.
+2
+Lemma 6.1: Given a signed network G and threshold k, a
+maximal balanced clique satisfying the size constraint with k is
+contained in a (k −1, k)-signed core.
+Therefore, in order to compute the maximal balanced
+cliques in a given signed network G with integer k, we
+only need to compute the maximal balanced cliques in the
+corresponding (k −1, k)-signed core of G. The remaining
+problem is how to efﬁciently compute the (k −1, k)-signed
+core. We propose a linear algorithm VertexReduction to
+address this problem.
+Algorithm of VertexReduction. Based on Deﬁnition 6.1, to
+compute the (k −1, k)-signed core in the signed network G,
+we only need to identify the vertices with d+
+G(v) < k −1 or
+d−
+G(v) < k and remove them from G. Due to the removal
+of such vertices, more vertices will violate the degree con-
+straints, we can further remove these vertices until no such
+kind of vertices exist in G.
+Theorem 6.2: Given a signed network G and an integer k, the
+time complexity of VertexReduction is O(n + m).
+Edge Reduction. In this part, we explore the opportunities
+to remove unpromising edges with respect to MBCE by
+considering the common neighbors of an edge formed by
+different types of edges. Speciﬁcally, for a positive/negative
+edge (u, v), we deﬁne the edge common neighbor number:
+Deﬁnition 6.2: (Edge Common Neighbor Number) Given a
+signed network G = (V, E+, E−), for a positive edge (u, v),
+we deﬁne:
+• δ++
+G (u, v) = |{w|(u, w) ∈E+ ∧(v, w) ∈E+}|
+• δ−−
+G (u, v) = |{w|(u, w) ∈E−∧(v, w) ∈E−}|
+for a negative edge (u, v), we deﬁne:
+• δ+−
+G (u, v) = |{w|(u, w) ∈E+ ∧(v, w) ∈E−}|
+• δ−+
+G (u, v) = |{w|(u, w) ∈E−∧(v, w) ∈E+}|
+2
+Figure 4 shows the different types of common neighbors
+used in Deﬁnition 6.2. For a positive edge (u, v), Figure 4 (a)
+and (b) show the common neighbor w used in δ++
+G (u, v) and
+δ−−
+G (u, v), respectively. For a negative edge (u, v), Figure 4
+(c) and (d) show the common neighbor w used in δ+−
+G (u, v)
+and δ−+
+G (u, v), respectively. Note that G is undirected and
+every edge is stored once in G. Based on Deﬁnition 6.2, we
+have the following lemma:
+Lemma 6.2: Given a signed network G and an integer k, let G′
+be the maximal sub-network of G s.t.,
+1) ∀(u, v) ∈E+
+G′ →δ++
+G′ (u, v) ≥k −2 ∧δ−−
+G′ (u, v) ≥k;
+2) ∀(u, v) ∈E−
+G′ →δ+−
+G′ (u, v) ≥k−1∧δ−+
+G′ (u, v) ≥k−1;
+then, every maximal balanced clique C = {CL, CR} in G
+satisfying the size constraint with k is contained in G′.
+Algorithm of EdgeReduction. With Lemma 6.2, in order
+to enumerate the maximal balanced cliques in a given
+signed network G with respect k, we only need to keep the
+edges in G′ shown in Lemma 6.2 and the positive/negative
+edges not in G′ can be safely pruned. We ﬁrst compute
+δ++
+G (u, v) and δ−−
+G (u, v) for each positive edge of G and
+δ+−
+G (u, v) and δ−+
+G (u, v) for each negative edge of G. Fol-
+lowing Lemma 6.2, for each positive edge (u, v) such that
+δ++
+G (u, v) < k −2 or δ−−
+G (u, v) < k, we remove (u, v). After
+that, we decrease the corresponding edge common neighbor
+numbers that have been changed due to the removal of
+(u, v) for the edge incident to (u, v) based on Deﬁnition 6.2.
+It’s similar to negative edges. The algorithm terminates
+when all the edges satisfy conditions in Lemma 6.2.
+Theorem 6.3: Given a signed network G, an integer k, the time
+complexity of EdgeReduction is O(m1.5).
+7
+MAXIMUM BALANCED CLIQUE SEARCH
+Maximum clique search problem is a fundamental and hot
+research topic in graph analysis. In this section, we study
+the maximum balanced clique search problem.
+7.1
+A Baseline Approach
+We ﬁrst propose a baseline approach, namely MBCSear,
+to compute the maximum balanced clique in the input
+graph. We continuously enumerate the maximal balanced
+cliques in the input graph and maintain the maximum
+balanced clique C∗found so far. For each search branch
+(CL, CR, PL, PR), if |CL| + |CR| + |PL| + |PR| ≤ϵ, where
+ϵ = |C∗|, we can terminate the branch. When the enumer-
+ation ﬁnishes, it is easy to verify that C∗is the maximum
+balanced clique.
+Drawbacks of MBCSear. Although the straightforward ap-
+proach can ﬁnd the maximum balanced clique, the com-
+plexity of MBCSear is the same as that of MBCEnum∗in the
+worst case. The search space of MBCSear is huge. In details,
+the drawbacks of MBCSear are twofold.
+
+=== PAGE 7 ===
+7
+• Lack of rigorous size constraints for |CL| and |CR|.
+Given a signed graph G, during the search process,
+MBCSear only holds the size constraint |CL| + |CR| +
+|PL| + |PR| > ϵ for each search branch. However, when
+ϵ is small, most of search branches have |CL| + |CR| +
+|PL| + |PR| larger than ϵ which causes the fail of size
+constraint for most search branches. Unfortunately, as
+our algorithm constantly searches larger result than at
+present, the value of ϵ is gradually increasing from a
+small value, which makes MBCSear has to search the
+result with large search space.
+• Massive invalid search branches. Although the search
+branches meet the size constraint with ϵ, the structure
+between PL and PR maybe sparse which will gener-
+ates invalid search branches. Hence, during the search
+process, more pruning techniques is needed urgently.
+Moreover, the optimization strategies based on k in
+MBCEnum∗, like vertex reduction and edge reduction,
+are limited here, as C∗usually has size much larger
+than k. Therefore, the remaining graph after reduction
+is still huge on large-scale signed network.
+Main idea. In the further work, we aim to improve the
+efﬁciency of our algorithm.
+• To address the ﬁrst drawback of lacking of rigorous
+size constraints for |CL| and |CR|, we can propose κ
+and κ as the lower bounds for min{|CL|, |CR|} and
+max{|CL|, |CR|}, respectively. Then, we can get the
+balanced cliques with |CL| ≥κ and |CR| ≥κ within
+narrow search space (assume |CL| ≤|CR|). Under
+different value of κ and κ, the search space is split into
+multiple partitions. Moreover, with initializing κ or κ as
+large value, we can search balanced cliques with large
+size as priority. Under large ϵ and rigorous bounds κ
+and κ, the search space can be signiﬁcantly reduced.
+• To address the second drawback of massive invalid
+search branches, regarding to bounds ϵ, κ and κ, we can
+propose optimizations to forecast the size of balanced
+clique found in the current search branch to avoid
+invalid search branches and remove redundant vertices
+from candidates. Moreover, we can extend the vertex
+reduction and edge reduction of MBCEnum∗with new
+bounds to prune more useless vertices and edges.
+7.2
+Search Space Partition-based Framework
+To improve the efﬁciency of our approach, regarding to the
+ﬁrst drawback of MBCSear, in this subsection, we propose a
+new maximum balance clique search framework MBCSear-
+SSP with two lower bounds κ and κ for |CL| and |CR|.
+Given certain value κi and κi, a search region is denoted
+as (κi, κi), the maximum balanced clique found in it should
+satisﬁes |CL| ≥κi and |CR| ≥κi if |CL| ≤|CR| (otherwise,
+swap L and R). Under different value of κ and κ, the whole
+search space can be divided into several search regions. In
+each search region, we keep searching larger result than
+at present. When all search regions are explored, the ﬁnal
+result C∗can be found.
+As our main idea, to search the result with large size as
+priority, for the ﬁrst search region (κ0, κ0), κ0 is initialized
+as a large integer value. Obviously, as κ0 value is large,
+beneﬁted from the strict size constraint, most of search
+branches of MBCSear are ineligible now. Hence the result
+Algorithm 2 MBCSear-SSP (G = (V, E+, E−), k)
+1: compute degeneracy σ of G+ = (V, E+);
+2: ϵ ←2k; κ ←k; κ ←σ + 1; κ′ ←−1;
+3: while κ ≥κ and κ < κ′ do
+4:
+MBCSear (G = (V, E+, E−), ϵ) with adding size con-
+straints: min{L, R} < κ or max{L, R} < κ;
+5:
+κ′ ←κ; κ ←max{ϵ −κ, k}; κ ←max{Dec(κ), κ};
+can be found quickly in this search region. Besides, to obey
+the size threshold k, we make κ0 = k. Then, to cover the
+whole search space, for the later search regions, we keep
+increasing κ and decreasing κ until κ = κ. In another word,
+for i < j, κi ≤κj and κi ≥κj.
+Here, we ﬁrst assign the possible maximum value to κ0,
+we have the following lemma:
+Lemma 7.1: Given a signed network G = (V, E+, E−), for
+every balanced clique, we have max{|CL|, |CR|} ≤σ +1, where
+σ is the degeneracy number of G+.
+Proof. In unsigned networks, the degeneracy number plus
+1 is an upper bound for the maximum size of cliques
+[27]. Based on Deﬁnition 3.2, in a signed network G =
+(V, E+, E−), for every balanced clique C = {CL, CR}, CL
+and CR are traditional cliques in G+. Therefore, |CL| and
+|CR| are must not greater than σ + 1, respectively.
+Based on Lemma 7.1, we assign (k, σ + 1) to the ﬁrst
+search region (κ0, κ0). Then, in the later search region, we
+continue to seek larger balanced clique than the current one.
+However, not every search region can ﬁnd a valid result. To
+skip invalid search regions, we have the following lemma:
+Lemma 7.2: Given a signed network G, the maximum balanced
+clique found in the i-th search region (κi, κi) is denoted by C∗
+i =
+{Ci
+L, Ci
+R}. Then, for the next search region (κi+1, κi+1) , we
+have κi+1 = |C∗
+i | −κi.
+Proof. We prove it by contradiction. Following the i-th
+search region, in the next search region (κi+1, κi+1), if
+we get a larger balanced clique C∗
+i+1 = {Ci+1
+L
+, Ci+1
+R
+}
+than C∗
+i . Based on our search framework, we have
+max{|Ci+1
+L
+|, |Ci+1
+R
+|} < κi, otherwise, C∗
+i+1 will be found in
+the i-th search region rather than the (i+1)-th search region.
+Now, we assume min{|Ci+1
+L
+|, |Ci+1
+R
+|} < |C∗
+i | −κi. Com-
+bining with max{|Ci+1
+L
+|, |Ci+1
+R
+|} < κi, we have |C∗
+i+1| =
+|Ci+1
+L
+| + |Ci+1
+R
+| < |C∗
+i |. Obviously, it is against with our
+premise that C∗
+i+1 is larger than C∗
+i . Therefore, the assump-
+tion for min{|Ci+1
+L
+|, |Ci+1
+R
+|} < |C∗
+i | −κi does not hold. We
+get min{|Ci+1
+L
+|, Ci+1
+R
+} ≥|C∗
+i |−κi, i.e., κi+1 = |C∗
+i |−κi.
+Based on Lemma 7.2, after the i-th search region, the
+search regions with κ < |C∗
+i | −κi can be skipped directly.
+Algorithm of MBCSear-SSP. Following the above idea, the
+new maximum balanced clique search algorithm MBCSear-
+SSP is shown at Algorithm 2. Given a signed network
+G = (V, E+, E−) and size threshold k, we ﬁrst compute
+the degeneracy number σ of G+ = (V, E+) (line 1). We
+initialize ϵ = 2k, κ = k, κ = σ + 1 (line 2). Then, in
+each search region, Algorithm 2 invokes MBCSear to ﬁnd
+the maximum balanced clique in current search region with
+adding size constraints: min{L, R} < κ or max{L, R} < κ
+
+=== PAGE 8 ===
+8
+Ϧ̖̖̖
+1̖
+0̖
+0
+υ1
+∗̖
+1̖
+2̖
+2̖
+3̖
+3̖
+=̖
+MBCSear
+MBCSear-SSP
+υ0
+∗
+υ2
+∗
+υ∗
+Fig. 5: The search space of MBCSear and MBCSear-SSP
+on each search branch. For the next search region, we let
+κ = max{ϵ −κ, k} (line 5), since the size threshold k
+is held for CL and CR as well. For the next value of κ,
+κ = max{Dec(κ), κ} , where Dec(κ) is used to decrease
+κ. When κ < κ, let κ=κ. The search process ﬁnishes when
+κ = κ and κ can not be reduced anymore, since if κ is
+unchanged, this search region is covered by the previous
+region already(line 3). When the search process of the ﬁ-
+nal search region is ﬁnished, Algorithm 2 terminates and
+returns the maximum balanced clique C∗in G.
+Then, we discuss how Dec(κ) decreases the value of κ.
+The total running time of MBCSear-SSP can be formulated
+as T = Σω
+i=0ti, where ω is the number of search regions and
+ti is the partial running time of the i-th search region. In
+this paper, to keep the efﬁciency of MBCSear-SSP, we give a
+heuristic way to decrease κ. In detail, if the last search region
+is time-consuming (set time threshold like 20 seconds), to
+make the total running time T as small as possible, we
+reduce the amount of search regions ω by decreasing κ by a
+large value, i.e., Dec(κ) = ⌈κ
+2 ⌉, otherwise, Dec(κ) = κ −2.
+Now, we compare the search space between MBCSear
+and MBCSear-SSP. As shown at Figure 5, since C∗is the
+maximum balanced clique, MBCSear searches all balanced
+cliques with size less than C∗until C∗is found. The search
+space of MBCSear is shown at Figure 5. For the search space
+of MBCSear-SSP, beneﬁted from the tight bounds for |CL|
+and |CR| at each search region, MBCSear-SSP searches local
+maximum balanced clique within small search space. For
+instance, as shown at Figure 5, it ﬁnds the current maximum
+balanced clique C∗
+0 in the ﬁrst search region. Then, in the
+second search region, it searches balanced cliques with κ1 ≤
+|CR| < κ0 and |CL| ≥κ1 (assume |CL| ≤|CR|) until C∗
+1 is
+found. As shown at Figure 5, the search space of MBCSear-
+SSP is much smaller than MBCSear.
+Example 7.1: Reconsidering the signed network G in Fig-
+ure 2, k = 2, Algorithm 2 ﬁrst computes degeneracy number
+σ of G+, get σ = 2. So, the ﬁrst search region is (2, 3).
+Algorithm 2 ﬁnd result C∗
+0 = {{v0, v1, v3}, {v5, v6, v7}} at
+ﬁrst, ϵ = 6. Then, based on Lemma 7.2, κ1 is 3. As we
+should keep κ ≥κ, κ1 is 3 as well. However, as the value
+of κ is unchanged, this search region is covered by the ﬁrst
+search region. Hence, Algorithm 2 is terminated and returns
+C∗
+0 as C∗. Comparing with MBCSear, the search space of
+MBCSear-SSP is reduced from (2, 2) to (2, 3).
+2
+7.3
+Optimization Strategies
+Regarding to the second drawback of MBCSear on massive
+invalid search branches in each search region, in this subsec-
+tion, we explore the chance to further improve the efﬁciency
+of our approach. Under our rigorous lower bounds κ and
+κ, we ﬁrst propose two optimization strategies, coloring-
+based branch pruning and vertex domination-based candi-
+date pruning, to prune invalid search branches and remove
+meaningless vertices from candidates. Then, we extend
+the vertex&edge reduction technologies of MBCE to prune
+more unnecessary vertices and edges in advance.
+7.3.1
+Coloring-based Branch Pruning
+Given a search region (κ, κ) and a search branch, if the
+upper bound of the balanced clique size in current search
+branch is less than the lower bounds κ, κ and ϵ, current
+search branch can be pruned directly. Looking back to
+MBCSear, it uses the candidates size to form the upper
+bound. However, this upper bound is too loose, because
+although the number of candidates is large, the connectivity
+between candidates maybe sparse, which will lead to many
+invalid search branches. Hence, now, we aim to propose a
+tighter upper bound based on vertex coloring.
+Deﬁnition 7.1: (Vertex Coloring [57]) Given a graph G,
+vertex coloring in G aims to assign colors to each vertex such
+that vertices are different in color from their neighbors. The
+amount of colors needed in G is named chromatic number,
+denoted by γ(G).
+2
+Lemma 7.3: Given a search branch (CL, CR, PL, PR), the max-
+imum balanced clique from this branch is denoted as C′ =
+{C′
+L, C′
+R}, we have that |C′
+L| ≤γ(GL) + |CL|, |C′
+R| ≤
+γ(GR) + |CR|, where GL(R) is the positive subgraph produced
+by PL(R).
+Proof. Given a graph G, the chromatic number γ(G) is an
+upper bound of the maximum size of cliques in G [27].
+Based on it, the lemma can be proved.
+Based on Lemma 7.3, if the upper bound does not
+meet the size requirements of current search region, i.e.,
+min{γ(GL) + |CL|, γ(GR) + |CR|} < κ or max{γ(GL) +
+|CL|, γ(GR)+|CR|} < κ or γ(GL)+|CL|+γ(GR)+|CR| ≤ϵ,
+the search branch can be early terminated directly.
+Algorithm of ColoringPrune. We propose ColoringPrune al-
+gorithm to prune search branches. The pseudocode is shown
+at Algorithm 3. It ﬁrst computes γ(GL) and γ(GR) (line 1-8).
+Then it returns true if the upper bound does not meet the
+size requirements, which means this search branch can be
+pruned directly, otherwise, returns false (line 9-11).
+Theorem 7.1: The space complexity of Algorithm 3 is O(|PL| +
+|PR| + |EGL| + |EGR|), the time complexity is O(|PL| + |PR| +
+|EGL| + |EGR|).
+
+=== PAGE 9 ===
+9
+Algorithm 3 ColoringPrune(CL, CR, PL, PR, ϵ, κ, κ)
+1: GL ←G+(PL); GR ←G+(PR);
+2: γ(GL(R)) ←0; col(v) ←0 for each v ∈PL(R);
+3: for each v ∈PL(R) do
+4:
+col(v) ←1;
+5:
+while ∃u ∈NGL(R)(v), s.t., col(u) = col(v) do
+6:
+col(v) ←col(v) + 1;
+7:
+if col(v) > γ(GL) then
+8:
+γ(GL(R)) ←γ(GL(R)) + 1;
+9: if min{γ(GL) + |CL|, γ(GR) + |CR|} < κ or max{γ(GL) +
+|CL|, γ(GR)+|CR|} < κ or γ(GL)+|CL|+γ(GR)+|CR| ≤ϵ
+then
+10:
+return true;
+11: return false;
+l1
+p
+l2
+l4
+w
+r2
+r4
+r3
+pivot
+(a) Case 1&3
+l1
+l3
+l2
+p
+w
+r2
+q
+r3
+pivot
+(b) Case 2&4
+Fig. 6: Vertex Domination Cases
+Note that Algorithm 3 can be directly applied to MBCE
+problem with κ = k, κ = k, ϵ = 2k. However, since k is
+usually small, the effectiveness of Algorithm 3 is limited in
+MBCE problem.
+7.3.2
+Vertex Domination-based Candidate Pruning
+To further improve the efﬁciency, we reduce the number of
+candidates in PL and PR at each search branch by pruning
+invalid vertices from candidates. Our key thought is that if
+we have the prior knowledge to know that vertex v forms
+balanced clique with size larger than that of vertex u, then,
+u is dominated by v, denoted by u ∈Φv, the search relevant
+to u can be skipped. Simplely, for each search branch, we
+can use the local neighborhood between candidates to ﬁgure
+out the domination relationship, i.e., if Nl(u) ⊆Nl(v), then
+u ∈Φv. Then, we have:
+Lemma 7.4: Given a signed network G and a search branch with
+candidate sets PL and PR, for each vertex v ∈PL ∪PR, if v is
+dominated, the sub-search branch from v can be skipped.
+Proof. Given a search branch, for vertices u, v in candidates
+such that u ∈Φv, we use Cv and Cu to indicate the balanced
+cliques maintaining v and u, respectively. Due to Nl(u) ⊆
+Nl(v), then Cu \ {u} ⊆Cv \ {v}, i.e., |Cu| ≤|Cv|. Hence
+u won’t belong to any balanced clique larger than Cv. The
+search from u can be skipped.
+The vertex domination can be computed with adjacency
+list join operation. The time complexity of computing vertex
+domination at single search branch is O(C2
+⋉· (⋉−1)) =
+O(⋉3), where ⋉= |PL| + |PR|, which is time-consuming.
+Moreover, the amount of search branches is huge. To obtain
+the vertex domination effectively, in this paper, we only
+consider four special cases based on pivot technique, which
+can be computed within const time. The four special cases
+are introduced as follows, p is the selected pivot.
+• Case 1: If p ∈QL ∪QR and newPL ∪newPR = {w},
+then Φp = {w}.
+• Case 2: If p ∈QL ∪QR, newPL ∪newPR = {w, q} and
+(w, q) /∈E, then, Φp = {w, q}.
+• Case 3: If p ∈PL ∪PR, newPL ∪newPR = {p, w}, then,
+Φp = {w}.
+• Case 4: If p ∈PL ∪PR, newPL ∪newPR = {p, w, q}
+and (w, q) /∈E, then, Φp = {w, q}.
+Figure 6 shows the four special cases of vertex domina-
+tion, respectively. For case 1&3(Figure 6(a)), p is selected as
+pivot, then, the surviving candidate is w as other vertices
+are p’s neighbors. Since Nl(w) ⊆Nl(p), w is dominated
+by p. For case 2&4(Figure 6(b)), w and q are two surviving
+candidates with pivot p, as (w, q)
+/∈E, they will not
+appear at a common balanced clique, hence, Nl(w) ⊆Nl(p),
+Nl(q) ⊆Nl(p), Φp = {w, q}.
+Based on Lemma 7.4, when we meet the above four
+special cases of vertex domination, we skip the searches
+from vertices in Φp by deleting them from candidate sets,
+this process only consumes const time. In this way, the
+invalid candidates can be further pruned effectively.
+7.3.3
+Vertex&Edge Reduction Variants
+Although the optimization strategies proposed in MBCE
+algorithm, like vertex reduction and edge reduction, are still
+applicable for MBCSear, they only ensure that CL and CR
+are not less than k but lack of binding force of our new size
+bounds κ, κ and ϵ. Moreover, the value of κ, κ and ϵ are
+much larger than k, especially for κ and ϵ, which makes
+the effectiveness of the reduction optimizations is limited in
+MBCS problem. Hence, we extend the vertex reduction and
+edge reduction such that they can support tighter bounds to
+prune more vertices and edges.
+Vertex reduction variant. We ﬁrst propose the vertex reduc-
+tion variant with considering the degree of vertices. We have
+the following lemma:
+Lemma 7.5: Given a signed network G = (V, E+, E−), a search
+region (κi, κi) and ϵ, G = (V, E+, E−) is a subgraph of G,
+s.t., (a)∀v ∈V, min{d+
+G(v) + 1, d−
+G (v)} ≥κi, max{d+
+G(v) +
+1, d−
+G (v)} ≥κi; (b)∀v ∈V, d+
+G(v) + d−
+G (v) + 1 > ϵ. We have
+C∗
+i ⊆G.
+Proof. Given a search region (κi, κi), let C∗
+i = {CL, CR}
+is the maximum balanced clique in current search region.
+Based on Algorithm 2, C∗
+i
+= {CL, CR} should satisfy
+min{|CL|, |CR|} ≥κi and max{|CL|, |CR|} ≥κi. Mean-
+while, based on Deﬁnition 3.2, ∀v ∈CL, d+
+C∗
+i (v) = |CL| −1,
+d−
+C∗
+i (v) = |CR|. ∀v ∈CR, d+
+C∗
+i (v) = |CR|−1, d−
+C∗
+i (v) = |CL|.
+Combining them, we get min{d+
+C∗
+i (v) + 1, d−
+C∗
+i (v)} ≥κ,
+max{d+
+C∗
+i (v) + 1, d−
+C∗
+i (v)} ≥κ. Moreover, as C∗
+i is the
+current maximum balanced clique, the degree of vertices
+in C∗
+i should not less than ϵ.
+Algorithm of VertexReduction+. Based on Lemma 7.5, we
+can reduce the size of the candidate sets by continuously
+deleting the vertices that do not meet the degree constraints
+in Lemma 7.5. We propose VertexReduction+ algorithm,
+the pseudocode is shown at Algorithm 4. It continuously
+
+=== PAGE 10 ===
+10
+Algorithm 4 VertexReduction+(CL, CR, PL, PR, ϵ, κ, κ)
+1: V ′ ←PL ∪PR; G ←G(V ′) ;
+2: while ∃v ∈PL(R), s.t. min{d+
+G(v) + 1 + |CL(R)|, d−
+G (v) +
+|CR(L)|} < κ or max{d+
+G(v)+1+|CL(R)|, d−
+G (v)+|CR(L)|} <
+κ or d+
+G(v) + 1 + d−
+G (v) + |CL| + |CR| ≤ϵ do
+3:
+for each u ∈N +
+G (v) do
+4:
+d+
+G(u) ←d+
+G(u) −1;
+5:
+for each u ∈N −
+G (v) do
+6:
+d−
+G (u) ←d−
+G (u) −1;
+7:
+G ←G \ v;
+8:
+PL(R) ←PL(R) \ v;
+removes vertices until all vertices left in candidate sets meet
+the degree constraints.
+Theorem 7.2: The space complexity of Algorithm 4 is O(|PL| +
+|PR| + |E+
+G | + |E−
+G |). The time complexity of Algorithm 4 is
+O(|PL| + |PR| + |E+
+G | + |E−
+G |), where G = G(PL ∪PR).
+Edge reduction variant. After the vertex reduction variant,
+we extend the edge reduction now. Inspired by the edge
+reduction technology utilized in MBCE, we continue to
+explore the edge reduction under a certain search region. Re-
+considering the edge common neighbor number introduced
+at Deﬁnition 6.2, we have the following lemma:
+Lemma 7.6: Given a signed network G, a search region (κi, κi)
+and ϵ, G = (V, E+, E−) is a subgraph of G, s.t.,
+• ∀(u, v) ∈E+ →min{δ++
+G (u, v) + 2, δ−−
+G
+(u, v)} ≥κi ∧
+max{δ++
+G (u, v) + 2, δ−−
+G
+(u, v)} ≥κi;
+• ∀(u, v) ∈E−→min{δ+−
+G
+(u, v) + 1, δ−+
+G
+(u, v) + 1} ≥
+κi ∧max{δ+−
+G
+(u, v) + 1, δ−+
+G
+(u, v) + 1} ≥κi.
+Then, we have C∗
+i ⊆G
+Algorithm of EdgeReduction+. Based on Lemma 7.6, we
+propose EdgeReduction+ algorithm. Given a signed net-
+work G = (V, E+, E−), a search region (κi, κi) and ϵ,
+before the search starts, it removes the invalid edges that do
+not meet the requirements for the edge common neighbor
+number in Lemma 7.6 until no more edges can be pruned.
+The pseudocode is omitted here. The time complexity of
+EdgeReduction+ is O(m1.5).
+7.3.4
+The Optimized Algorithm
+Utilizing the above optimization strategies, i.e., coloring-
+based branch pruning, vertex domination-based candidate
+pruning and vertex&edge reduction variants, we propose
+our optimized algorithm MBCSear∗to search maximum
+balanced clique in a given search region. The pseudocode is
+shown at Algorithm 5. Given a search region (κ,κ), for each
+search branch in this region, it ﬁrst prunes candidates in PL
+and PR by invoking VertexReduction+ algorithm (line 4).
+Then, the surviving candidate sets are judged to see whether
+it meets the size requirements (line 5-7). If the candidate sets
+and explored sets are both empty, we get a larger result and
+return it (line 8-11). Otherwise, Algorithm 5 tries to prune
+invalid branch by invoking ColoringPrune (line 12-13). After
+that, it chooses the pivot and distinguishes the four special
+cases for vertex domination to further prune candidates (line
+18-27). Then, it continuously search larger balanced clique in
+the remaining candidates by recursively calling itself. When
+all search branches are ﬁnished, Algorithm 5 can get the
+maximum balanced clique in the given search region.
+Algorithm 5 MBCSear∗(G = (V, E+, E−), ϵ)
+1: for each v ∈V do
+2:
+initialize CL, CR, PL, PR, QL, QR;
+3:
+MBCSearUtil∗(CL, CR, PL, PR, QL, QR, ϵ);
+Procedure MBCSearUtil∗(CL, CR, PL, PR, QL, QR, ϵ)
+// Vertex Reduction Varint
+4: VertexReduction+(CL, CR, PL, PR, ϵ, κ, κ);
+5: L ←|CL| + |PL|; R ←|CR| + |PR|;
+6: if L + R ≤ϵ or min{L, R} < κ or max{L, R} < κ then
+7:
+return;
+8: if PL = ∅and PR = ∅and QL = ∅and QR = ∅then
+9:
+C∗←{CL, CR};
+10:
+ϵ ←|CL| + |CR|;
+11:
+return;
+// Coloring-based Branch Pruning
+12: if ColoringPrune(CL, CR, PL, PR, ϵ, κ, κ) then
+13:
+return;
+14: p ←argmaxv∈PL∪PR∪QL∪QR{dl(v)};
+15: // assume p from PL ∪QL (PR ∪QR )
+16: newPL ←PL \ N +(−)
+G
+(p);
+17: newPR ←PR \ N −(+)
+G
+(p);
+// Vertex Domination-based Candidate Pruning
+// Case 1
+18: if p ∈QL(R) and |newPL| + |newPR| = 1 then
+19:
+return;
+// Case 2
+20: if p ∈QL(R) and |newPL| + |newPR| = 2 then
+21:
+if w, q ∈newPL ∪newPR and (w, q) /∈E then
+22:
+return;
+// Case 3
+23: if p ∈PL(R) and |newPL| + |newPR| = 2 then
+24:
+newPL(R) ←{p}; newPR(L) ←∅;
+// Case 4
+25: if p ∈PL(R) and |newPL| + |newPR| = 3 then
+26:
+if w, q ∈newPL ∪newPR and (w, q) /∈E then
+27:
+newPL(R) ←{p}; newPR(L) ←∅;
+28: search result within newPL and newPR as MBCEnum;
+Algorithm 6 MBCSear-SSP∗(G = (V, E+, E−), k)
+1: compute degeneracy σ of G+ = (V, E+);
+2: ϵ ←2k; κ ←k; κ ←σ + 1; κ′ ←−1;
+3: while κ ≥κ and κ < κ′ do
+4:
+G′ ←EdgeReduction+(G, ϵ, κ, κ);
+5:
+MBCSear∗(G′, ϵ);
+6:
+κ′ ←κ; κ ←max{ϵ −κ, k}; κ ←max{⌈κ
+2 ⌉, κ};
+Based on MBCSear∗algorithm, we are ready to propose
+the formal optimized algorithm MBCSear-SSP∗, the pseu-
+docode is shown at Algorithm 6. Given a signed network
+G = (V, E+, E−) and size threshold k, for each search
+region (κ, κ), the algorithm ﬁrst invokes EdgeReduction+
+to reduce the graph size by removing invalid edges before
+search start (line 4). Then, it invokes Algorithm 5 to search
+the maximum balanced clique in current search region (line
+5). In the end, when ﬁnish the search in all search regions, it
+gets the maximum balanced clique C∗in G and terminates.
+8
+PERFORMANCE STUDIES
+In this section, we present our experimental results.All the
+experiments are performed on a machine with two Intel
+Xeon 2.2GHz CPUs and 64GB RAM running CentOS 7.
+Algorithms. We evaluate MBCE algorithms and MBCS al-
+gorithms.
+
+=== PAGE 11 ===
+11
+TABLE 1: Statistic for real datasets
+Dataset
+n
+m
+|E+|
+|E−|
+AdjWordNet
+21,247
+426,896
+378,993
+47,903
+Slashdot
+77,357
+516,575
+396,378
+120,197
+Epinions
+131,828
+841,372
+717,667
+123,705
+DBLP
+1,314,050
+5,179,945
+1,471,903
+3,708,042
+Douban
+1,588,565
+13,918,375
+9,034,537
+4,883,838
+Pokec
+1,632,803
+30,622,564
+15,179,203
+7,122,761
+Livejournal
+4,847,571
+42,851,237
+29,105,031 13,746,206
+Orkut
+3,072,441
+117,184,899 79,664,169 37,520,730
+Dbpedia
+18,268,992 126,890,209 86,002,736 40,887,473
+For MBCE algorithms, they are Baseline, MBCEnum
+and MBCEnum∗. Baseline is the baseline solution shown
+in Section 4. MBCEnum is our algorithm shown in Sec-
+tion 5. MBCEnum∗is the algorithm with the in-enumeration
+optimization shown in Section 6.1. Note that the pre-
+enumeration optimization strategies can be also used in
+Baseline and MBCEnum, thus, we apply them for all three
+algorithms for fairness.
+For MBCS algorithms, they are MBCSear, MBCSear-
+SSP and MBCSear-SSP∗. MBCSear is the baseline ap-
+proach introduced at Section 7.1. MBCSear-SSP is proposed
+at Section 7.2. MBCSear-SSP∗is the improved algorithm
+shown at Section 7.3. Note that, for fair, we apply the
+EdgeReduction+ proposed at Section 7.3.3 to both MBCSear-
+SSP and MBCSear-SSP∗.
+All algorithms are implemented in C++, using g++ com-
+plier with -O3. The time cost is measured as the amount
+of wall-clock time elapsed during the program’s execution.
+If an algorithm cannot ﬁnish in 12 hours, we denote the
+processing time as INF.
+Real datasets. We evaluate our algorithms on nine real
+datasets. Slashdot and Epinions are signed networks in real
+world. AdjWordNet, DBLP and Douban are signed net-
+works used in [58], [40] and [59], respectively. For other
+datasets, we transfer them from unsigned network to signed
+network. In order to simulate the balanced clique as much
+as possible, the vertices in the graph are divided into two
+groups with a ratio of 4:1, the edges connecting vertices
+from the same group are positive edges, otherwise, they are
+negative edges. In this way, all the cliques in the original
+graph correspond to balanced cliques in the signed graph.
+For data source, AdjWordNet is downloaded from WordNet
+(https://wordnet.princeton.edu/). DBLP and Dbpedia are
+downloaded from KONECT (http://konect.cc/). Douban
+is from authors in [59]. Other datasets are downloaded
+from SNAP (http://snap.stanford.edu). The details of each
+dataset are shown in Table 1.
+8.1
+The Performance of MBCE Algorithms
+Exp-1: Efﬁciency of MBCE algorithms when varying k.
+In this experiment, we evaluate the efﬁciency of three al-
+gorithms when varying k from 4 to 10 and the results are
+shown in Figure 7.
+As shown in Figure 7, Baseline consumes the most time
+among three algorithms on all datasets when we vary k and
+it can only handle the small datasets. MBCEnum is faster
+than Baseline on most of the test cases as MBCEnum takes
+the uniqueness of the signed networks into consideration
+and enumerates the maximal balanced cliques based on the
+0.1
+1
+10
+100
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+ 10
+Running time (sec)
+k
+MBCEnum*
+MBCEnum
+Baseline
+(a) Slashdot (vary k)
+0.1
+1
+10
+100
+1K
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+ 10
+Running time (sec)
+k
+MBCEum*
+MBCEum
+Baseline
+(b) Epinions (vary k)
+1
+10
+100
+1K
+10K
+INF
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9 10
+Running time (sec)
+k
+MBCEnum*
+MBCEnum
+Baseline
+(c) DBLP (Vary k)
+10
+100
+1K
+10K
+INF
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9 10
+Running time (sec)
+k
+MBCEnum*
+MBCEnum
+Baseline
+(d) Douban (Vary k)
+Fig. 7: Running time of MBCE algorithms varying k
+1
+100
+10K
+INF
+20% 40% 60% 80% 100%
+Running time (sec)
+MBCEnum*
+MBCEnum
+(a) DBLP (Vary n)
+1
+100
+10K
+INF
+20% 40% 60% 80% 100%
+Running time (sec)
+MBCEnum*
+MBCEnum
+(b) Douban (Vary n)
+Fig. 8: Scalability of MBCEnum and MBCEnum∗, k=4
+signed network directly. MBCEnum∗is the most efﬁcient al-
+gorithm on all datasets when varying k due to the utilization
+of in-enumeration optimization strategies, which reveals the
+effectiveness of in-enumeration optimization strategies. An-
+other phenomena shown in Figure 7 is that the running time
+of all algorithms decreases as k increases. This is because as
+k increases, the pruning power of the optimization strategies
+proposed in Section 6 strengthens.
+Exp-2: Scalability of MBCE algorithms. In this experiment,
+we test the scalability of MBCEnum and MBCEnum∗on two
+large datasets DBLP and Douban by varying their vertices
+from 20% to 100%. Figure 8 shows the results.
+As shown in Figure 8, when n increases, the running
+time of both algorithms increases as well, but MBCEnum∗
+outperforms MBCEnum for all cases on both datasets. For
+example, on DBLP, when we sample 20% vertices, the
+running time of MBCEnum and MBCEnum∗is 0.6 seconds
+and 0.5 seconds, respectively, while when sampling 80%
+vertices, their running times are 770.6 seconds and 4.0
+seconds, respectively. It shows that MBCEnum∗has a good
+scalability in practice.
+Exp-3: Case study on AdjWordNet. In this experiment, we
+perform a case study on the real dateset AdjWordNet. In
+this dataset, two synonyms have a positive edge and two
+antonyms have a negative edge, and Table 2 shows some
+results obtained by our algorithm. As shown in Table 2,
+words in CL or CR have similar meaning while each word
+from CL is an antonym to all words in CR. This case study
+veriﬁes that maximal balanced clique enumeration can be
+applied in the applications to ﬁnd synonym and antonym
+groups on dictionary data.
+
+=== PAGE 12 ===
+12
+TABLE 2: Case study on AdjWordNet
+CL
+CR
+raw, rough, rude
+reﬁned, smooth, suave
+relaxing, reposeful, restful
+restless,uneasy, ungratiﬁed,
+unsatisﬁed
+interior, internal, intimate
+away, foreign, outer, outside,
+remote
+assumed, false, ﬁctitious, ﬁctive,
+mistaken,
+off-key,
+pretended,
+put-on, sham, sour, untrue
+actual, existent, existing, fac-
+tual, genuine, literal, real, tan-
+gible, touchable, true, truthful,
+unfeigned, veridical
+active, animated, combat-ready,
+dynamic, dynamical, ﬁghting,
+participating, alive, live
+adynamic, asthenic, debilitated,
+enervated,
+undynamic,
+stag-
+nant, light
+following,
+undermentioned,
+next
+ahead, in-the-lead, leading, pre-
+eminent, prima, star, starring,
+stellar
+undesirable,
+unsuitable,
+unwanted
+cherished,
+treasured,
+wanted,
+precious
+8.2
+The Performance of MBCS Algorithms
+Exp-4: Efﬁciency of MBCS algorithms when varying k. To
+evaluate the efﬁciency of MBCS algorithms, we record the
+running time of them on eight datasets, k = [2 −10], the
+results are shown at Figure 9.
+As shown at Figure 9, with the value of k increasing, the
+running time of three algorithms decreases on most datasets.
+For each value of k, MBCSear-SSP∗is the fastest algorithm
+of the three algorithms, while MBCSear is the most time-
+consuming. Moreover, on large graphs as Livejournal, Orkut
+and Dbpedia, when k=2, MBCSear and MBCSear-SSP can
+not get the result within a reasonable time, only MBCSear-
+SSP∗can get the result. The running time of MBCSear-
+SSP∗on the three graphs are 413.4s, 3626.0s and 1833.6s,
+respectively. It’s because that MBCSear has to search on
+the whole graph, while MBCSear-SSP uses search space
+partition to search the maximum balanced clique within a
+partial subgraph. Based on MBCSear-SSP, beneﬁted from
+multiple optimization strategies for further reducing the
+search space, MBCSear-SSP∗is the most efﬁcient algorithm
+of them, it can efﬁciently search result on all datasets.
+Exp-5: Effectiveness of MBCS algorithms when varying k.
+To intuitively compare the effectiveness of three MBCS algo-
+rithms, in this experiment, we record the amount of calcula-
+tion of three algorithms on eight datasets, k = [2 −5]. The
+calculation quantity is the time of invoking MBCSearUtil
+and MBCSearUtil∗, which can intuitively represent the
+search space of different algorithms. The experimental re-
+sults are shown at Figure 10.
+As shown at Figure 10(a), when k = 2, on all datasets,
+the calculation quantity of MBCSear-SSP∗is much less
+than that of other algorithms. Meanwhile, MBCSear-SSP’s
+calculation quantity is less than MBCSear’s. For instance, on
+DBLP(DB), the calculation quantity of MBCSear, MBCSear-
+SSP and MBCSear-SSP∗are 155,621, 328 and 183, respec-
+tively. When k > 2, the trend is similar. It’s because
+MBCSear-SSP∗and MBCSear-SSP are based on search
+space partitions, which can reduce the total search space
+effectively. The experimental results also conﬁrm the reason
+for the efﬁciency of MBCSear-SSP∗at Exp-4.
+Exp-6: Search process of MBCSear-SSP∗on real datasets.
+In this experiment, we show the search process of MBCSear-
+SSP∗algorithm on Douban and Pokec datasets, k=2. Table
+3 shows every search region (κ, κ), the size of its input
+1
+10
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(a) Slashdot (Vary k)
+1
+10
+100
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(b) Epinions (Vary k)
+1
+10
+100
+1K
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(c) DBLP (Vary k)
+10
+100
+1K
+10K
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(d) Douban (Vary k)
+10
+100
+1K
+10K
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(e) Pokec (Vary k)
+100
+1K
+10K
+INF
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(f) Livejournal (Vary k)
+100
+1K
+10K
+INF
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(g) Orkut (Vary k)
+100
+1K
+10K
+INF
+ 2 3 4 5 6 7 8 9 10
+Running time (sec)
+k
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(h) Dbpedia (Vary k)
+Fig. 9: Running time of MBCS algorithms varying k
+ 100
+10K
+1M
+100M
+INF
+SD EP DBDOPK LJ OK DP
+Calculation quantity
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(a) k=2
+ 100
+10K
+1M
+100M
+INF
+SD EP DBDOPK LJ OK DP
+Calculation quantity
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(b) k=3
+ 100
+10K
+1M
+100M
+INF
+SD EP DBDOPK LJ OK DP
+Calculation quantity
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(c) k=4
+ 100
+10K
+1M
+100M
+INF
+SD EP DBDOPK LJ OK DP
+Calculation quantity
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(d) k=5
+Fig. 10: Calculation quantity of different algorithms
+graph G′ including positive edges number |E+
+G′| and neg-
+ative edges number |E−
+G′|, the ratio of G′ in the original
+graph G, and the maximum balanced clique size ϵ found
+so far. Since Douban and Pokec are big datasets, the search
+process is time consuming, hence, MBCSear-SSP∗adopts
+Dec(k) = ⌈κ
+2 ⌉.
+As Table 3 shows, on Douban, the ﬁrst search region
+(κ0, κ0) is (2, 78), and ϵ is initialized as 4. MBCSear-SSP∗
+ﬁrst invokes EdgeReduction+ to pre-reduce useless edges in
+G. Due to the large value of κ0, all edges are pruned from
+G. Hence, G′ is empty here. For the second search region
+(2, 39), G′ is still empty. For the third search region (2, 20),
+
+=== PAGE 13 ===
+13
+TABLE 3: The search process of MBCSear-SSP∗
+(a) MBCSear-SSP∗on Douban, k=2
+Index
+Search Region
+|E+
+G′|
+|E−
+G′|
+G′/G(%)
+ϵ
+0
+(2,78)
+0
+0
+0
+4
+1
+(2,39)
+0
+0
+0
+4
+2
+(2,20)
+21,695
+12,190
+0.24
+33
+3
+(13,13)
+0
+0
+0
+33
+(b) MBCSear-SSP∗on Pokec, k=2
+Index
+Search Region
+|E+
+G′|
+|E−
+G′|
+G′/G(%)
+ϵ
+0
+(2,37)
+0
+0
+0
+4
+1
+(2,19)
+6,605
+2,521
+0.30
+29
+2
+(10,10)
+0
+0
+0
+29
+1
+10
+100
+1K
+10K
+INF
+20
+40
+60
+80
+100
+Running time (sec)
+Sample ratio(%)
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(a) Orkut (Vary n)
+1
+10
+100
+1K
+10K
+INF
+20
+40
+60
+80
+100
+Running time (sec)
+Sample ratio(%)
+MBCSear
+MBCSear-SSP
+MBCSear-SSP*
+(b) Dbpedia (Vary n)
+Fig. 11: Scalability of MBCS algorithms, k=2
+G′ has 21,695 positive edges and 12,190 negative edges,
+it only holds 0.24% edges of the original graph which is
+much less than G. Then, MBCSear-SSP∗ﬁnds the maximum
+balanced clique C∗on G′. The size of C∗is 33. For the
+last search region (13, 13), G′ is empty, the search process
+is ﬁnished. The search process on Pokec is similar.
+By observing the search process of MBCSear-SSP∗on
+the two datasets, We ﬁnd two signiﬁcant phenomena. First,
+beneﬁted from the search space partition paradigm, the
+number of search regions is limited. Second, the input graph
+G′ for each search region is much smaller than the original
+graph, because the edge reduction strategy can remove most
+of the invalid edges before the search starting.
+Exp-7: Scalability of MBCS algorithms. In this experiment,
+we evaluate the scalability of MBCS algorithms on two
+biggest datasets Orkut and Dbpedia as Exp-2. The results
+are shown at Figure 11.
+As Figure 11 shows, with the number of vertices in-
+creases, the running time of three algorithms increases as
+well. Among them, the growth rate of MBCSear-SSP∗is
+the most stable. For instance, on Dbpedia with 40% ver-
+tices, MBCSear cannot get result within a reasonable time,
+the running time of MBCSear-SSP and MBCSear-SSP∗are
+11953.0s and 319.9s, respectively. On Dbpedia with more
+than 40% vertices, only MBCSear-SSP∗can get result within
+a reasonable time. The trend of running time on Orkut is
+similar. Therefore, MBCSear-SSP∗can scale to large-scale
+graphs.
+9
+CONCLUSIONS
+In this paper, we study the maximal balanced clique enu-
+meration problem in signed networks. We propose a new
+enumeration algorithm tailored for signed networks. Based
+on the new enumeration algorithm, we explore two opti-
+mization strategies to further improve the efﬁciency of the
+enumeration algorithm. Besides, we study the maximum
+balanced clique search problem, and propose a novel search
+space partition-based search framework. Moreover, we ex-
+plore multiple optimization strategies to further reduce
+the search space during search process. The experimental
+results on real datasets demonstrate the efﬁciency, effective-
+ness and scalability of our solutions.
+REFERENCES
+[1]
+D. Ouyang, L. Yuan, F. Zhang, L. Qin, and X. Lin, “Towards
+efﬁcient path skyline computation in bicriteria networks,” in Pro-
+ceedings of DASFAA, 2018, pp. 239–254.
+[2]
+L. Yuan, L. Qin, W. Zhang, L. Chang, and J. Yang, “Index-based
+densest clique percolation community search in networks,” IEEE
+TKDE, vol. 30, no. 5, pp. 922–935, 2018.
+[3]
+L. Yuan, L. Qin, X. Lin, L. Chang, and W. Zhang, “Effective and
+efﬁcient dynamic graph coloring,” PVLDB, vol. 11, no. 3, pp. 338–
+351, 2017.
+[4]
+X. Feng, L. Chang, X. Lin, L. Qin, W. Zhang, and L. Yuan,
+“Distributed computing connected components with linear com-
+munication cost,” Distributed and Parallel Databases, vol. 36, no. 3,
+pp. 555–592, 2018.
+[5]
+B. Liu, L. Yuan, X. Lin, L. Qin, W. Zhang, and J. Zhou, “Efﬁcient
+(α, β)-core computation: an index-based approach,” in Proceedings
+of WWW, 2019, pp. 1130–1141.
+[6]
+X. Wu, L. Yuan, X. Lin, S. Yang, and W. Zhang, “Towards efﬁ-
+cient k-tripeak decomposition on large graphs,” in Proceedings of
+DASFAA, 2019, pp. 604–621.
+[7]
+Z. Qing, L. Yuan, F. Zhang, L. Qin, X. Lin, and W. Zhang, “External
+topological sorting in large graphs,” in Proceedings of DASFAA,
+2018, pp. 203–220.
+[8]
+D. Ouyang, L. Yuan, L. Qin, L. Chang, and Y. Zhang, “Efﬁcient
+shortest path index maintenance on dynamic road networks with
+theoretical guarantees,” PVLDB, vol. 13, no. 5, pp. 602–615, 2020.
+[9]
+J. Pattillo, N. Youssef, and S. Butenko, “On clique relaxation mod-
+els in network analysis,” European Journal of Operational Research,
+vol. 226, no. 1, pp. 9–18, 2013.
+[10] C. Bron and J. Kerbosch, “Finding all cliques of an undirected
+graph (algorithm 457),” Commun. ACM, vol. 16, no. 9, pp. 575–576,
+1973.
+[11] D. Eppstein, M. L¨ofﬂer, and D. Strash, “Listing all maximal cliques
+in sparse graphs in near-optimal time,” in International Symposium
+on Algorithms and Computation, 2010, pp. 403–414.
+[12] D. Eppstein and D. Strash, “Listing all maximal cliques in large
+sparse real-world graphs,” in International Symposium on Experi-
+mental Algorithms, 2011, pp. 364–375.
+[13] L. Yuan, L. Qin, X. Lin, L. Chang, and W. Zhang, “Diversiﬁed top-k
+clique search,” VLDB J., vol. 25, no. 2, pp. 171–196, 2016.
+[14] D. Easley and J. Kleinberg, Networks, crowds, and markets: Reasoning
+about a highly connected world.
+Cambridge University Press, 2010.
+[15] S. Kumar, F. Spezzano, V. S. Subrahmanian, and C. Faloutsos,
+“Edge weight prediction in weighted signed networks,” in IEEE
+16th International Conference on Data Mining, 2016, pp. 221–230.
+[16] J. Kunegis, A. Lommatzsch, and C. Bauckhage, “The slashdot zoo:
+mining a social network with negative edges,” in Proceedings of
+WWW, 2009, pp. 741–750.
+[17] J. Leskovec, D. Huttenlocher, and J. Kleinberg, “Signed networks
+in social media,” in Proceedings of SIGCHI, 2010, pp. 1361–1370.
+[18] L. Ou-Yang, D.-Q. Dai, and X.-F. Zhang, “Detecting protein
+complexes from signed protein-protein interaction networks,”
+IEEE/ACM Transactions on Computational Biology and Bioinformatics,
+vol. 12, no. 6, pp. 1333–1344, 2015.
+[19] D. Cartwright and F. Harary, “Structural balance: a generalization
+of heider’s theory.” Psychological review, vol. 63, no. 5, p. 277, 1956.
+[20] S. A. Marvel, S. H. Strogatz, and J. M. Kleinberg, “Energy land-
+scape of social balance,” Physical review letters, vol. 103, no. 19, p.
+198701, 2009.
+[21] P. Abell and M. Ludwig, “Structural balance: a dynamic perspec-
+tive,” Journal of Mathematical Sociology, vol. 33, no. 2, pp. 129–155,
+2009.
+[22] S. A. Marvel, J. Kleinberg, R. D. Kleinberg, and S. H. Strogatz,
+“Continuous-time model of structural balance,” Proceedings of the
+National Academy of Sciences, vol. 108, no. 5, pp. 1771–1776, 2011.
+[23] T. Derr, C. Aggarwal, and J. Tang, “Signed network modeling
+based on structural balance theory,” in Proceedings of CIKM, 2018,
+pp. 557–566.
+[24] F. Heider, “Attitudes and cognitive organization,” The Journal of
+psychology, vol. 21, no. 1, pp. 107–112, 1946.
+[25] F. Harary et al., “On the notion of balance of a signed graph.” The
+Michigan Mathematical Journal, vol. 2, no. 2, pp. 143–146, 1953.
+
+=== PAGE 14 ===
+14
+[26] L. Chang, “Efﬁcient maximum clique computation and enumera-
+tion over large sparse graphs,” VLDB J., vol. 29, no. 5, pp. 999–
+1022, 2020.
+[27] C. Lu, J. X. Yu, H. Wei, and Y. Zhang, “Finding the maximum
+clique in massive graphs,” PVLDB, vol. 10, no. 11, pp. 1538–1549,
+2017.
+[28] J. Chen, S. Cai, S. Pan, Y. Wang, Q. Lin, M. Zhao, and M. Yin,
+“Nuqclq: An effective local search algorithm for maximum quasi-
+clique problem,” in AAAI 2021, pp. 12 258–12 266.
+[29] B. Lyu, L. Qin, X. Lin, Y. Zhang, Z. Qian, and J. Zhou, “Maximum
+biclique search at billion scale,” Proc. VLDB Endow., vol. 13, no. 9,
+pp. 1359–1372, 2020.
+[30] A.
+Zhou,
+Y.
+Wang,
+and
+L.
+Chen,
+“Finding
+large
+diverse
+communities on networks: The edge maximum k*-partite clique,”
+Proc. VLDB Endow., vol. 13, no. 11, pp. 2576–2589, 2020. [Online].
+Available: http://www.vldb.org/pvldb/vol13/p2576-zhou.pdf
+[31] E. Sevinc¸ and T. D¨okeroglu, “A novel parallel local search algo-
+rithm for the maximum vertex weight clique problem in large
+graphs,” Soft Comput., vol. 24, no. 5, pp. 3551–3567, 2020.
+[32] R. Li, X. Wu, H. Liu, J. Wu, and M. Yin, “An efﬁcient local search
+for the maximum edge weighted clique problem,” IEEE Access,
+vol. 6, pp. 10 743–10 753, 2018.
+[33] X. Song, Y. Chi, K. Hino, and B. Tseng, “Identifying opinion leaders
+in the blogosphere,” in Proceedings of CIKM, 2007, pp. 971–974.
+[34] R. Axelrod and D. S. Bennett, “A landscape theory of aggregation,”
+BJPS, vol. 23, no. 02, p. 211–233, 1993.
+[35] M. Iˇsorait˙e, “Importance of strategic alliances in company’s activ-
+ity,” BJPS, vol. 1, no. 5, p. 39–46, 2009.
+[36] G. A. Miller., “Wordnet: a lexical database for english,” Communi-
+cations of the ACM, vol. 38, no. 11, p. 39–41, 1995.
+[37] V. Kumar, N. Joshi, A. Mukherjee, G. Ramakrishnan, and P. Jyothi,
+“Cross-lingual training for automatic question generation,” in
+ACL, 2019, pp. 4863–4872.
+[38] A. Krishnan, D. P, S. Ranu, and S. Mehta, “Leveraging semantic
+resources in diversiﬁed query expansion,” World Wide Web, vol. 21,
+no. 4, pp. 1041–1067, 2018.
+[39] X. Zheng and D. Zeng, “Social balance in signed networks,”
+Information Systems Frontiers, vol. 17, no. 5, pp. 1077–1095, 2015.
+[40] R.-H. Li, Q. Dai, L. Qin, G. Wang, X. Xiao, J. X. Yu, and S. Qiao,
+“Efﬁcient signed clique search in signed networks,” in Proceedings
+of ICDE, 2018, pp. 245–256.
+[41] F. Hao, S. S. Yau, G. Min, and L. T. Yang, “Detecting k-balanced
+trusted cliques in signed social networks,” IEEE Internet Comput-
+ing, vol. 18, no. 2, pp. 24–31, 2014.
+[42] Akkoyunlu and E. A, “The enumeration of maximal cliques of
+large graphs[j],” SIAM Journal on Computing, vol. 2, no. 1, pp. 1–6,
+1973.
+[43] E. Tomita, A. Tanaka, and H. Takahashi, “The worst-case time
+complexity for generating all maximal cliques and computational
+experiments,” Theoretical Computer Science, vol. 363, no. 1, pp. 28–
+42, 2006.
+[44] F. Fakhfakh, M. Tounsi, M. Mosbah, and A. H. Kacem, “Algo-
+rithms for ﬁnding maximal and maximum cliques: A survey,” in
+International Conference on Intelligent Systems Design and Applica-
+tions, 2017, pp. 745–754.
+[45] S. B. Seidman, “Network structure and minimum degree,” Social
+networks, vol. 5, no. 3, pp. 269–287, 1983.
+[46] J. Cohen, “Trusses: Cohesive subgraphs for social network analy-
+sis,” IEEE Transactions on Knowledge and Data Engineering, 2008.
+[47] X. Huang, H. Cheng, L. Qin, W. Tian, and J. X. Yu, “Querying k-
+truss community in large and dynamic graphs,” in SIGMOD, 2014,
+pp. 1311–1322.
+[48] R. Zhou, C. Liu, J. X. Yu, W. Liang, B. Chen, and J. Li, “Finding
+maximal k-edge-connected subgraphs from a large graph,” in
+EDBT, 2012.
+[49] L. Yuan, L. Qin, X. Lin, L. Chang, and W. Zhang, “I/O efﬁcient
+ECC graph decomposition via graph reduction,” PVLDB, vol. 9,
+no. 7, pp. 516–527, 2016.
+[50] ——, “I/O efﬁcient ECC graph decomposition via graph reduc-
+tion,” VLDB J., vol. 26, no. 2, pp. 275–300, 2017.
+[51] A. E. Sariyuce, C. Seshadhri, A. Pinar, and U. V. Catalyurek,
+“Finding the hierarchy of dense subgraphs using nucleus decom-
+positions,” in Proceedings of WWW, 2015, pp. 927–937.
+[52] A. E. Sariy¨uce, C. Seshadhri, A. Pinar, and ¨U. V. C¸ ataly¨urek,
+“Nucleus decompositions for identifying hierarchy of dense sub-
+graphs,” TWEB, vol. 11, no. 3, pp. 16:1–16:27, 2017.
+[53] J. Cheng, L. Zhu, Y. Ke, and S. Chu, “Fast algorithms for maxi-
+mal clique enumeration with limited memory,” in Proceedings of
+SIGKDD, 2012, pp. 1240–1248.
+[54] M. C. Schmidt, N. F. Samatova, K. Thomas, and B.-H. Park, “A
+scalable, parallel algorithm for maximal clique enumeration,” J.
+Parallel Distrib. Comput., vol. 69, no. 4, pp. 417–428, 2009.
+[55] Y. Zhang, C. A. Phillips, G. L. Rogers, E. J. Baker, E. J. Chesler,
+and M. A. Langston, “On ﬁnding bicliques in bipartite graphs: a
+novel algorithm and its application to the integration of diverse
+biological data types,” BMC bioinformatics, vol. 15, no. 1, p. 110,
+2014.
+[56] D. Wen, L. Qin, Y. Zhang, X. Lin, and J. X. Yu, “I/O efﬁcient core
+graph decomposition: Application to degeneracy ordering,” IEEE
+TKDE, vol. 31, no. 1, pp. 75–90, 2019.
+[57] L. Lov´asz, M. E. Saks, and W. T. Trotter, “An on-line graph col-
+oring algorithm with sublinear performance ratio,” Discret. Math.,
+vol. 75, no. 1-3, pp. 319–325, 1989.
+[58] L. Chu, Z. Wang, J. Pei, J. Wang, Z. Zhao, and E. Chen, “Finding
+gangs in war from signed networks,” in Proceedings of SIGKDD,
+2016, pp. 1505–1514.
+[59] T. Xu, D. Liu, E. Chen, H. Cao, and J. Tian, “Towards annotating
+media contents through social diffusion analysis,” in Proceedings of
+ICDM, 2012, pp. 1158–1163.

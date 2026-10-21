@@ -1,0 +1,1639 @@
+=== PAGE 1 ===
+DRAFT VERSION APRIL 4, 2019
+Preprint typeset using LATEX style emulateapj v. 12/16/11
+DETERMINATION OF THE PRIMORDIAL HELIUM ABUNDANCE BASED ON NGC 346 AN H II REGION OF THE
+SMALL MAGELLANIC CLOUD
+MABEL VALERDI, ANTONIO PEIMBERT, MANUEL PEIMBERT, & ANDRÉS SIXTOS
+Instituto de Astronomía, Universidad Nacional Autónoma de México, Apdo. Postal 70-264 Ciudad Universitaria, México
+Draft version April 4, 2019
+ABSTRACT
+To place meaningful constraints on Big Bang Nucleosynthesis models, the primordial helium abundance de-
+termination is crucial. Low-metallicity H II regions have been used to estimate it since their statistical uncer-
+tainties are relatively small. We present a new determination of the primordial helium abundance, based on
+long slit spectra of the H II region NGC 346 in the small Magellanic cloud. We obtained spectra using three
+409′′ ×0.51′′ slits divided in 97 subsets. They cover the range λλ3600−7400 of the electromagnetic spectrum.
+We used PyNeb and standard reduction procedures to determine the physical conditions and chemical compo-
+sition. We found that for NGC 346: X = 0.7465, Y = 0.2505 and Z = 0.0030. By assuming ∆Y/∆O = 3.3±0.7
+we found that the primordial helium abundance is YP = 0.2451 ± 0.0026 (1σ). Our YP value is in agreement
+with the value of neutrino families, Nν, and with the neutron half-life time, τn, obtained in the laboratory.
+Keywords: ISM: abundances — galaxies: ISM — primordial nucleosynthesis — H II regions — Magellanic
+Clouds
+1. INTRODUCTION
+A highly accurate (≲1%) primordial helium abundance
+(YP) determination plays an important role in understanding
+the Universe. In particular, it is extremely important to con-
+strain: Big Bang Nucleosynthesis models, elementary particle
+physics and the study of galactic chemical evolution.
+To obtain a value for YP using H II regions, it is necessary
+to use the relation between the helium mass fraction (Y) and
+the heavy elements mass fraction (Z). The relation is then ex-
+trapolated to zero metallicity to estimate the primordial mass
+fraction of helium. The ﬁrst determination of YP based on
+observations of H II regions was carried out by Peimbert &
+Torres-Peimbert (1974). Since then, many estimations have
+been done using this technique (e.g., Izotov et al. 2014; Aver
+et al. 2015). This method has been modiﬁed to use the O
+abundance instead of Z, because measuring other chemical
+elements becomes impractical. Although some groups seek
+alternatives to O, like using N or S (e.g. Pagel et al. 1992;
+Fernández et al. 2018).
+In recent years, careful studies with high quality determina-
+tions of YP have been done by: Izotov et al. (2014), Aver et al.
+(2015), Peimbert et al. (2016), and Fernández et al. (2018). To
+diminish the uncertainties most determinations use many ob-
+jects; but large samples only diminish the contribution of sta-
+tistical errors, while systematic errors are not diminished; in
+fact, if one is not careful, systematic errors can be more signif-
+icant for large samples, since low quality objects/observations
+are often included (e.g., Peimbert et al. 2000, 2007; Ferland
+et al. 2010).
+Low-metallicity H II regions have permitted to estimate the
+primordial helium abundance, whose statistical uncertainties
+are very small (≲1%) (e.g. Izotov et al. 2014); nevertheless,
+due to the numerous systematic uncertainties, obtaining better
+than 1% precision for individual objects remains a challenge.
+The Small Magellanic Cloud (SMC) hosts the region
+NGC 346, this is the best H II region to determine YP. This
+is the brightest and largest H II region of the SMC. Its Hα
+intensity places it on the boundary between normal and giant
+mvalerdi@astro.unam.mx
+extragalactic H II regions. In addition, its proximity, at a dis-
+tance of 61±1 Kpc (Hilditch et al. 2005), makes it possible to
+resolve individual stars and to avoid their contributions to the
+observed nebular spectra. We also note that NGC 346 hosts
+the largest sample of O-type stars in the entire SMC (Massey
+et al. 1989).
+NGC 346 possesses some deﬁnite advantages over other
+H II regions: as it is a nearby object, the underlying absorption
+correction (due to the stellar absorption of the H and He lines)
+can be reduced signiﬁcantly, at least by an order of magnitude;
+another advantage of its proximity is that it can be observed
+in different lines of sight, this has been used to rule out the
+presence of a signiﬁcant helium ionization correction factor
+(ICF; e.g. Vilchez 1989; Mathis & Rosa 1991; Peimbert et al.
+1992; Viegas et al. 2000; Zhang & Liu 2003); another impor-
+tant characteristic is that the electronic temperature is smaller
+than in the less metallic H II regions, this reduces the effect of
+collisional excitation of the ground level of H0; its metallicity
+(Z ∼0.003; ∼20% of solar) requires a small extrapolation to
+derive YP. However, it has the disadvantage that the correction
+for its chemical evolution, is larger than in many other objects
+used for the determination of YP (Peimbert et al. 2000). Over-
+all there is no H II region that is simultaneously at least as
+close, as large, and with a metallicity as low as NGC 346.
+In this paper, we present a very precise primordial helium
+abundance determination. For this we use a single H II region,
+NGC 346, which is probably the best object for this determi-
+nation, for the reasons mentioned before, see the comment by
+Steigman in Ferland et al. (2010). Additionally, we include a
+detailed study of the sources of error involved in this determi-
+nation, along with a justiﬁcation of using a single H II region
+to determine YP.
+The paper is organized as follows: Section 2 presents the
+characteristics of the observations and the data reduction. The
+line intensity corrections due to extinction and underlying ab-
+sorption are presented in Section 3. Section 4 shows the de-
+termination of physical conditions, using both recombination
+lines (RLs) and collisional excitation lines (CELs). Sections
+5 and 6 show the determination of chemical abundances, the
+determination of ionic abundances and of total abundances re-
+arXiv:1904.01594v1  [astro-ph.GA]  2 Apr 2019
+
+=== PAGE 2 ===
+2
+VALERDI ET AL.
+spectively. Finally, the determination of the primordial helium
+abundance, and the conclusions are shown in sections 7 and
+8.
+2. SPECTROSCOPIC OBSERVATIONS
+We obtained long-slit spectra with the Focal Reducer Low
+Dispersion Spectrograph FORS1, the night of 2002 Septem-
+ber 10 at the Very Large Telescope Facility (VLT), located at
+Melipal, Chile for the H II region NGC 346 (α = 00h59m05s.0
+δ = −72◦10′38′′). We used three grism conﬁgurations: GRIS-
+600B+12, GRIS-600R+14 with the ﬁlter GG435, and GRIS-
+300V with the ﬁlter GG375.
+Table 1
+Observation Settings.
+Grism
+Filter
+λ
+Resolution
+Exp. time
+(Å)
+(λ/∆λ)
+(s)
+600B+12
+−
+3560 - 5974
+1300
+720×3
+600R+14
+GG435
+5330 - 7485
+1700
+600×3
+300V
+GG375
+3440 - 7600
+700
+120×3
+Table 1 shows the resolution and wavelength coverage for
+the emission lines observed with each grism. We chose this
+resolution as a compromise: seeking high resolution without
+breaking the spectra into too many segments.
+Figure 1. VLT images of NGC 346 in the SMC. This object is located at
+α = 00h59m05s.0, δ = −72◦10′38′′.
+The slit width and length were 0′′.51 and 410′′ respec-
+tively.
+We have three different positions of the slit in
+the nebula:
+from the ﬁrst position A (slit position α =
+00h59m06s δ = −72◦10′29.3′′), we deﬁned 32 extraction win-
+dows; from the second position B (slit position α = 00h59m06s
+δ = −72◦10′37.3′′), we deﬁned 31 extraction windows; and
+from the last position C (slit position α = 00h59m19s δ =
+−72◦10′0.7′′), we deﬁned 34 extraction windows. The limits
+for each window were selected to avoid regions with qualita-
+tively different spectra (e.g. stars or clouds) or to break long
+regions into more homogeneous bits. To keep the same ob-
+served region within the slit, we used the LACD (linear atmo-
+spheric dispersion corrector) regardless of the air mass value.
+We used IRAF to reduce the spectra, following the stan-
+dard procedure; bias, dark and ﬂat correction, wavelength
+calibration, ﬂux calibration, spectra extraction. We use the
+low-resolution data to tie the calibration of the blue and red
+spectra by calibrating the brightest (blue and red) lines to the
+low-resolution spectra. For the ﬂux calibration we used the
+standard stars LTT 2415, LTT 7389, LTT 7987, and EG 21
+by Hamuy et al. (1992, 1994). We did an analysis of the full
+sample, for each spectrum, in the three slit positions A, B, and
+C.
+Figure 2. The plot shows the intensity of the ﬁve emission lines (λ3727,
+λ4363, λ4861, λ5007, and λ6717 + 31) in the 97 windows for each slit A, B
+and C (up, middle and down respectively). On the x axis, the bar corresponds
+to the number of pixels that each window contains. The slits are centered in
+pixel zero.
+We did a rough analysis of each of our 97 windows; in it
+we measured Hβ (as a measure of the overall intensity), [O II]
+λ3727 (as a measure of O+), [O III] λ5007 (as a measure of
+O++), [O III] λ4363 (as a measure of the quality of the temper-
+ature), and [S II] λ6717+31 (as a measure of the quality of the
+density); see Figure 2. We also present the equivalent width
+of Hβ in emission (to estimate the inﬂuence of the underlying
+absorption); see Figure 3. In a future paper, we will present
+the line intensities for each of the 97 windows.
+We want to select the windows that cover the brightest parts
+while avoiding regions where there is too much stellar contin-
+uum (i.e. we remove the brightest stars to avoid the effect of
+stellar underlying absorption, see Figure 1).
+To minimize the errors of the emission lines we deﬁne a
+new region, Region I, summing the windows with best data.
+We selected which windows to include in Region I using 3
+criteria: they needed to be bright, to have a high equivalent
+width in emission, and latter we will see that there was some
+Wolf -Rayet He II emission that we tried to diminish. We ﬁnd
+that windows with a high equivalent width in emission are
+brighter than I(Hβ) = 2×10−15 erg s−1 cm−3 Å−1 per pixel.
+
+=== PAGE 3 ===
+PRIMORDIAL HELIUM ABUNDANCE
+3
+Finally, we are left with regions that have Eqw(Hβ) >
+150, and that do not show Wolf-Rayet contamination in He II
+λ4686. Region I was lastly composed of 20 windows (A10,
+A12, A13, A14, A21, A23, A24, B10, B11, B14, B22, B23,
+C3, C5, C6, C7, C9, C11, C14, and C15). In Figures 4, and 5,
+we show the blue and red spectra of Region I.
+Figure 3. The plot shows the EW(Hβ) for each window in three slit posi-
+tions. Section A, B and C (up, middle and down respectively). On the x axis,
+the bar corresponds to the number of pixels that each window contains. The
+slits are centered in pixel zero.
+3. LINE INTENSITIES AND REDDENING CORRECTION
+Emission line ﬂux measurements were made with the
+SPLOT routine of the IRAF package. These were measured
+by integrating all the ﬂux in the line between two given limits
+and by subtracting the local continuum estimated by eye. Par-
+tially blended lines were deblended with two or three Gaus-
+sian proﬁles to measure the individual line ﬂuxes and we
+forced the lines to have the same widths.
+3700
+3725
+3750
+3775
+3800
+3825
+3850
+3875
+3900
+Wavelength(Å)
+1.00e-14
+2.00e-14
+3.00e-14
+4.00e-14
+5.00e-14
+6.00e-14
+F (erg cm
+2 s
+1 Å
+1)
+Figure 4. Plot of a fraction of the observed wavelength blue range for the
+high-resolution spectrum of the chosen extractions.
+We derived the reddening by ﬁtting the observed ﬂux ra-
+tios of the brightest Balmer lines to the theoretical values nor-
+malized to the Hβ ﬂux. We estimated the theoretical Balmer
+6500
+6550
+6600
+6650
+6700
+6750
+Wavelength(Å)
+1.00e-14
+2.00e-14
+3.00e-14
+4.00e-14
+5.00e-14
+F (erg cm
+2 s
+1 Å
+1)
+Figure 5. Plot of a fraction of the observed wavelength red range for high-
+resolution spectrum of the chosen extractions.
+decrement using the data by Storey & Hummer (1995) as-
+suming Te = 12500 K, and ne = 100 cm−3. We used the ex-
+tinction law of Seaton (1979). We assumed that the underly-
+ing absorption had the form EWabs(Hn) = EWabs(Hβ)×g(Hn),
+where g(Hn) was obtained from Table 2 of Peña-Guerrero
+et al. (2012). We produced a stellar template normalized to
+EWabs(Hβ) based in the low metallicity instantaneous burst
+models from González Delgado et al. (1999), to correct for
+the underlying absorption equivalent widths (EWs) for the
+Balmer lines. The percent error for each line includes the
+uncertainties in the reddening correction and the uncertainties
+in underlying absorption.
+The underlying absorption, reddening correction and a
+renormalization of Hβ were done simultaneously with the
+equation:
+I(λ)
+I(Hβ) = F(λ)
+F(Hβ)10 f(λ)C(Hβ)
+
+1−EWabs(λ)
+EW(λ)
+
+×
+
+1−EWabs(Hβ)
+EW(Hβ)
+−1 100
+η ,
+(1)
+where C(Hβ) is the reddening coefﬁcient, F(λ) is the absolute
+ﬂux for each line, EW(λ) is the equivalent width observed in λ
+and EWabs(λ) = EWabs(Hβ)×g(λ) is the theoretical equivalent
+width (Peña-Guerrero et al. 2012). Only the H and He lines
+were corrected for underlying absorption. This underlying ab-
+sorption is due to the contribution of dust scattered light, this
+contribution is expected to include in absorption the H and He
+lines present in the brightest stars.
+Finally we used a χ2 minimization routine to obtain the pa-
+rameters C(Hβ), EWabs(Hβ), and η, the ﬁtted values for Re-
+gion I were 0.159, 1.647, and 99.53, respectively. The values
+for our best spectrum are in good agreement with the ones de-
+rived from Peimbert et al. (2012). Note that Hβ is not nor-
+malized to 100 since with this value, the other lines of H,
+would be overestimated. In the same way that we want to
+average the helium lines, we want to do it with the hydrogen
+lines. We used the following Balmer lines Hα, Hβ, Hγ, Hδ,
+H11, H12, and H13 to calculate the observations, this cal-
+culation implies that Hβ = 99.53. We decided to normalize
+the reddening-corrected ﬂuxes using the 7 brightest Balmer
+lines. The best ﬁt to these 7 lines yielded an Hβ different than
+100. We took the unconventional decision of choosing this
+Hβ value, to avoid having to correct for the optimum value of
+H at a later stage.
+Table 2 shows in columns (1) and (2) the adopted laboratory
+wavelength λ, and the identiﬁcation for each line respectively,
+
+=== PAGE 4 ===
+4
+VALERDI ET AL.
+the extinction law value used for each line (Seaton 1979) is in
+column (3), in columns (4) and (5) we present the ﬂux F(λ)
+and the intensity I(λ) for each line (normalized to Hβ), and
+ﬁnally we show the % error for the intensity in column (6).
+Table 2 List of emission line intensities.
+λ
+ID
+f(λ)
+F(λ)a
+I(λ)b
+% Error
+3614
+He I
+0.282
+0.64
+0.70
+6
+3634
+He I
+0.280
+1.08
+1.18
+4
+3674
+H I
+0.269
+0.40
+0.48
+8
+3679
+H I
+0.268
+0.27
+0.35
+10
+3683
+H I
+0.267
+0.35
+0.45
+8
+3687
+H I
+0.266
+0.39
+0.52
+8
+3692
+H I
+0.265
+0.55
+0.72
+8
+3697
+H I
+0.264
+1.02
+1.26
+6
+3704
+H I+He I
+0.262
+1.47
+1.79
+4
+3712
+H I
+0.260
+1.27
+1.61
+4
+3722
+H I
+0.258
+2.13
+2.32
+4
+3726
+[O II]
+0.256
+30.37
+33.00
+2
+3729
+[O II]
+0.255
+43.88
+47.65
+2
+3734
+H I
+0.253
+2.18
+2.36
+3
+3750
+H I
+0.250
+2.54
+3.14
+3
+3771
+H I
+0.245
+3.33
+4.09
+3
+3789
+C III?
+0.240
+0.12
+0.13
+15
+3798
+H I+[S III]
+0.238
+4.14
+5.09
+3
+3820
+He I
+0.233
+0.86
+1.03
+6
+3829
+Mn II?
+0.231
+0.50
+0.53
+8
+3835
+H I
+0.229
+6.31
+7.53
+2
+3869
+[Ne III]
+0.222
+35.95
+38.58
+1
+3889
+He I+H I
+0.218
+17.56
+18.82
+1.2
+3970
+H I
+0.200
+25.71
+27.35
+1
+4009
+He I + [Fe III]
+0.194
+0.59
+0.63
+6
+4026
+He I
+0.190
+1.79
+2.07
+4
+4069
+[S II]
+0.182
+1.00
+1.06
+6
+4076
+[S II]
+0.181
+0.55
+0.59
+8
+4102
+H I
+0.176
+24.62
+27.00
+1
+4121
+He I
+0.173
+0.20
+0.30
+12
+4133
+O II
+0.171
+0.11
+0.11
+15
+4144
+He I
+0.169
+0.16
+0.27
+12
+4316
+O II
+0.135
+0.38
+0.39
+8
+4340
+H I
+0.128
+45.95
+48.47
+1
+4363
+[O III]
+0.122
+6.82
+7.06
+2
+4376
+Ar II
+0.119
+0.14
+0.15
+15
+4388
+He I
+0.116
+0.48
+0.56
+8
+4438
+He I
+0.100
+0.23
+0.24
+10
+4472
+He I
+0.094
+3.80
+4.03
+3
+4483
+S II?
+0.092
+0.05
+0.05
+20
+4529
+Ne I
+0.076
+0.07
+0.07
+20
+4563
+···
+0.070
+0.09
+0.10
+15
+4607
+[Fe III]
+0.055
+0.05
+0.05
+20
+4639+42
+O II
+0.051
+0.06
+0.06
+20
+4649+51
+O II
+0.049
+0.12
+0.12
+15
+4658
+[Fe III]
+0.047
+0.30
+0.30
+10
+4686
+He II
+0.041
+0.24
+0.24
+10
+4712
+[Ar IV]+He I
+0.034
+1.10
+1.10
+6
+4740
+[Ar IV]
+0.028
+0.42
+0.42
+8
+4769
+[Fe III]
+0.023
+0.07
+0.07
+20
+4861
+H I
+0.000
+100.00
+*99.53
+0.8
+4881
+[Fe III]
+-0.004
+0.16
+0.16
+12
+4922
+He I
+-0.013
+1.08
+1.13
+6
+4959
+[O III]
+-0.021
+178.21
+175.16
+0.8
+4986
+[Fe III]
+-0.027
+0.29
+0.29
+10
+5007
+[O III]
+-0.032
+534.12
+522.70
+0.8
+5016
+He I
+-0.034
+2.48
+2.51
+3
+5048
+He I
+-0.041
+0.13
+0.21
+12
+5192
+[Ar III]+[N I]
+-0.073
+2.04
+1.97
+4
+5270
+[Fe III]
+-0.089
+0.11
+0.11
+15
+5326
+Ne I
+-0.096
+0.26
+0.25
+10
+5433
+[Fe II]
+-0.128
+0.08
+0.08
+20
+5518
+[Cl III]
+-0.140
+0.41
+0.38
+8
+5538
+[Cl III]
+-0.144
+0.42
+0.39
+8
+5755
+[N II]
+-0.192
+0.08
+0.07
+20
+5876
+He I
+-0.216
+11.69
+10.85
+1.5
+6312
+[S III]
+-0.286
+1.78
+1.61
+4
+Table 2 cont.
+λ
+ID
+f(λ)
+F(λ)a
+I(λ)b
+% Error
+6548
+[N II]
+-0.320
+2.18
+1.95
+4
+6563
+H I
+-0.322
+314.61
+282.24
+0.8
+6583
+[N II]
+-0.324
+4.28
+3.83
+3
+6678
+He I
+-0.337
+3.39
+3.05
+3
+6716
+[S II]
+-0.342
+8.32
+7.40
+1.5
+6731
+[S II]
+-0.343
+5.98
+5.31
+2
+7065
+He I
+-0.383
+2.40
+2.13
+3
+7136
+[Ar III]
+-0.391
+8.39
+7.33
+2
+7281
+He I
+-0.406
+2.27
+1.99
+3
+7320
+[O II]
+-0.410
+1.30
+1.13
+4
+7330
+[O II]
+-0.411
+1.07
+0.93
+6
+a F(λ) in units of F(Hβ) = 100.0; F(Hβ) = 1.57×10−12 erg cm−2s−1.
+b I(λ) in units of I(Hβ) = 99.53; I(Hβ) = 2.26×10−12 erg cm−2s−1.
+* Note that I(Hβ) = 99.53, see text.
+To determine the [O II] λλ3726,3729 intensity we sub-
+tracted the contribution of the H13 and H14 Balmer lines, we
+also subtracted the contribution of the [S III] λ3722 line that
+originates in the same upper level than [S III] λ6312. Simi-
+larly the contribution of [Ar IV] to I(4711) was obtained by
+subtracting the intensity of He I λ4713. Finally the contri-
+bution of He I to I(3889) was obtained after subtracting the
+expected contribution of H8 (based on the work by Storey &
+Hummer 1995).
+4. PHYSICAL CONDITIONS
+4.1. Temperatures and Densities from CELs
+We calculated physical conditions through CELs, ﬁtting the
+line ratios using PyNeb (Luridiana et al. 2015). Electron tem-
+peratures were determined using the [O III] λ4363/(λ4959 +
+λ5007), [O II] (λ7320 + λ7330)/(λ3726 + λ3729), and [N II]
+λ5755/λ6584 auroral to nebular intensity ratios. Electronic
+densities were determined from the [O II] λ3726/λ3729, and
+[S II] λ6731/λ6716 ratios which are strongly density depen-
+dent.
+In addition,
+we obtained the [Fe III] density from
+the computations by Keenan et al. (2001),
+using the
+I(λ4986)/I(λ4658) ratio. This ratio is strongly dependent on
+density, going from I(4986)/I(4658) ≈1.0 at ne = 100 cm−3
+to I(4986)/I(4658) ≈0.05 at ne = 3000 cm−3. This ratio is
+a good density indicator, particularly for low densities, since
+it is more density dependent than the [Cl III] and [Ar IV] de-
+terminations; moreover the Fe++ density is much more repre-
+sentative of the whole object than the O+ and S+ densities,
+since Fe++/Fe≈60% while O+/O≈20% and S+/S≈15%.
+The temperatures and densities are presented in Table 3.
+Table 3
+Temperature and density from CELs.
+Temperature (K)
+[OIII]
+[OII]
+[NII]
+NGC 346
+12871±98
+12445±464
+10882±767
+Density (cm−3)
+[OII]
+[SII]
+[FeIII]
+NGC 346
+23.7±8.2
+32±21
+101±17
+4.2. Temperatures and Densities from RLs
+We used the program Helio14, which is an extension
+of the maximum likelihood method presented by Peimbert
+et al. (2000) to obtain values for the temperature and den-
+sity from He I lines. Helio14 code determines the He+/H+
+
+=== PAGE 5 ===
+PRIMORDIAL HELIUM ABUNDANCE
+5
+ionic abundance, ne(He I), Te(He I), the optical depth of
+the line He I λ3889, and t2(He I) through the informa-
+tion on the line intensities of He I, and the information of
+the [O II] (λ7320 + λ7330)/(λ3726 + λ3729) and the [O III]
+λ4363/(λ4959 + λ5007) line ratios. For a full description of
+the method see Peimbert et al. (2007).
+By using ten He I lines: λ3819, λ3889, λ4026, λ4388,
+λ4471, λ4922, λ5016, λ5876, λ6678, and λ7065, we ob-
+tained a temperature Te(He I)= 11400 ± 550 K, and a density
+ne(He I)< 10 cm−3.
+4.3. Temperature Inhomogeneities
+To derive the ionic abundance ratios, the average tempera-
+ture, and the temperature standard deviation, we use the for-
+malism of t2 (Peimbert 1967). This formalism takes into ac-
+count the temperature structure inside the H II region.
+Each ionic species, Xi+, has a unique value of average tem-
+perature and of thermal inhomogeneity given by:
+T0(Xi+) =
+R
+Tenen(Xi+)dV
+R
+nen(Xi+)dV
+(2)
+and
+t2(Xi+) =
+R 
+Te −T0(Xi+)
+2 nen(Xi+)dV
+T0(Xi+)2 R
+nen(Xi+)dV
+,
+(3)
+where ne and n(Xi+) are the electron and ion densities respec-
+tively, and V is the observed volume.
+In general, RLs, emissivities are stronger when Te is lower
+while, CELs, emissivities are stronger when Te is higher; and,
+also in general, RL temperatures are lower than T0 while
+CEL temperatures are higher than T0. Overall, each temper-
+ature has a different t2 dependence; for instance the [O III]
+4363/5007 temperature, in the presence of thermal inhomo-
+geneities, can be expressed as a function of T0 and t2 as:
+T4363/5007 = T0
+
+1+ t2
+2
+91300
+T0
+−3
+
+;
+(4)
+equivalent equations can be derived for the [N II], [O II], and
+[S II] temperatures as well as for He I and Balmer continuum
+temperatures.
+Since temperatures can be presented as a function of t2 and
+T0, when one measures 2 different temperatures in principle
+one can obtain T0 and t2. In practice one prefers one tempera-
+ture that weighs preferably the hot regions (e.g. T[O III]), and
+one that weighs preferentially the cold regions (e.g. T(He I)
+or T(Bac)).
+Combining results from CELs and values from He I and
+using the Helio14 code we found that the maximum like-
+lihood values are: t2(He+) = 0.033±0.017 and T0 = 11900±
+450 K. These values can be used to determine abundances
+in the high-temperature regions, due to the similar ionization
+potentials of He+ and O++. Determinations for t2 values from
+observations of H II regions range between 0.020 and 0.120
+(Peimbert et al. 2012). The t2 value depends on the speciﬁc
+characteristics of the thermal structure of each nebula (or even
+of each fraction of nebula).
+5. IONIC CHEMICAL ABUNDANCES
+5.1. Heavy element ionic abundances
+We have followed the t2 formalism for chemical abun-
+dances as presented by Peimbert & Costero (1969). The ﬁrst
+step to do so is to derive the abundances using the so called
+direct method and then to correct for the presence of thermal
+inhomogeneities.
+We have used a two-zone direct method characterized by
+the zones where low- and high-ionization ions are present:
+T(low) and T(high). T(low) is the mean of Te[N II], Te[O II]
+and Te[S II], while T(high) is Te[O III]; we used T(low) for
+singly ionized heavy elements, and T(high) for multiple ion-
+ized elements.
+We used PyNeb to made the computations (Luridiana et al.
+2015).
+In Table 4 we present two values for each ionic
+abundance, the ﬁrst value is obtained directly from PyNeb
+(t2 = 0.00), and the second value is using the formalism of t2.
+To obtain the ionic abundance using t2̸ = 0.00, we used the
+equations by Peimbert et al. (2004):
+ncel(X+i)
+n(H+)
+
+t2̸=0.00
+= T(Hβ)αT(λnm)0.5
+T α+0.5
+(4363/5007)
+×exp
+
+−
+∆En
+kT(4363/5007)
++
+∆En
+kT(λnm)
+
+×
+ncel(X+i)
+n(H+)
+
+t2=0.00
+,
+(5)
+where α = −0.89 is the termperature dependence of Hβ, ∆En
+is the difference of energy between the ground and the ex-
+cited level of the CEL, and T(λnm) and T(Hβ) are line tem-
+peratures, as described by Peimbert (1967) (and represent the
+average emmisivity of each line for the temperature distribu-
+tion on the observed object) and can be written as:
+T(λnm) = T0
+(
+1+ t2
+2
+" ∆En/kT0
+2 −3∆En/kT0 +3/4
+∆En/kT0 −1/2
+#)
+,
+(6)
+and
+T(Hβ) = T0
+
+1−t2
+2 (1−α)
+
+.
+(7)
+Table 4
+Ionic abundances from collisional excitation lines for NGC 346.
+Ion
+t2 = 0.000
+t2 = 0.033±0.017
+N+
+5.87±0.02
+5.97±0.06
+O+
+7.41±0.05
+7.54±0.08
+O++
+7.93±0.01
+8.04±0.06
+Ne++
+7.22±0.01
+7.33±0.06
+S+
+5.55±0.03
+5.65±0.06
+S++
+6.18±0.02
+6.24±0.04
+Ar++
+5.54±0.01
+5.60±0.03
+Ar+3
+5.11±0.02
+5.22±0.06
+Cl++
+4.37±0.03
+4.47±0.06
+In units of 12+logn(X+i)/n(H).
+5.2. Helium Abundance
+To determine the He abundance we also used the 10 lines
+mentioned in Sec. 4.2 as input for the Helio14 code. This
+code uses the effective recombination coefﬁcients given by
+Storey & Hummer (1995) for H+ and for the case of He+ those
+given by Benjamin et al. (2002) and Porter et al. (2013). The
+collisional contribution was estimated from Sawey & Berring-
+ton (1993) and Kingdon & Ferland (1995), and we used the
+
+=== PAGE 6 ===
+6
+VALERDI ET AL.
+calculations made by Benjamin et al. (2002) for the optical
+depth effects in the triplets.
+The correction of the underlying stellar absorption is impor-
+tant for He I lines, therefore we used the values from González
+Delgado et al. (1999) to correct lines with λ < 5000Å, and for
+lines redder than 5876Å, we used the values of Peimbert et al.
+(2005). The ionic abundance of He++ was obtained from the
+λ4686 line presented in Table 2, and the recombination coef-
+ﬁcients given by Storey & Hummer (1995).
+Table 5
+Ionic abundances from recombination lines for NGC 346.
+Ion
+t2 = 0.000
+t2 = 0.033±0.017
+He+
+10.917±0.004
+10.915±0.004
+He++
+8.30±0.04
+8.30±0.04
+In units of 12+logn(X+i)/n(H).
+6. TOTAL ABUNDANCES
+For most elements we cannot observe all their ionic stages;
+so, in general, ionization correction factors (ICFs) are re-
+quired. The functional forms of those ICFs frequently depend
+on the depth, quality, and coverage of the spectra.
+In general, for helium:
+N(He)
+N(H) = N(He0)+N(He+)+N(He++)
+N(H0)+N(H+)
+=ICF(He0)N(He+)+N(He++)
+N(H+)
+,
+(8)
+for objects of low, and medium, degree of ionization, the pres-
+ence of neutral helium within the H II region is important and
+the ICF(He0) > 1; for H II regions with a high degree of ion-
+ization, as is NGC 346, we can consider that the presence of
+neutral helium within the nebula is negligible; however one
+must be careful as for objects with very high degree of ion-
+ization the ICF(He0) < 1.00 (even if the correction for helium
+is always ICF(He0) ≳0.99, when we are looking for a precise
+determination of YP, one should try to avoid such objects).
+To determine an accurate He/H ratio a precise value of
+the ICF(He0) is needed. Previous computations by Luridiana
+et al. (2003); Peimbert et al. (2002, 2007); Relaño et al. (2002)
+showed that the ICF(He0)= 1.00 for NGC 346, because there
+is no transition zone from ionized to neutral He and H regions.
+We note that their results were calculated using tailor-made
+photoionization models with the code CLOUDY (Ferland et al.
+2013).
+For oxygen, to obtain the total abundance, we considered
+that:
+N(O3+)
+N(O) = N(He++)
+N(He) ,
+(9)
+and
+ICF(O+ +O++) = N(O+)+N(O++)+N(O3+)
+N(O+)+N(O++)
+;
+(10)
+therefore:
+N(O)
+N(H) = ICF(O+ +O++)
+N(O+)+N(O++)
+N(H+)
+
+,
+(11)
+where
+ICF(O+ +O++) =
+
+1−N(He++)
+N(He)
+−1
+.
+(12)
+For nitrogen, and neon we obtained the total abundances
+using the ICFs by Peimbert & Costero (1969).
+N(N)
+N(H) = ICF(N+)
+N(N+)
+N(H+)
+
+,
+(13)
+where
+ICF(N+) = N(O+)+N(O++)+N(O+3)
+N(O+)
+,
+(14)
+and
+N(Ne)
+N(H) = ICF(Ne++)
+N(Ne++)
+N(H+)
+
+,
+(15)
+where
+ICF(Ne++) = N(O+)+N(O++)+N(O+3)
+N(O++)
+.
+(16)
+We observed the auroral lines of [S II] and [S III]. To ob-
+tain the total sulphur abundance we used the ICF proposed by
+Stasi´nska (1978):
+N(S)
+N(H) = ICF(S+ +S++)
+N(S+)+N(S++)
+N(H+)
+
+(17)
+where
+ICF(S+ +S++) =
+"
+1−
+
+1−N(O+)
+N(O)
+3#1/3
+.
+(18)
+For the case of argon, we have measurements for lines
+of [Ar III] and [Ar IV]; we used the calculations by Pérez-
+Montero et al. (2007):
+N(Ar)
+N(H) = ICF(Ar++ +Ar3+)
+N(Ar++)+N(Ar+3)
+N(H+)
+
+(19)
+where
+ICF(Ar++ +Ar3+) = 0.928+0.364(1−x)+ 0.006
+1−x .
+(20)
+For chlorine, we have measurements for lines of [Cl III],
+and to obtain the total abundance we used a reimplementation
+of the ICF proposed by Delgado-Inglada et al. (2014):
+N(Cl)
+N(H) = ICF(Cl++)N(O+)+N(O++)
+N(H+)
+N(Cl++)
+N(O+) ,
+(21)
+where
+ICF(Cl++) = 2.914
+ 
+1−
+
+N(O++)
+N(O+)+N(O++)
+0.21!0.75
+.
+(22)
+In Table 6 we present the results for t2 = 0.00 as well as for
+t2 = 0.033±0.017.
+6.1. X, Y, and Z values for NGC 346
+To calculate the fraction of He by mass, we need to know
+the fraction of the heavy elements by mass. For low metal-
+licity objects, like NGC 346, the O/Z ratio is expected to
+be O/Z ≈0.55 (Peimbert et al. 2007); this ratio is slightly
+larger than for high metallicity objects where O/Z ∼0.40,
+mainly due to the increase of the C/O ratio (Carigi & Peim-
+bert 2011). Using O/Z = 0.55 thus we can estimate the full
+value of Z = 0.0030 and from that Y = 0.2490.
+
+=== PAGE 7 ===
+PRIMORDIAL HELIUM ABUNDANCE
+7
+Table 6
+Total abundances for NGC 346.
+Element
+t2 = 0.000
+t2 = 0.033±0.017
+He
+10.918±0.004
+10.916±0.004
+N
+6.50±0.03
+6.61±0.07
+O
+8.05±0.02
+8.19±0.08
+Ne
+7.33±0.02
+7.48±0.08
+S
+6.40±0.03
+6.44±0.08
+Ar
+5.70±0.02
+5.82±0.07
+Cl
+5.37±0.04
+5.47±0.07
+In units of 12+logn(X)/n(H).
+One of the most subtle effects that we need to include in
+the determination of primordial helium or helium in very hot
+objects, is the correction due to the collisional excitation of
+the Balmer lines. Since models in Peimbert et al. (2002) that
+were later used in Peimbert et al. (2007, 2016), we know that
+for NGC 346 to include this effect produces an increase of
+0.0015 ± 0.0005, consequently X = 0.7465, Y = 0.2505 and
+Z = 0.0030. In this work, the contribution by collisions to
+the intensity of He and H lines is considerably smaller than
+objects with higher electron temperature like SBS 0335−052
+or I Zw 18. To minimize this particular error it is important
+to study O/H poor objects but not extremely poor. There-
+fore, if we wish to further minimize this error, we must ob-
+serve colder objects, with heavy elements abundances similar
+to those of NGC 346.
+7. PRIMORDIAL HELIUM ABUNDANCE
+To obtain the YP value, we need to compute the fraction of
+helium present in the interstellar medium produced by galac-
+tic chemical evolution. For this purpose it was assumed that:
+YP = Y −O ∆Y
+∆O,
+(23)
+where Y and O are the helium and oxygen abundances by
+mass. We adopted the determination ∆Y/∆O = 3.3 ± 0.7 by
+Peimbert et al. (2016). To obtain this value, they used the ob-
+servations of brighter objects from Peimbert et al. (2007) and
+chemical the evolution models for galaxies of low mass and
+metallicity by Carigi & Peimbert (2008) and Peimbert et al.
+(2010).
+Most determinations are dominated by systematic errors
+rather than statistical errors. We can decrease the statistical
+errors increasing the number of objects used to determine YP.
+Nevertheless, the systematic ones will not decrease.
+In Table 7, we present the error budget of our determination.
+The error is derived from the same 13 sources considered in
+Peimbert et al. (2007). The most important source of error is
+due to the difﬁculty to correct for the collisional excitation of
+the Balmer lines; in very hot objects, Te ≥15000, this excita-
+tion produces a non negligible increase in the Balmer line in-
+tensities relative to the case B recombination and, if ignored,
+introduces a bias in the reddening correction deduced from
+the Balmer decrement, both effects affecting the calibration
+of all the lines in the spectra by up to a few percent; however,
+since this effect has not been studied extensively the correc-
+tions that can be applied are uncertain at best, and thus such
+objects should be avoided. Another important source of er-
+ror comes from the temperature structure; this arises because
+most Y determinations are based on a single homogeneous
+temperature, T(4363/5007), however the Te(He I) is system-
+atically lower showing the presence of temperature variations
+that should be included in the YP determination. The error
+Table 7
+Error budget in the YP determination.
+Problem
+Error
+*
+This paper
+∆O(∆Y/∆O) correction
+Systematic
+±0.0010
+±0.0012
+Rec. coefﬁcients of He I
+Systematic
+±0.0010
+±0.0010
+Temperature structure
+Statistical
+±0.0010
+±0.0010
+Reddening correction
+Systematic
+±0.0007
+±0.0007
+Collisional excitation of He I
+Statistical
+±0.0007
+±0.0007
+Underlying absorption in He I
+Statistical
+±0.0007
+±0.0007
+Underlying absorption in H I
+Statistical
+±0.0005
+±0.0007
+Optical depth of He I triplets
+Statistical
+±0.0005
+±0.0007
+Collisional excitation of H I
+Systematic
+±0.0015
+±0.0005
+Rec. coefﬁcients of H I
+Systematic
+±0.0005
+±0.0005
+He I and H I line intensities
+Statistical
+±0.0005
+±0.0005
+He ionization correction factor
+Statistical
+±0.0005
+±0.0003
+Density structure
+Statistical
+±0.0005
+±0.0003
+*Peimbert et al. (2007).
+of O(∆Y/∆O) correction implies the extrapolation to zero
+heavy-element content; based on chemical evolution models
+of galaxies of different types, it is found that Y/O is prac-
+tically constant for objects with O < 4 × 10−3. To estimate
+the error in the reddening correction, we made comparisons
+among four classic extinction laws and a recent one; these
+laws are labeled S79 (Seaton 1979), W58 (Whitford 1958),
+CCM89 (Cardelli et al. 1989), and B07 (Blagrave et al. 2007).
+The systematic effect of ICF(He), has to be tested with tailor-
+made photoionization models for low-metallicity H II regions.
+A discussion of the remaining (smaller) sources errors is pre-
+sented in Peimbert et al. (2007).
+When compared with errors of the sample of 2007 we can
+see that some systematic errors go down because we are us-
+ing the best-known object to determine YP; while a few of
+the statistical errors go up because we are using a single ob-
+ject with a notable increase in ∆Y/∆O. One of the advan-
+tages of NCG 346 is that the correction due to the collisional
+excitation of the Balmer lines is smaller 0.0015 ± 0.0005 in
+comparison with 0.0144 ± 0.0038 for SBS 0335 −052, and
+the 0.0056 ± 0.0015 for the sample by Peimbert et al. (2007,
+2016). Overall the total error goes down, and the YP value
+amounts to 0.2451±0.0026.
+We can also compare with previous determinations for YP
+determined using only NCG 346: YP = 0.2345±0.0026 by Pe-
+imbert et al. (2000), YP = 0.2384 ± 0.0025 by Peimbert et al.
+(2002), YP = 0.2453 ± 0.0033 by Peimbert et al. (2007), and
+YP = 0.2433±0.0034 by Peimbert et al. (2016). The difference
+when comparing the values of 2000 and 2002 with those from
+2007 and onward comes from a better model of NGC346,
+newer atomic data and a better understanding of the quantity
+and magnitude of the sources of error (particularly, the effects
+of the collisional excitation of the Balmer lines were ignored
+in the ﬁrst two determinations).
+To summarize there are several advantages in observing a
+nearby H II region. The higher spatial resolution allows us
+to isolate the windows that are contaminated by the light of
+bright stars. This allows us to reduce the starlight emission
+and therefore to obtain a greater signal to noise in the emis-
+sion lines. In this determination, the systematic errors due to
+collisional excitation of the H are smaller and some statisti-
+cal errors (like the ICF(He0) and the density structure), also
+become smaller.
+It is useful to discuss the determination of YP as a function
+time, Skillman et al. (2012) presents the plot with results from
+1974 to 2012, accordingly in Figure 6 we present theYP results
+
+=== PAGE 8 ===
+8
+VALERDI ET AL.
+from 2007 to the present. It is clear that the YP values derived
+by different groups provide an important constraint to the big
+bang theory. The main source of error is due to systematic un-
+certainties. In addition, the result by the Planck Collaboration
+et al. (2016), corresponds to YP = 0.24467±0.0002.
+2008
+2010
+2012
+2014
+2016
+2018
+Year
+0.235
+0.240
+0.245
+0.250
+0.255
+Yp
+Aver et al.
+Izotov et al.
+Peimbert et al.
+Fernandez et al.
+This paper
+Figure 6. Measurements YP of the last 12 years, using H II regions.
+8. DISCUSSION AND CONCLUSIONS
+Low-metallicity H II regions are optimal objects to deter-
+mine the primordial helium abundance. In this context, we
+studied the H II region NGC 346.
+By measuring its He I
+line intensities, we determined a primordial helium abundance
+YP = 0.2451±0.0026.
+Table 8 shows YP measurements reported in the literature
+and in this work. Our YP value is consistent with most of the
+previous estimates. We note that the Izotov et al. (2014) deter-
+mination differs signiﬁcantly from the other values. We con-
+sider that they have some systematic errors that they are ignor-
+ing; for example, part of this difference is due to the adopted
+temperature structure: Izotov et al. (2014) used the tempera-
+ture from CLOUDY photoionized models (Ferland et al. 2013),
+which predict 0.000 < t2 < 0.015, with a typical value of
+about 0.004 (Peimbert et al. 2017); alternatively the observed
+t2 values for 28 H II regions are in the 0.019 to 0.120 range
+with an average value of 0.044 (Peimbert et al. 2012). A dis-
+cussion on the possible reasons for the high t2 values observed
+in H II regions is given by Peimbert et al. (2016).
+Since the regions observed in all cases are not the same, we
+do not expect the values to be the same, e.g. there may be
+regions where the t2 value may be higher due to stellar winds
+or other sources of energy input (e.g., Peimbert et al. 2017).
+According to our error budget presented in Table 7 it is
+comforting that three of the other four independent YP results
+are very similar to ours. The main points of our result are:
+a) the lower temperature of NGC 346 reduces considerably
+the collisional excitation of the hydrogen lines as well as the
+uncertainty of its determination, when compared to the other
+samples, all of which include a few very hot objects, and b)
+the small error introduced by correcting for the underlying ab-
+sorption of the He I lines in NGC 346, this is because we were
+able to eliminate most of the contribution of the dust scattered
+stellar light in our observations.
+Peimbert et al. (2016) presents a YP value determined only
+using NGC 346; that determination has its error divided into
+statistical and systematical components that amounts 0.0028
+and 0.0019 respectively, while in this paper the statistical er-
+ror has been diminished to 0.0018 and the systematical one
+remains at 0.0019. The systematical error was not expected
+to change, since we are using the same atomic data, the same
+reddening law, etc.; on the other hand the statistical error was
+indeed expected to diminish due to the greater quality of the
+data (the bigger telescope and the higher number of photons
+collected).
+While this is a signiﬁcant improvement over previous de-
+terminations, we would still like better determinations. To
+continue the quest to obtain a YP value of higher precision, we
+need: a) helium atomic data of higher quality; b) better chem-
+ical evolution models of dwarf galaxies, that would allow us
+to have a better determination of the ∆Y/∆O ratio; and c) a
+newer study of the reddening law, one designed to take full
+advantage of the newer telescopes and instruments that were
+not available a few decades ago. We also consider that obser-
+vations, of objects like NCG 346, with the future generation
+extra-large telescopes will help reduce the error in the YP de-
+termination.
+Table 8
+YP values and predicted equivalent number of neutrino families, Nν.
+YP source
+YP
+Nν
+Izotov et al. (2014)
+0.2551±0.0022
+3.58±0.16
+Aver et al. (2015)
+0.2449±0.0040
+2.91±0.30
+Peimbert et al. (2016)
+0.2446±0.0029
+2.89±0.22
+Fernández et al. (2018)
+0.245±0.007
+2.92±0.55
+This work
+0.2451±0.0026
+2.92±0.20
+Assuming τn = 880.2 s (Tanabashi et al. 2018).
+We estimated the number of neutrino families, Nν, using
+the YP values reported in Table 8 assuming a neutron half-life
+value τn = 880.2 ± 1.0s by Tanabashi et al. (2018). Table 8
+shows the Nν values from the previous cited authors. As ex-
+pected the result in this paper is consistent with the results by
+Aver et al. (2015), Peimbert et al. (2016), and Fernández et al.
+(2018); these results agree with the presence of three families
+of neutrinos, which is consistent with laboratory determina-
+tions (e.g., Mangano et al. 2005; Mangano & Serpico 2011).
+While the YP result by Izotov et al. (2014) suggests the pres-
+ence of a fourth neutrino family. which would not be fully
+ultrarelativistic (light) at the time of neutrino decoupling.
+Table 9
+YP values and the neutron mean life, τn.
+YP source
+YP
+τn
+Izotov et al. (2014)
+0.2551±0.0022
+921±11
+Aver et al. (2015)
+0.2449±0.0040
+872±19
+Peimbert et al. (2016)
+0.2446±0.0029
+870±14
+Fernández et al. (2018)
+0.245±0.007
+872±33
+This work
+0.2451±0.0026
+873±13
+Assuming Nν = 3.046 (Mangano et al. 2005).
+We also estimate the value of the neutron mean life, τn using
+the value of Nν reported by Mangano et al. (2005), together
+with the YP estimations in Table 9. The results obtained from
+Aver et al. (2015), Peimbert et al. (2016), Fernández et al.
+(2018), and ourselves, are within 1σ from the value presented
+by Tanabashi et al. (2018), and they are in agreement with the
+τn laboratory determinations. Alternatively from theYP results
+obtained by Izotov et al. (2014), the τn value differs by more
+than 3σ from the laboratory determination.
+We are grateful to the anonymous referee for a careful read-
+
+=== PAGE 9 ===
+PRIMORDIAL HELIUM ABUNDANCE
+9
+ing of the manuscript and some excellent suggestions. We
+are indebted to Maria Teresa Ruiz for her collaboration in
+the observations of this object. We acknowledge CONACyT
+for supporting this project throught grant 241732. M. V. ac-
+knowledges several constructive suggestions in Python by Os-
+car Barragán.
+REFERENCES
+Aver, E., Olive, K. A., & Skillman, E. D. 2015, JCAP, 7, 011
+Benjamin, R. A., Skillman, E. D., & Smits, D. P. 2002, ApJ, 569, 288
+Blagrave, K. P. M., Martin, P. G., Rubin, R. H., et al. 2007, ApJ, 655, 299
+Cardelli, J. A., Clayton, G. C., & Mathis, J. S. 1989, in IAU Symposium,
+Vol. 135, Interstellar Dust, ed. L. J. Allamandola & A. G. G. M. Tielens, 5
+Carigi, L., & Peimbert, M. 2008, RMxAA, 44, 341
+—. 2011, Revista Mexicana de Astronomia y Astroﬁsica, 47, 139
+Delgado-Inglada, G., Morisset, C., & Stasi´nska, G. 2014, MNRAS, 440, 536
+Ferland, G. J., Izotov, Y., Peimbert, A., et al. 2010, in IAU Symposium, Vol.
+268, Light Elements in the Universe, ed. C. Charbonnel, M. Tosi,
+F. Primas, & C. Chiappini, 163
+Ferland, G. J., Porter, R. L., van Hoof, P. A. M., et al. 2013, RMxAA, 49,
+137
+Fernández, V., Terlevich, E., Díaz, A. I., Terlevich, R., & Rosales-Ortega,
+F. F. 2018, MNRAS, 478, 5301
+González Delgado, R. M., Leitherer, C., & Heckman, T. M. 1999, ApJS,
+125, 489
+Hamuy, M., Suntzeff, N. B., Heathcote, S. R., et al. 1994, PASP, 106, 566
+Hamuy, M., Walker, A. R., Suntzeff, N. B., et al. 1992, PASP, 104, 533
+Hilditch, R. W., Howarth, I. D., & Harries, T. J. 2005, MNRAS, 357, 304
+Izotov, Y. I., Thuan, T. X., & Guseva, N. G. 2014, MNRAS, 445, 778
+Keenan, F. P., Aller, L. H., Ryans, R. S. I., & Hyung, S. 2001, Proceedings
+of the National Academy of Science, 98, 9476
+Kingdon, J., & Ferland, G. J. 1995, ApJ, 442, 714
+Luridiana, V., Morisset, C., & Shaw, R. A. 2015, A&A, 573, A42
+Luridiana, V., Peimbert, A., Peimbert, M., & Cerviño, M. 2003, ApJ, 592,
+846
+Mangano, G., Miele, G., Pastor, S., et al. 2005, Nuclear Physics B, 729, 221
+Mangano, G., & Serpico, P. D. 2011, Physics Letters B, 701, 296
+Massey, P., Parker, J. W., & Garmany, C. D. 1989, AJ, 98, 1305
+Mathis, J. S., & Rosa, M. R. 1991, A&A, 245, 625
+Pagel, B. E. J., Simonson, E. A., Terlevich, R. J., & Edmunds, M. G. 1992,
+MNRAS, 255, 325
+Peña-Guerrero, M. A., Peimbert, A., Peimbert, M., & Ruiz, M. T. 2012,
+ApJ, 746, 115
+Peimbert, A., Peña-Guerrero, M. A., & Peimbert, M. 2012, ApJ, 753, 39
+Peimbert, A., Peimbert, M., & Luridiana, V. 2002, ApJ, 565, 668
+—. 2016, RMxAA, 52, 419
+Peimbert, A., Peimbert, M., & Ruiz, M. T. 2005, ApJ, 634, 1056
+Peimbert, M. 1967, ApJ, 150, 825
+Peimbert, M., & Costero, R. 1969, Boletin de los Observatorios Tonantzintla
+y Tacubaya, 5, 3
+Peimbert, M., Luridiana, V., & Peimbert, A. 2007, ApJ, 666, 636
+Peimbert, M., Peimbert, A., Carigi, L., & Luridiana, V. 2010, in IAU
+Symposium, Vol. 268, Light Elements in the Universe, ed. C. Charbonnel,
+M. Tosi, F. Primas, & C. Chiappini, 91
+Peimbert, M., Peimbert, A., & Delgado-Inglada, G. 2017, PASP, 129,
+082001
+Peimbert, M., Peimbert, A., & Ruiz, M. T. 2000, ApJ, 541, 688
+Peimbert, M., Peimbert, A., Ruiz, M. T., & Esteban, C. 2004, ApJS, 150, 431
+Peimbert, M., & Torres-Peimbert, S. 1974, ApJ, 193, 327
+Peimbert, M., Torres-Peimbert, S., & Ruiz, M. T. 1992, RMxAA, 24, 155
+Pérez-Montero, E., Hägele, G. F., Contini, T., & Díaz, Á. I. 2007, MNRAS,
+381, 125
+Planck Collaboration, Ade, P. A. R., Aghanim, N., et al. 2016, A&A, 594,
+A13
+Porter, R. L., Ferland, G. J., Storey, P. J., & Detisch, M. J. 2013, MNRAS,
+433, L89
+Relaño, M., Peimbert, M., & Beckman, J. 2002, ApJ, 564, 704
+Sawey, P. M. J., & Berrington, K. A. 1993, Atomic Data and Nuclear Data
+Tables, 55, 81
+Seaton, M. J. 1979, MNRAS, 187, 73P
+Skillman, E., Aver, E., & Olive, K. 2012, Memorie della Societa
+Astronomica Italiana Supplementi, 22, 164
+Stasi´nska, G. 1978, A&A, 66, 257
+Storey, P. J., & Hummer, D. G. 1995, MNRAS, 272, 41
+Tanabashi, M., Hagiwara, K., Hikasa, K., et al. 2018, Phys. Rev. D, 98,
+030001
+Viegas, S. M., Gruenwald, R., & Steigman, G. 2000, ApJ, 531, 813
+Vilchez, J. M. 1989, Ap&SS, 157, 9
+Whitford, A. E. 1958, AJ, 63, 201
+Zhang, Y., & Liu, X.-W. 2003, A&A, 404, 545

@@ -1,0 +1,1222 @@
+=== PAGE 1 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+233
+CONCEPTS AND ACHIEVEMENTS EXPERIMENTAL MODELS 
+(CYBER-MIXMECHATRONICS SYSTEMS) FOR SMART COBOTIC 
+PLATFORMS IN THE SMART INDUSTRY (4.0) 
+ 
+Gheorghe Gheorghe1 
+1National Institute of Research and Development for Mechatronics and Measurement  
+Technique – INCDMTM, Bucharest, Romania 
+Email: geocefin@yahoo.com  
+Abstract - The scientific work presents some constructive solutions of mechatronic multi-
+application robotic platform, COBOT type used for ultra-precisely remote monitoring and remote 
+control for digital enterprise and Smart Industry (4.0). The paper also positions the IT&C 
+technology for the digital enterprise and Smart Industry (4.0), with some examples of experimental 
+models for intelligent platforms COBOT type. 
+ 
+Keywords: Cyber-Mixmecatronics Systems; Cobotic Intelligent Platforms; Intelligent Industry. 
+1. Introduction 
+ 
+1.1 Future Ideas for Intelligent Cobotic 
+Platforms 
+► Cobotics 
+systems 
+for 
+Electronics 
+Manufacturing for integrated tactile adaptive 
+control 
+ 
+Industry 4.0, the Internet of Things, cloud 
+computing, self-management, e-health, augmented 
+reality 
+or 
+artificial 
+intelligence 
+benefit 
+from 
+advanced technology, in the sense that the 
+semiconductor and electronics industries make 
+them available today. 
+At the same time, these growing markets present 
+great challenges: even smaller components, with a 
+higher functional density, shorter innovation cycles 
+and an increasing diversity of smart end products. 
+The precision, efficiency, reliability and flexibility 
+of production systems are increasingly decisive at 
+the level of board and chip, not to mention at the 
+level of printed circuit boards. 
+Each positioning solution for the placement, 
+alignment, processing or inspection of components 
+must be able to meet these requirements. 
+Process type, duty cycle, tool types, machining 
+area size, feature size and criteria such as flow rate, 
+accuracy and geometric tolerances produce different 
+requirements on technological motion systems. 
+Many years of experience in the semiconductor 
+market, technological diversity and the high range of 
+vertical production allow it to react flexibly to 
+market development and provide motion systems 
+that meet the needs, integrators and end users in the 
+field of electronics production. 
+This scientific paper contains examples of high-
+performance cobotic systems for different stages of 
+production, from standard products to highly 
+customized solutions that communicate through 
+standard industrial networks. 
+Figure 1 shows an example of an integrated 
+tactile adaptive control application of a mouse 
+button and the toutch-screen surface of a tablet in 
+order to test both functionality and reliability 
+(average operating time - MTBF). 
+ 
+ 
+Figure 1 
+ 
+It provides technologically complex solutions and 
+therefore uses its own high-precision drive and 
+positioning components. 
+All levels of integration can be offered up to 
+multi-axis combinations that use different drive 
+technologies, including motion control. 
+The 
+engineering 
+projects 
+of 
+the 
+motion 
+subsystems were part of the basic activities as 
+customized solutions, perfectly fitting into existing 
+
+=== PAGE 2 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+234
+processes, advanced automation in manufacturing 
+and inspection processes for the production of chips 
+or optical-photonic cables, as well as complex 
+research facilities. 
+The cobotic axle system has high displacement 
+accuracy and load capacity due to precision linear 
+guides with preloaded recirculated ball bearings 
+provided with 2 mm pitch compensated ball screw. 
+The base is aluminum for maximum stability.  
+Types of actuation and position measurement for 
+the following models are:  
+• 
+DC 
+motor 
+with 
+integrated 
+high-speed 
+ActiveDrive 
+amplifiers 
+combined 
+with 
+direct-
+encoding linear encoder for high resolution and 
+increased repeatability. 
+• also with integrated support brake. 
+• 
+direct 
+gear 
+motor 
+with 
+direct 
+control 
+ActiveDrive integrated and rotary encoder. 
+• DC motor with integrated amplifier and rotary 
+encoder. 
+• Brushless DC motor with integrated block 
+switch and rotary encoder. 
+As specifications we have: 
+ displacement ranges 102, 204 and 306 mm (4 ”, 
+8”, 12 ”) 
+ speed up to 100 mm / s 
+ bidirectional repeatability ± 0.2 µm n Load 
+capacity per 100 kg 
+ ball screw with zero play 
+ possible XY and XYZ configurations 
+ 
+The areas of application are: Industry and 
+Research. 
+Laser 
+material 
+processing, 
+surface 
+inspection, etc. 
+ 
+► Tactical 
+and 
+optical 
+testing 
+of 
+electronic devices, regarding the control of 
+machines 
+with 
+assembled 
+electronic 
+components 
+ 
+Electronic devices are getting smaller, more 
+complex, working in different environments and 
+include several types of components that require 
+tactile, optical, and electronic testing methods. The 
+position of these devices in the final assembly 
+requires the precise positioning of the inspection 
+instrument in several degrees of freedom. Powerful 
+flexible motion systems are offered for different test 
+methods that can be integrated into customers' 
+production lines while maintaining capacity and 
+efficiency. 
+The key features of cobotic motion systems are: 
+- the unique range of motion technologies to 
+design the most advanced solutions;  
+- high-performance industrial motion control 
+platform ensures coordinated movement of all axes 
+for maximum efficiency 
+- easy connection and management of sensors 
+and test devices with flexible connectivity; 
+It can be integrated as a subsystem in most PLC’s 
+and automated controllers. 
+According to Figure 2, the following scenario is 
+described: 
+ 
+Figure 2 
+ 
+(1) Positioning the part 
+• Linear motors with direct magnetic drive for 
+high precision and speed 
+• Absolute encoder with 1 nm resolution 
+• XY cable chain management 
+• Precision linear motor stage v451 
+(2) Positioning of test devices 
+• Linear motor with ring screw or voice coil 
+• Cable management integration 
+• Brake or counterbalance 
+• Direct linear encoder measurement 
+• (M511) High precision linear stage 
+
+=== PAGE 3 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+235
+(3) Positioning the sensor at different angles 
+• Parallel kinematic hexapod 
+• Six degrees of freedom 
+• Freely definable center of rotation 
+• (H 811- 6) miniature hexapod ax 
+(4) Force control measuring sensor 
+• PiMag Voice call linear actuator 
+• Force sensor with 1Mn resolution 
+• Weight force compensation 
+• Voice call linear actuator 
+Electronic component manufacturers require 
+high control wiring efficiency with assembled 
+electronic components. They can take advantage of 
+the high speed of automation systems based on the 
+integration of hexapodal robots, but also of the high 
+precision offered for them in the active control of the 
+production processes in the electronics industry. 
+Accuracy and reliability in a large number of 
+operating cycles are also important. 
+Cobotic 
+motion 
+platforms 
+meet 
+these 
+requirements and also ensure easy connectivity to 
+other automation systems and devices in the 
+production line. 
+Thanks to the precision linear guides with 
+crossed bearings, the linear positioning is especially 
+suitable for scanning applications with constant 
+speed. 
+The anti-creep system reliably prevents loading 
+into the joints. 
+The guides have a high load capacity and 
+precision in all operating conditions. 
+The position measurement is performed with the 
+highest accuracy directly on the movement platform, 
+so that the nonlinearity, the mechanical play or the 
+elastic 
+deformation 
+do 
+not 
+influence 
+the 
+measurement. 
+The 
+high-resolution 
+PIOne 
+encoder 
+was 
+developed with proper processing of the measured 
+values and allows a position resolution of much less 
+than one nanometer. 
+Optical and non-contact PIOne encoders are 
+based on an interferometric measurement principle. 
+Due to the short signal period and high signal 
+quality, the linearity error of PIOne encoders is less 
+than 1%. PIOne encoders support direction detection 
+when they detect a reference signal. 
+Absolute encoders provide explicit position 
+information 
+that 
+allows 
+immediate 
+position 
+determination. This means that the reference is not 
+required during start-up, which increases efficiency 
+and safety during operation. 
+Direct drive motors are suitable for positioning 
+tasks with the highest accuracy requirements, as 
+there is no unwanted interaction with permanent 
+magnets. 
+This allows smooth running even at the lowest 
+speeds and at the same time there is no vibration at 
+high speeds. 
+Non-rectilinearity in control behavior is avoided 
+and any position can be easily controlled. The 
+actuating force can be easily set. 
+In direct drives, the force of the drive element is 
+transmitted directly to the load to be moved without 
+the use of mechanical transmission elements, such as 
+the coupling, the drive screw or the reducer. 
+The multi-axis system can be controlled by an 
+ACS motion control module for optimal axis 
+synchronization. ACS Motion Control offers a 
+complete 
+modular 
+system 
+and 
+organizes 
+components into three different layers: 
+ the first level is the user interface. this is 
+basically the host software and communication 
+with the motion system is allowed. 
+ second 
+level 
+devices 
+are 
+called 
+motion 
+controllers. 
+The 
+motion 
+controller 
+is 
+responsible for communicating with the host 
+software and also takes care of everything 
+related to profile generation, trajectory, 
+macros, diagnostics, etc.  
+ position commands are sent to the universal 
+drive modules at the third level via an industrial 
+network. The motion controller, units and 
+power supplies are integrated in a single 
+housing. These products are called control 
+modules. 
+The drive modules power and drive the motors, 
+manage the feedback devices, manage the digital 
+inputs and outputs (I / O) and analyze the sensor 
+signals for closed loop positioning 
+As 
+applications 
+Industry 
+and 
+Research 
+applications. Automation. Metrology. Photonic and 
+precision scanning in the manufacture of electronic 
+circuits. 
+ 
+► Cobotic system with integrated hybrid 
+hexapod  
+ 
+The electronics industry often requires very specific 
+solutions, for example, for flexible band connections. 
+Cobotic systems, (fig. 3) represent an ideal basis for 
+customized adaptations.  
+ 
+ 
+
+=== PAGE 4 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+236
+ 
+Figure 3 
+ 
+The stacking width and height can be varied 
+almost arbitrarily, the configuration of the motors 
+ensures extremely high accelerations of up to 5g, 
+thus ensuring the highest productivity depending on 
+the application. 
+The features of ACS motion controllers, such as 
+"Input Shaping", help build a stable and adaptive 
+system that actively suppresses possible vibrations. 
+Positioning 
+accuracy 
+requirements 
+are 
+particularly high in the production and inspection of 
+semiconductors or circuit boards. The high dynamics 
+of the axis of motion is necessary for an optimized 
+flow of the processed wiring. In this case, a travel 
+range of 200 mm × 200 mm in XY is usually 
+sufficient. All guides have special bearings that 
+guarantee the best flatness for a precise and high 
+dynamic positioning of the movement. In addition, it 
+is possible to maintain a stable position 
+The series of applications is offered in the range 
+of displacements on axes of 500mm, 1000mm and 
+1500mm. Custom lengths are available by direct 
+order at the factory. With speeds of up to 1 m / sec, 
+cobotic systems are useful for applications that 
+require high-speed positioning of light payloads. 
+ 
+The series of cobotic systems is standard with 
+stepper motors. The motors are also available with 
+4000 rotations, with incremental optical rotary 
+encoders, mounted integral with the motor. 
+The mechanical limit switches of the travel end 
+are standard on the axle travel system. 
+The drive system uses a 9.5 mm wide guide. The 
+mobile system moves on four pre-loaded ball 
+bearings, profiled to fit the contour of the aluminum 
+extrusion base to provide a larger contact surface. 
+All cobotic systems are machined from AL 6061 
+aluminum alloy and black anodized. The base is an 
+aluminum extrusion with a clear anodized finish. 
+ Typical applications for a cobotic system include 
+pick & place, component inspection and distribution. 
+ 
+► Hermetic 
+sealing 
+of 
+electronic 
+omponents using laser welding 
+ 
+Fig. 4 shows a solution for hermetically sealing 
+electronic components with laser welding. 
+ 
+ 
+Figure 4 
+
+=== PAGE 5 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+237
+On a cobotic platform Hexapod type 6-Axis 
+Miniature, is fixed a motor with torque control and 
+an LCM system - Laser Control Module 
+Torque-controlled 
+motors 
+are 
+direct-
+electromagnetic motors. 
+It is distributed with mechanical traction 
+components and transfers the driving force directly 
+and without friction to the movement platform. 
+The specifications of this cobotic system are: 
+  active axis θZ; 
+  travel range> 360 (1)°; 
+  integrated Sin / cos sensor; 
+  Peak Sensor Resolution 1845 Lines; 
+  revolution Minimum incremental movement 2 
+µrad Type; 
+  unidirectional repeatability 4 µrad Type; 
+  bidirectional repeatability 88 µrad Type; 
+  angular speed 500 rpm Max; 
+  Optical reference switch, coding index, 5 V, TTL 
+differential, 1 × on the platform revolution. 
+The mechanical properties of the cobotic 
+system are: 
+ cross roller bearings; 
+ load capacity / axial force 20 N Max. ; 
+ permissible lateral force 6 N max .; 
+ moment of inertia 0.00025 kgm² ± 20%; 
+ nominal moment 0.49 (2) 0.49 (2) N • mMax .; 
+ rated current 2.05 (2) 2.05 (2) A Typ .; 
+ maximum moment 1.25 (2) 1.25 (2) N • mMax .; 
+ maximum current (max. 6 s) 5 (2) 5 (2) A Max .; 
+ torque constant 0.24 0.24 N • m/ A Type; 
+ resistance phase phase 3 3 Ω Type. Inductance 
+phase 0.5 0.5 mH Type; 
+ number of pairs of poles 12 12; 
+ electromagnetic safety brake. 
+The LCM system is an EtherCAT network module 
+that allows ACS controllers and control modules to 
+control a laser source directly with full motion 
+synchronization, resulting in the highest quality 
+laser micro-processing and optimum efficiency. 
+It is compatible with interfaces from a wide range 
+of lasers for complex applications such as DPSS, CO2, 
+excimer, fiber, Q-switch, picosecond, femtosecond 
+and more. 
+The system has several operating modules: 
+- Power control module: 
+ fixed frequency; 
+ fixed pulse width; 
+ fixed service cycle; 
+ Tickle mode; 
+ fixed frequency and pulse width. 
+-  Motion capabilities (with ACS Controller): 
+ fast point positioning on a single axis or on 
+several axes using 3rd order interpolation; 
+ up to 5 axes, movement traversed by means of 
+the universal G code or the native ACS XSEG 
+motion commands, with advanced forward and 
+rounding algorithms; 
+ mapping compensation error; 
+ support 
+for 
+Cartesian 
+and 
+non-Cartesian 
+systems. 
+The functional summary covers: 
+ digital pulse modulation for dynamic control of 
+laser power; 
+ synchronization of the pulse with the XYZ 
+movement path in certain positions; 
+ synchronization by starting / stopping the laser 
+gate with the XYZ movement path in specific 
+positions; 
+ flexible electrical interface: active laser output, 
+safety lock input, error input for robust safety 
+implementation, 
+general 
+purpose 
+programmable I / O. 
+When faced with health problems, today's 
+medical technology makes it possible for implants, 
+such as pacemakers or insulin pumps, to perform 
+important functions. Such implants are extremely 
+complex systems consisting of electrical and 
+electronic components. Hermetic sealing, which 
+keeps the microsystem and surrounding tissue 
+reliably separated from each other, is necessary for 
+safe and 
+reliable use 
+in the human 
+body. 
+Components depend on airtight seals for them to 
+work properly and safely in other industries, for 
+example, 
+sensors 
+and 
+electronics 
+in 
+the 
+semiconductor industry or the charging of batteries 
+must be protected against vapors or foreign 
+particles. 
+Laser welding is a method used for sealing. For 
+this purpose, the laser point is focused on the 
+rotating workpiece. In order to obtain a uniform 
+welding quality, the size of the laser point must be 
+maintained keeping the same distance between the 
+laser and the workpiece in the same way during 
+welding. In addition, the laser beam must strike the 
+surface of the part at the correct angle. Part 
+retention or alignment errors must also be 
+considered and corrected by controlling the laser 
+welding path. 
+Hexapods, which can move in six degrees of 
+freedom and allow the definition of reference 
+systems for the workpiece and instrument ("work", 
+"instrument" coordinate systems), can reliably 
+perform all these tasks. 
+ 
+2. Simulation and Verification of the 
+Stability of the Image Taken by a Drone  
+ 
+Taking 
+high-definition 
+images 
+from 
+drone 
+systems, despite poor lighting conditions, taking 
+snapshots without fading, recognizing traffic signs or 
+road markings in driver assistance systems, or 
+identifying dangerous situations in surveillance 
+systems - all of these are possible today with the help 
+of modern cameras. But how good is the still and 
+video image quality of a camera or smartphone? 
+
+=== PAGE 6 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+238
+End-users, manufacturers from companies in the 
+aerospace, medical and security sectors or in the 
+field of automation technologies - all require high 
+performance capabilities and are looking for 
+answers to these questions. Companies that deal 
+with these issues rely on test equipment that 
+guarantees reliable and comparable test results. For 
+testing image stabilization systems of cameras that 
+process images from drones, for example, the 
+frequencies and movements of the axes must be 
+simulated realistically and must be identical for each 
+test. 
+In order to perfectly adapt the trajectory to the 
+requirements of the application, it is possible to 
+define different coordinate systems using a Hexapod 
+cobotic platform as in figure 5. 
+ 
+Figure 5 
+ 
+This offers great advantages for applications in 
+industrial automation, but also for drone flight 
+simulation. 
+The frequency of the in-flight tremor, or of the 
+human hand during filming, is around 12 Hz, which 
+means that the tests must be able to cover a range 
+between 0 and 12 Hz. Most of the required 
+frequencies are between 4 and 8 Hz. Hexapod 
+systems can be used successfully to achieve this goal. 
+An effective testing procedure is of particular 
+interest to both manufacturers and users. And here 
+is a key role of Image Engineering. The main 
+experience is the measurement of digital image 
+quality, as well as the development of appropriate 
+testing procedures and complete testing systems for 
+cameras. 
+Image quality assessment and image stabilization 
+testing place high technical requirements on the test 
+procedure and its components. Above all, the goal is 
+to accurately simulate the tremor by realistic 
+simulation of the drone's flight. 
+Hexapod 
+platforms 
+are 
+used 
+for 
+precise 
+movement 
+and 
+positioning, 
+alignment 
+and 
+displacement of loads in all six degrees of freedom, ie 
+three lines and three rotating axes. Hexapods have a 
+parallel kinematic structure, meaning that the six 
+units act together on a single moving platform. 
+The length of the motion actuators is variable, 
+allowing the system to move in all six degrees of 
+freedom in space. This special design of the hexapod 
+optimizes the overall rigidity of the system and 
+allows more space for movement. 
+Depending on their design, hexapods can position 
+loads from a few kg to a few hundred kg or even a 
+few tons in any spatial orientation, ie independent of 
+the mounting orientation and with high accuracy. 
+Motion simulation applications benefit of: 
+ more degrees of freedom than the classic 
+solutions; 
+ pivot point that can be defined depending on 
+the 
+position 
+of 
+the 
+image 
+stabilization 
+component in the camera; 
+ following the predetermined trajectories; 
+ movement frequencies at 50 Hz; 
+ CIPA certification. 
+For the  CIPA certification: 
+The 
+lobby 
+association 
+of 
+the 
+Japanese 
+photographic industry Camera & Imaging Products 
+Association (CIPA) sets standards for motion 
+systems that are used in image stabilization test 
+equipment. 
+Hexapods are the only six-axis positioning system 
+for simulating camera vibration during in-flight 
+shooting that meets the requirements of the CIPA 
+standard. 
+The freely definable rotation or pivot point is an 
+essential feature of the parallel-kinematic hexapod. 
+This means that the movement of the hexapod 
+platform can be specifically adapted to the position 
+of the gyroscope mounted on the camera, so that 
+ideal realistic conditions can be created by flight 
+simulation and real-time image acquisition. 
+Hexapods can be designed considerably more 
+compactly than multi-axis positioning systems in 
+series. Because only one platform is operated, most 
+often with a large aperture, the moving mass of the 
+Hexapod is significantly smaller. This leads to 
+improved dynamics, with a considerably faster 
+response. In addition, the electric cable with the 
+control signals from the controller does not create 
+any problems, so no additional forces and torques 
+are present so as to reduce the accuracy. 
+In the case of stacked systems (dodecapod 
+systems), the lower axles not only move the mass of 
+the payload, but also the mass of all other units that 
+follow. This reduces the dynamic properties and 
+total rigidity of the system. 
+The "mini Hexapod" Hexapod system is used for 
+testing smartphones and the "universal Hexapod" 
+system is used for heavier cameras. Both are 
+perfectly suitable for testing image stabilization 
+systems and are already CIPA certified. "CIPA 
+certification allows us to take a pioneering role in 
+
+=== PAGE 7 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+239
+qualifying a six-axis system for evaluating image 
+stabilization systems," says Wüller. 
+Meanwhile, both Hexapod systems have proven 
+to be practically practical as follows:  
+ mini Hexapod can simulate vibrations, e.g. 
+rotary motion, with dynamics of 20 Hz and a 
+deviation of 0,1°. For this purpose, the parallel-
+kinematic system performs a repeatable and defined 
+test trajectory. It offers travel distances of up to 34 
+mm in the XY plane and up to 13 mm in the Z 
+direction. Tilt angles are 20° around the X and Y axes 
+and up to 42° around the vertical. 
+  the universal Hexapod system has higher loads, 
+provides travel distances of up to 100 mm and 
+rotation angles of up to 60°. 
+ 
+2.1 Cobotic Robotic Station 
+ 
+Today's industry managers are under significant 
+pressure to automate production processes to make 
+products that can evolve rapidly as the needs of the 
+customers they want to serve. Consequently, we see 
+that car platforms, for example, with a shelf life of 
+three years instead of five, are becoming the norm, 
+and it is observed that electronic products adopt an 
+obsolescence program of one to two years instead of 
+three years. This new reality significantly disrupts 
+the way final products and supporting equipment 
+(eg machines) are designed and manufactured. 
+At the highest level, a shorter product life cycle 
+means that the depreciation window for related 
+production equipment is also shorter, creating a 
+need for production assets that can be designed, 
+deployed and reused at low cost. Despite this 
+pressure, custom industrial equipment is still 
+designed 
+and 
+manufactured 
+using 
+traditional 
+methods, based on an extremely fragmented 
+industrial 
+ecosystem 
+of 
+regional 
+industrial 
+distributors, engineering integrators and local 
+machine shops. This industry is ripe for a major 
+change through the use of collaborative robots (Fig. 
+6). 
+ 
+Figure 6 
+For the description are produced (fig. 6) systems 
+based on the use of a Universal Robot - UR3 framed 
+in a workspace with 450x540mm aluminum 
+motherboard, (as in Figure 6). The height of the table 
+is 720 mm, with an adjustable leveling support of 80 
+mm. There is a high shelf for the cabinet with 
+electronic control circuits and modules. 
+The technical specification is: - weight: 35.2 kg 
+ 
+3. Cobotic Application – Collaborative 
+Robot 
+ 
+The collaborative robot - OMRON TM in Figure 7 is 
+designed to work with both humans and machines, 
+this robot is the latest in a long line of innovations in 
+automation technology for industrial applications. 
+Safe and transportable, with integrated vision, 
+this robot allows quick start and quick adaptation. 
+Its intuitive software allows the robot to be easily 
+trained to perform almost any task, wherever it is 
+needed, freeing the workforce from repetitive tasks 
+and increasing productivity. 
+Regardless of the industrial field, in automobiles, 
+semiconductors, secondary packaging for food or 
+cosmetics, the OMRON TM collaborative robot is 
+designed to adapt to almost any industry. 
+The OMRON TM collaborative robot offers a 
+vision system with a built-in camera. The integrated 
+camera locates objects in a wide field of view, and 
+image enhancement light allows objects to be 
+recognized in almost any condition. 
+ 
+ 
+Figure 7 
+ 
+The 
+vision 
+system 
+improves 
+reliability, 
+consistency and high-precision placement and 
+includes features such as pattern matching, barcode 
+reading and color classification that allow inspection, 
+measurement and sorting at no extra cost or effort. 
+With the various vision features and simple and 
+intuitive programming environment of OMRON TM 
+collaborative robots, it allows for continued safe, 
+flexible and collaborative manufacturing between 
+man and machine. 
+As changing consumer trends continue to reduce 
+product life cycles, manufacturers need production 
+
+=== PAGE 8 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+240
+lines to meet the requirements of frequent product 
+changes. In addition, as labor shortages become a 
+reality, manufacturers are striving to automate 
+simpler and more monotonous tasks, to create jobs 
+where people can contribute to more creative tasks. 
+The RobotTM series offers a unique solution to 
+easily install a robot to automate applications such 
+as assembly, lifting, placement and inspection. At the 
+launch of the TM series, there is a "mobile 
+compatible" model, which will integrate perfectly 
+into the market of an autonomous mobile robot. This 
+allows users to automate more complex tasks, such 
+as retrieval and placement on a tray or container, 
+and connect processes with autonomous mobile 
+robots. 
+OMRON Robots from TM series have the 
+following specifications: 
+ arm length: 700 mm, 900 mm, 1100 mm, 1300 
+mm; 
+ payload: 4 kg, 6 kg, 12 kg, 14 kg; 
+ power supply: AC, DC; 
+ according to SEMI S2 Safety Guides. 
+Three 
+key 
+features 
+of 
+the 
+TM 
+series 
+collaboration robot are: 
+(1)  Intuitive programming interface reduces 
+programming time: Reduced installation and 
+configuration times compared to traditional 
+industrial robots. The intuitive programming 
+interface based on the flowchart and easy 
+teaching requires little or no previous robot 
+programming experience. 
+(2)  The integrated arm view system reduces 
+setup time: the TM series is equipped with 
+built-in 
+vision 
+and 
+integrated 
+lighting, 
+allowing the user to capture products with a 
+wide viewing angle. Equipped with image 
+detection features such as pattern matching, 
+barcode reading and color identification, this 
+robotic 
+system 
+makes 
+inspection, 
+measurement 
+and 
+sorting 
+applications 
+extremely easy to configure from the control 
+panel. 
+(3) 
+according 
+to 
+all 
+safety 
+standards 
+of 
+collaborative robots, reducing installation 
+time: the TM series meets all safety standards 
+that allow cooperation between humans and 
+machines and can be operated safely around 
+humans 
+without 
+the 
+necessary 
+classic 
+industrial safety "fences" traditionally for 
+industrial robots, again greatly reducing 
+installation time. (According to the safety 
+requirements 
+for 
+ISO10218-1 
+industrial 
+robots, as well as the safety requirements for 
+ISO 
+/ 
+TS15066 
+collaborating 
+industrial 
+robots) 
+With the addition of the TM series collaborative 
+robot to the manufacturing line, safe, flexible 
+manufacturing and human-machine collaboration 
+are allowed to accelerate the implementation of the 
+“Flexible 
+Innovation-Automation” 
+concept, 
+an 
+innovative manufacturing concept. 
+ 
+3.1 
+Cobot 
+- 
+Transcranial 
+magnetic 
+stimulation 
+ 
+An increasing number of patients increasingly 
+need to free the specialist operator (doctor or nurse) 
+from a time-consuming and time-consuming task 
+and to reallocate some of his time to value-added 
+tasks. bigger. 
+Finally, avoiding any movement of the head 
+during a period of 30s, even at rest and relaxation, is 
+a real constraint for the patient. 
+The objective of the "TMS-Cobot" system shown 
+in Figure 8 is to provide an affordable robotic 
+solution, with head movement compensation, to 
+improve the accuracy of a medical procedure, while 
+providing the operator with avoidance of a 
+demanding and repetitive task. and reducing 
+unpleasant constraints for the patient (through 
+mechanical stiffeners or other methods). 
+ 
+ 
+Figure 8 
+ 
+For example, it is important for the physician to 
+maximize the ability to provide the stimulation dose 
+with electromagnetic radiation provided by a coil 
+and an electric current at the appropriate and 
+predetermined location and with TMS-Cobot is 
+possible. 
+The key features are: 
+ collaborative robotic “cobot” technique (safety); 
+ such technology offers intrinsic safety features 
+through a collision detection mechanism at each 
+common level, allowing close collaboration with the 
+patient and the doctor; 
+ the movements of the robotic arm can be 
+automated or directed manually by the user who has 
+activated a so-called initial free action mode; 
+ maintaining the position and orientation of the 
+Transcranial Magnetic Stimulation (TMS) coil during 
+the therapy session by optically tracking the markers 
+on the head; 
+ compensates for the potential movement of the 
+head during the therapy session; 
+
+=== PAGE 9 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+241
+ ensures a permanent contact between the coil 
+and the head (integrated pressure sensor); 
+ compatible with any seat; 
+ Easy and extremely mobile: Can be easily moved 
+on its wheels. 
+Ergonomics: when piloted by a compatible 
+neuronavigation system, the operator controls the 
+TMS-Cobot from the graphical user interface of the 
+neuronavigator 
+When piloted by the Axilum Robotics Optical 
+Tracking System, the operator controls the TMS-
+Cobot from a control panel. 
+The key advantages are: 
+ improves the accuracy and repeatability of the 
+procedure; 
+ the accuracy of the robotic arm is less than 2 
+mm; 
+ offers the operator relief from a repetitive and 
+time-consuming task; 
+ Once the therapy session has been initiated, 
+minimal operator attention is required to ensure 
+proper position, orientation and contact of the coil 
+on the patient's head. 
+Cobot cmpatibility: 
+ TMS-Cobot is compatible with therapy coils 
+from Deymed, Magstim, MagVenture, Mag & More, 
+Neurosoft. List of coils compatible on request 
+  TMS-Cobot can be piloted either by Axilum 
+Robotics Optical Tracking System (without MRI) or 
+by a compatible neuro-navigation system from 
+Localite, Rogue Research / Brainsight, Syneika 
+The dimensions and weight for cobot: 
+ TMS-Cobot fits any space and fits most elevators 
+due to its practical size and light weight; 
+ height with arm: (H) 1770 mm; 
+ basic dimensions: (L x W) 1111 x 650 mm; 
+ weight: 143 kg; 
+ regulatory information; 
+ CE (EU) marking. 
+TMS-Cobot is a Class IIa medical device designed 
+to automate and improve the accuracy and 
+repeatability of the positioning of a Transchannel 
+Magnetic Stimulation Coil (TMS) in clinical situations 
+where the use of compatible devices is desired, 
+except for peripheral nerve stimulation. It bears the 
+CE marking 0120, the conformity assessment of 
+which has been established by the notified body SGS. 
+These medical devices are not reimbursed by the 
+French health insurance. 
+Axilum Robotics TMS-Cobot® TS MV is indicated 
+for the positioning and spatial orientation of the 
+treatment coil of the MagVenture TMS Therapy 
+system. 
+Transcranial magnetic stimulation is used to treat 
+major depressive disorder in patients who have not 
+responded to medication. Proper positioning of the 
+coil so that it accurately targets the correct part of 
+the brain is the key to effective treatment. 
+Patient movement can interfere with correct 
+positioning, but the TMS-Cobot TS MV is an optical 
+system capable of tracking the patient's movement 
+and continuously adjusting its positioning to keep 
+the coil focused on the target. The arm can be 
+adjusted and repositioned by the operator as 
+needed. 
+ 
+3.2 Example of male / female positioning 
+ 
+GKN is a standard for ergonomic requirements 
+for 
+an 
+operator's 
+workload. 
+The 
+document 
+complying with EuropeanCouncilDirective 90/269 / 
+EEC also includes additional requests from the 
+authorities for the working environment in AFS 
+2012: 2 on ergonomics for the prevention of 
+musculoskeletal disorders. It also refers to the 
+Swedish 
+working 
+environment 
+authorities 
+Organizatorisk och social arbetsmiljö. AFS 2015: 4 
+and Arbets platsens utformning. AFS 2009: 02. 
+ 
+172 cm = male female medium height 
+ 
+Figure 9 
+ 
+Standards include measurements of desirable 
+jobs and those jobs that have been avoided. Figure 9 
+shows an example of three different areas. Green is 
+the area where you work, and red is the least desired 
+position, related to the position of the hands. There 
+is a high risk of injury when the hands are in the red 
+areas for more than 2 hours or more than 100 times 
+a day. 
+The 
+robot 
+should 
+have 
+enough 
+sensory 
+subsystems to be able to handle the details in a good 
+way. An industrial robot is usable because it is 
+reprogrammable and can be integrated into a larger 
+system 
+connected 
+to 
+intelligent 
+sensors 
+and 
+subsystems etc. 
+The robot's operating space must be divided into 
+3 zones in which the robot can move at different 
+speeds and these zones will be controlled by sensors. 
+
+=== PAGE 10 ===
+Concepts and Achievements Experimental Models (Cyber-Mixmechatronics Systems) for Smart Cobotic Platforms in 
+the Smart Industry (4.0) 
+ 
+ 
+International Journal of Mechatronics and Applied Mechanics, 2020, Issue 8, Vol. II  
+242
+The first area is where the robot touches the 
+workpiece. In this area the robot must be able to 
+move quickly and there should be no operator access 
+to this area as long as the robot is in working mode. 
+The second area is where the robot moves the 
+part into the human workspace. There should be 
+sensors in this area to ensure that there is no human 
+interference on the way when the robot is moving 
+the object, otherwise the robot should stop or slow 
+down. 
+The third area is the collaborative workspace in 
+which both the human and the robot move. In this 
+space the robot should move very slowly, and the 
+movements must be controlled by man and also be 
+able to be stopped quickly by touching the robot. 
+The collaborative robot (COBOT) must be able to 
+move in the common workspace only if the 
+movements are small. For larger movements, such as 
+turning, the man should take a step and let the robot 
+move first from the common workspace and move 
+backwards before returning to the workspace. The 
+sensors can also be placed on all operator 
+instruments. 
+ 
+4. Conclusions 
+ 
+The trends in the manufacturing industry are 
+moving towards the seamless integration of the 
+world's physical and digital data to enable rapid 
+integration, feedback and control loops throughout 
+the distribution of production infrastructure. This 
+article presents experimental models for intelligent 
+COBOT type platform within the NUCLEUS project 
+"Interdisciplinary research on the design and 
+implementation of a multi-application intelligent 
+robotic platform type COBOT of ultra-precise 
+telemetry and remote control, for the Smart Industry 
+(4.0)". 
+ 
+References 
+ 
+[1]    Gheorghe I. Gh., ”The Development of Intelligent 
+Industry in Romania”, International Journal of 
+Modeling and Optimization, Vol. 10, No. 6, 
+December 2020; 
+[2] Constantin A., „Telementenance and Teleservice 
+Oriented Design of Dependable Mechatronic 
+System in Automotive Industry”, Proceedings of 
+the International Conference on Numerical 
+Analysis 
+and 
+Applied 
+Mathematics 
+2014 
+(ICNAAM-2014), AIP Conference Proceedings 
+1648, 
+620004 
+(2015); 
+doi: 
+http://dx.doi.org/10.1063/1.4912854; 
+ 
+ 
+[3] Abrahamson, S., Ryder, P., Unterberg, B., 
+Crowdstorm: The Future of Innovation, Ideas, 
+and Problem Solving, John Wiley & Sons, Inc. 
+2013;  
+[4] Gheorghe I. Gh., ”Original Concepts and 
+Achievements 
+for 
+Designing 
+of 
+Smart 
+Mechatronics 
+and 
+Cyber-Mixmechatronics 
+Systems used in Laboratories and in the 
+Industry”, IFAC PapersOnLine 51-30 (2018) 
+598–603 
+[5] Gheorghe I. Gh., ”Cyber-Mixmechatronics Mix 
+Concepts, Integrated IN Cobotic Platforms for 
+the Smart Industry (4.0) and the Digitized 
+Enterprise”, 
+International 
+Journal 
+of 
+Mechatronics and Applied Mechanics, 2019, 
+Issue 6, Vol. I, pp. 165-179 
+[6] Gheorghe I. Gh., „Vision of the National Institute 
+of Research-Development for Mechatronics and 
+Measurement Technique – INCDMTM Bucharest 
+in research and innovation for the smart 
+domain “Internet of Things –IoT”, integrated in 
+the COBOT technology platforms”, International 
+Journal of Modeling and Optimization (IJMO), 
+IJMO 2019 Vol.9(5): 291-297 ISSN: 2010-3697 
+DOI: 10.7763/IJMO.2019.V9.725;  
+[7] Machado, J, Soares, F., Celina, L: A virtaul 
+Workbench applied to Automation Students 
+Response Analysis Proceeings of Controlo 2014, 
+Portugal, Vol: 321, Pages 709-719, Published: 
+2015; DOI:10.1007/978-3-319-10380-8_68; 
+[8] Rizescu, C.I., Udrea, C. Rizescu, D., Experimental 
+Setup 
+for 
+Harmonic 
+Drive 
+Efficiency 
+Determination, Advanced Materials Research 
+Vols. 463-464 (2012) pp. 1518-1521, ISSN 
+10226680, ISBN 978-303785363-4; 
+[9] Varela, M.L.R., Putnik, G.D., Manupati, V.K., 
+Rajyalakshmi, G., Trojanowska, J., Machado, J. 
+(2018), ”Collaborative manufacturing based on 
+cloud, and on other I4.0 oriented principles and 
+technologies: A systematic literature review 
+and reflections”, Management and Production 
+Engineering Review Vol. 9, Nr. 3, Sept. 2018 • 
+pp. 90–99, DOI: 10.24425/119538 ; 
+[10] Voicu A., Gheorghe I. Gh., „Complex 3D 
+Measuring 
+by 
+multiple 
+laser 
+scaning 
+of 
+automotive parts”, Advanced Materials, Volume 
+837, 
+2013, 
+pp. 
+511-516, 
+DOI: 
+10.4028/www.scientific.net/AMR.837.511  
+ 

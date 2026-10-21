@@ -1,0 +1,169 @@
+The Dynamics of Bilateral Tremor during Goal-Directed Pointing
+Keogh, J., Morrison, S. & Barrett, R.
+School of Physiotherapy & Exercise Science, Griffith University, Gold Coast
+Introduction
+Coordination can be viewed as the mastery of the redundant degrees of freedom (DF) used during
+movement (Bernstein, 1967). In postural pointing tasks, coordination may involve the coupling of
+adjacent limb segments in a compensatory arrangement, thereby reducing the number of DF needing to be
+controlled (Morrison & Newell, 2000).
+While many isotonic bilateral movements are characterized by a degree of bilateral (inter-limb) coupling,
+bilateral postural pointing tasks generally exhibit no significant inter-limb coupling, even though similar
+intra-limb relations are evident (Morrison & Newell, 1999). However, as task complexity increases, the
+level of bilateral coupling may also increase (Morrison & Newell, 1999). This may suggest that increased
+bilateral coupling may be a coordinative solution used to reduce the number of DF needing to be
+controlled in bilateral tasks. Therefore this study sought to address the effect of increasing accuracy
+requirements on the intra- and inter-limb relations during bilateral postural tasks.
+Methods
+Six subjects attempted to minimize limb tremor during three related movement tasks. The tasks involved
+either maintaining a postural pointing position (Pointing) or aiming at one of two different sized targets
+with a small lightweight laser pointer (Target 1 and Target 2). Target 1 and 2 consisted of a series of
+concentric circles of different radii (4 cm and 2 cm radius), respectively, and were positioned 5.5 m from
+the subject. Subjects held the laser pointers in each hand during all conditions, with the laser only being
+switched “on” during the targeting (aiming) tasks. The goal of the pointing task was to minimize
+oscillations of the index finger, while the goal of the aiming tasks was to keep the laser pointer emissions
+within the innermost circle of each target area. Eight 30 s trials were performed for each condition.
+Measures of limb tremor (using small lightweight uniaxial accelerometers), muscle (EMG) activity (from
+EDL and FDL), and target accuracy were recorded. Data analysis examined the principal time and
+frequency components of tremor, EMG and target accuracy.
+Results & Discussion
+Time Series
+A significant reduction in the mean RMS tremor amplitude occurred as accuracy requirements increased
+(see Table 1). The decrease in tremor amplitude was unexpected as imposing accuracy requirements on
+unilateral postural tasks lead to significantly greater tremor amplitude (Morrison & Keogh, in press).
+Measure
+Limb
+Pointing (m.s-2)
+Target 1 (m.s-2)
+Target 2 (m.s-2)
+Finger
+Right
+0.23
+0.18
+0.18
+Left
+0.24
+0.18
+0.20
+Hand
+Right
+0.13
+0.10
+0.10
+Left
+0.12
+0.09
+0.09
+Forearm
+Right
+0.08
+0.06
+0.07
+Left
+0.09
+0.07
+0.07
+Table 1: Mean RMS tremor amplitude as a function of task and limb segment.
+Muscle activity in the EDL and FDL muscles was greater in the targeting than pointing tasks. This
+increase in muscle activity coincided with greater variability in targeting performance for Target 2 than
+the Target 1 (p < 0.001).
+
+Frequency Analysis
+Similar to unilateral multi-segment tremor studies, prominent frequency peaks for each segment were
+seen between 2-4 Hz and 8-12 Hz (Morrison & Newell, 1999, 2000) (see Figure 1 for a representative
+trial). The proximal-to-distal difference in tremor power (see Figure 1), is also consistent with previous
+reports (Morrison & Newell, 1999, 2000). As accuracy requirements increased, peak power at the finger
+decreased significantly (p < 0.0001). This contrasts with reports of unilateral targeting where a significant
+increase in the 8-12 Hz power was seen with increased accuracy demands (Morrison & Keogh, in press).
+However a decrease in the power of these peaks is consistent with the decrease in tremor RMS amplitude.
+Figure 1: Representative power spectral density multi-segment tremor plots for bilateral pointing.
+Intra-Limb Coupling
+Correlation
+Significant intra-limb correlations in pointing tasks were evident between the finger and hand (right limb:
+r = 0.72; left limb: r = 0.74), with no significant correlations between the hand and forearm (right limb: r
+= 0.10; left limb: r = 0.14). As accuracy requirements increased, these intra-limb correlations decreased
+for the finger and hand (right limb: r = 0.65; left limb: r = 0.60), and the hand and forearm (r = -0.13; left
+limb: r = -0.13).
+Coherence
+Significant intra-limb coherences were seen in pointing tasks between adjacent segments in both limbs
+between 1-7 Hz (r = 0.92-0.96) and 7-17 Hz (r = 0.77-0.92). As accuracy requirements increased, a
+significant decrease in intra-limb coherence between adjacent segments was observed between 1-7 Hz (p
+< 0.001), with no change between 7-17 Hz (p > 0.05). This was unexpected as previous studies have
+shown decreased coherence at both frequency bandwidths (Morrison & Newell, 2000).
+Inter-Limb (Bilateral) Coupling
+Correlation
+No significant inter-limb correlations were seen in pointing tasks (finger–finger r = 0.03; hand-hand r =
+0
+5
+10
+15
+20
+1
+2
+3
+4
+5
+6
+0
+0.04
+0.08
+0.12
+0.16
+Frequency (Hz)
+Limb Segment
+Right Forearm
+Right Hand
+Right Finger
+Left Forearm
+Left Hand
+Left Finger
+Power
+(m.s-2)2
+
+0.10; forearm-forearm r = 0.05). As accuracy requirements increased, inter-limb relations increased at all
+segments (finger–finger r = 0.10; hand-hand r = 0.14; forearm-forearm r = 0.10).
+Coherence
+Similar to the inter-limb correlations, no significant coherence was seen between limbs for the bilateral
+pointing task at either 1-7 Hz or 7-17 Hz. As accuracy requirements increased, the degree of inter-limb
+coherence between contralateral fingers increased (see Figure 2).
+Figure 2: Inter-limb relations as a function of limb and task between 1-7 Hz and 7-17 Hz.
+As expected, significant levels of intra-limb coupling existed between segments in the bilateral pointing
+task, and this coupling was similar between limbs. The intra-limb coupling tended to decrease with
+increased accuracy demand similar to that for unilateral targeting tasks (Morrison & Keogh, in press).
+No significant inter-limb coupling existed in pointing tasks, although the level of inter-limb coupling
+increased as the task became more goal-directed. This was consistent with previous studies of bilateral
+tremor (Morrison & Newell, 2000) and suggests that increased bilateral coupling may simplify the
+coordination of complex bilateral tasks by reducing the number of DF needing to be controlled
+(Bernstein, 1967).
+References
+Bernstein, N. The coordination and regulation of movement. Pergamon Press, 1967.
+Morrison, S., & Keogh, J. Hum Movt Sci, in press.
+Morrison, S., & Newell, K. Eur J Appl Physiol, 80, 564-574, 1999.
+Morrison, S., & Newell, K. Motor Control, 4, 293-315, 2000.
+Acknowledgements
+Thanks to Mrs Karen Smith for her invaluable assistance in data collection for this project, and to Mr
+Adam Corbett for designing the Labview data collection software.
+0.35
+0.36
+0.37
+0.38
+0.39
+0.40
+0.41
+0.42
+0.43
+Limb Segment Combinations
+PFin-NFin
+PHnd-NHnd
+PFor-NFor
+Coherence
+0.38
+0.39
+0.40
+0.41
+0.42
+0.43
+Pointing
+Target 1
+Target 2
+ 1-7 Hz
+       7-17 Hz

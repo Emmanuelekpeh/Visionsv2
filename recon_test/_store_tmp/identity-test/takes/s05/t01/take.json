@@ -1,0 +1,32 @@
+{
+  "take": "t01",
+  "shot": "s05",
+  "at": "2026-10-14 11:55:17",
+  "generation": {
+    "prompt": "probe",
+    "scale": "medium",
+    "camera": "none",
+    "subject": "",
+    "seed": 1608,
+    "model": "off",
+    "frames": 16
+  },
+  "input_hash": "17328e8fd522",
+  "finish": {
+    "seconds": 2.0,
+    "fps": 16,
+    "shake_scale": 1.0,
+    "palette": "warm-gold",
+    "technical_baseline": true
+  },
+  "rebuild_hash": "6a85f38a2e7a",
+  "seconds": 540.0,
+  "frames": 3,
+  "ladder": {
+    "raw": 3,
+    "smooth": 5,
+    "delivered": 3
+  },
+  "approved": true,
+  "approved_at": "2026-10-14 11:55:17"
+}

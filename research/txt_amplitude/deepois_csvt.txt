@@ -1,0 +1,1531 @@
+=== PAGE 1 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+1
+DeepOIS: Gyroscope-Guided Deep Optical Image
+Stabilizer Compensation
+Shuaicheng Liu, Member, IEEE, Haipeng Li, Zhengning Wang Member, IEEE,
+Jue Wang, Senior Member, IEEE, Shuyuan Zhu, Member, IEEE, Bing Zeng, Fellow, IEEE
+Abstract—Mobile captured images can be aligned using their
+gyroscope sensors. Optical image stabilizer (OIS) terminates this
+possibility by adjusting the images during the capturing. In this
+work, we propose a deep network that compensates for the
+motions caused by the OIS, such that the gyroscopes can be used
+for image alignment on the OIS cameras. To achieve this, we ﬁrst
+record both videos and gyroscope readings with an OIS camera
+as training data. Then, we convert gyroscope readings into motion
+ﬁelds. Second, we propose an Essential Mixtures motion model
+for rolling shutter cameras, where an array of rotations within
+a frame are extracted as the ground-truth guidance. Third, we
+train a convolutional neural network with gyroscope motions
+as input to compensate for the OIS motion. Once ﬁnished, the
+compensation network can be applied for other scenes, where
+the image alignment is purely based on gyroscopes with no need
+for images contents, delivering strong robustness. Experiments
+show that our results are comparable with that of non-OIS
+cameras, and outperform image-based alignment results with
+a relatively large margin. Code and dataset is available at:
+https://github.com/lhaippp/DeepOIS.
+Index Terms—Image alignment, gyroscope, optical image sta-
+bilizer.
+I. INTRODUCTION
+I
+MAGE alignment is a fundamental research problem that
+has been studied for decades, which has been applied in
+various applications [1]–[5]. Commonly adopted registration
+methods include homography [6], [7], mesh-based deforma-
+tion [2], [8], and optical ﬂow [9]–[12]. These methods look at
+the image contents for the registration, which usually require
+rich textures [13], [14] and similar illumination variations [15]
+for good results, including but not limited to, panorama [1],
+image/video stitching [2], [3], multi-frame image restora-
+tion [4], medical image registration [16], and video stabiliza-
+tion [5]. These methods perform well when the corresponding
+conditions are satisﬁed. For example, the performance of ho-
+mography and mesh-based registration depends on the quality
+of image features [17], which cannot be guaranteed in scenes
+This work was supported in part by the National Natural Science Foundation
+of China (NSFC) under Grants No.61872067, No.61872068, No.U20A20184,
+No.62031009 and No.61720106004, in part by grants from Science
+Tech-
+nology Department of Sichuan Province of China (No. 2019YFH0016,
+2021YFG0366, 2020YFG0037)
+Shuaicheng Liu, Zhengning Wang, Shuyuan Zhu and Bing Zeng are with
+Institute of Image Processing, School of Information and Communication
+Engineering, University of Electronic Science and Technology of China,
+Chengdu 611731, China.
+Haipeng Li and Jue Wang are with Megvii Technology Limited.
+Corresponding author: Zhengning Wang (zhengning.wang@uestc.edu.cn)
+Copyright ©2021 IEEE. Personal use of this material is permitted. However,
+permission to use this material for any other purposes must be obtained from
+the IEEE by sending an email to pubs-permissions@ieee.org.
+D
+F
+H
+E
+I
+G
+Fig. 1. (a) inputs without the alignment, (b) gyroscope alignment on a non-
+OIS camera, (c) gyroscope alignment on an OIS camera, (d) deep homography
+[14] alignment on an OIS camera, (e) SIFT [18]+RANSAC [19] alignment
+on an OIS camera, and (f) our method on an OIS camera. To demonstrate the
+results of alignment, we highlight certain areas with the red box which are
+zoomed on the right side to show more detailed results. We replace the red
+channel of one image with that of the other image, where misaligned pixels
+are visualized as colored ghosts. The same visualization is applied for the rest
+of the paper.
+with poor textures [13], [14]. Similarly, optical ﬂow may suffer
+from poor textures, large illumination variations, and large
+baselines [15]. In summary, in challenging scenarios, such
+as low-light, low-texture, and moving-foreground, methods
+based on image contents prone to be erroneous because these
+methods require the image contents for the registration.
+In contrast, gyroscopes can be used to align images, where
+image contents are no longer required [20]. The gyroscope in a
+mobile phone provides the camera 3D rotations, which can be
+converted into homography given camera intrinsic parameters
+for the image alignment [20], [21]. In this way, the rotational
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 2 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+2
+motions can be compensated. We refer to this as gyro image
+alignment. One drawback is that translations cannot be handled
+by the gyro. Fortunately, rotational motions are prominent
+compared with translational motions [22], especially when
+ﬁlming scenes or objects are not close to the camera [23].
+Compared with image-based methods, gyro-based methods
+are attractive [24]. Firstly, gyro-based methods are irrelevant
+to image contents, which largely improve the robustness in
+challenging scenarios where not enough feature points could
+be detected. In such scenes, gyro-based methods perform much
+better than image-based methods. Secondly, gyroscopes are
+widely available and can be easily accessed on daily mobile
+phones. Many methods have built their applications based on
+the gyros [25]–[27].
+On the other hand, the cameras of smartphones keep evolv-
+ing, where optical image stabilizer (OIS) becomes more and
+more popular, which promises less blurry images and smoother
+videos. It compensates for the 2D pan and tilt motions of the
+imaging device through lens mechanics [28], [29]. However,
+OIS terminates the possibility of image registration by gyros.
+As the homography derived from the gyros no longer corre-
+sponds to the captured images, which have been adjusted by
+OIS with unknown quantities and directions. One may try to
+read pans and tilts from the camera module. However, this is
+not easy as it is bounded with the camera sensor, which re-
+quires assistance from professionals of the manufacturers [30].
+For all we know, Apple does not provide an API to read pans
+and tilts. Android provides an API named ‘OisSample’ but
+invalid for the vast majority of cell phones because it requires
+the implementation of phone manufacturers. Moreover, even
+OIS motions can be read by very few phones. They suffer from
+synchronization problems that could contaminate the data.
+Even the synchronization problem can be solved, pans and tilts
+do not directly correspond to the compensated homography.
+In this work, we propose a deep learning method that
+compensates for OIS motions without reading offset data, such
+that gyroscopes can be used for image alignment on OIS-
+equipped cell phones. Fig. 1 shows an alignment example
+in the low-texture environment. To demonstrate the results
+of alignment, we highlight certain areas with the red box
+which are zoomed on the right side to show more detailed
+results. We replace the red channel of one image with the
+counterpart of the other image, where misaligned pixels are
+visualized as colored ghosts. Fig. 1 (a) shows two input
+images. Fig. 1 (b) is the gyro alignment produced by the non-
+OIS camera. As seen, the images can be well aligned with no
+OIS interferences. Fig. 1 (c) is the gyro alignment produced
+by the OIS camera. Misalignments can be observed due to
+the OIS motion. To further analyze the results of image-based
+methods in challenging scenes, we compare our method with
+2 image-based algorithms. Fig. 1 (d) is the alignment result
+of deep homography [14]. Fig. 1 (e) is the alignment result of
+SIFT [18] + RANSAC [19]. Fig. 1 (f) is our OIS compensated
+result.
+Two frames are denoted as Ia and Ib, the motion from gyro
+between them as Gab. The real motion (after OIS adjustment)
+between two frames is G′
+ab. We want to ﬁnd a mapping
+function that transforms Gab to G′
+ab:
+G′
+ab = f(Gab).
+(1)
+We propose to train a supervised convolutional neural
+network for this mapping. To achieve this, we record videos
+and their gyros as training data. The input motion Gab can be
+obtained directly given the gyro readings. However, obtaining
+the ground-truth labels for G′
+ab is non-trivial. We propose
+to estimate the real motion from the captured images. If we
+estimate a homography between them, then the translations are
+included, which is inappropriate for rotation-only gyros. The
+ground-truth should merely contain rotations between Ia and
+Ib. Therefore, we estimate an essential matrix and decompose
+it for the rotation matrix [21]. However, the cell-phone cameras
+are rolling shutter (RS) cameras, where different rows of
+pixels have slightly distinct rotation matrices. In this work, we
+propose an Essential Mixtures model that estimates an array
+of essential matrices for the RS camera, such that rotational
+motions can be extracted as the ground-truth. In this way, we
+can learn the mapping function.
+For the evaluation, we collect a testing dataset under vari-
+ous scenes, where we manually mark point correspondences
+for quantitative metrics. According to our experiments, our
+network can accurately recover the mapping, achieving gyro
+alignments comparable to non-OIS cameras. In summary, our
+contributions are:
+• We propose a new problem that compensates OIS motions
+for gyro image alignment on cell phones. To the best
+of our knowledge, the problem is not explored yet, but
+important to many image and video applications.
+• We propose a solution that learns the mapping function
+between gyro motions and real motions, where an Essen-
+tial Mixtures model is proposed under the RS setting for
+the real motions.
+• We propose a dataset for the evaluation. Experiments
+show that our method works well compared with non-
+OIS cameras, and outperforms image-based opponents in
+challenging cases.
+II. RELATED WORK
+A. Image Alignments
+Homography [6], mesh-based [2], and optical ﬂow [15]
+methods are the most commonly adopted motion models,
+which align images in a global, middle, and pixel level. They
+are often estimated by matching image features or optimize
+photometric loss [13]. Apart from classical traditional features,
+such as SIFT [18], SURF [31], and ORB [32], deep features
+have been proposed for improving robustness, e.g., LIFT [33]
+and SOSNet [34]. Registration can also be realized by deep
+learning directly, such as deep homography estimation [14],
+[35]. In general, without extra sensors, these methods align
+images based on the image contents.
+B. Gyroscopes
+Gyroscope is important in helping estimate camera rotations
+during mobile capturing. The fusion of gyroscope and visual
+measurements has been widely applied in various applications,
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 3 ===
+3
+G(VVHQWLDO)ORZHVWLPDWRU
+F)ORZORVV
+E1HWZRUNVWUXFWXUH
+D*\UR)ORZHVWLPDWRU
++RPRJUDSK\$UUD\
+6RXUFH
+/ORVV
+2XWSXW
+7DUJHW
+(VVHQWLDO0L[WXUHV
+Fig. 2. The overview of our algorithm which includes (a) gyro-based ﬂow estimator, (d) the essential-based ﬂow estimator, and (b) neural network predicting
+an output ﬂow. For each pair of frames Ia and Ib, the homography array is computed using the gyroscope readings from tIa to tIb, which is converted into
+the source motion Gab as the network input. On the other side, we estimate an Essential Mixtures model to produce the target ﬂow Eab as the guidance.
+The network is then trained to produce the output G′
+ab.
+including but not limited to image alignment and video stabi-
+lization [20], image deblurring [36], simultaneous localization
+and mapping (SLAM) [25], gesture-based user authentication
+on mobile devices [26], and human gait recognition [27]. In
+mobiles, one important issue is the synchronization between
+the timestamps of gyros and video frames, which requires gyro
+calibration [37]. In this work, we access the gyro data at the
+Hardware Abstraction Layer (HAL) of the android layout [38],
+to achieve accurate synchronizations.
+C. Optical Image Stabilizer
+Optical Image Stabilizer (OIS) has been around commer-
+cially since the mid-90s [39] and becomes more and more
+popular in our daily cell phones. Since 2016, almost all
+manufacturers equip their ﬂagship smartphones with OIS.
+Both the image capturing and video recording can beneﬁt
+from OIS, producing results with less blur and improved
+stability [30]. It works by controlling the path of the image
+through the lens and the image sensor, which is achieved by
+measuring the camera shakes using high-frequency and precise
+inertial measurement sensors such as gyroscope. Then it moves
+the lens horizontally or vertically to counteract shakes by
+electromagnet motors [28], [29]. While the optical compen-
+sation can eliminate motion blur, OIS has some limitations.
+First, OIS is not suitable for large motion, because it can
+only compensate for 1-2 degrees moving as it has a limited
+physical range. Second, if OIS shifts too far from the origin
+position, some other artifacts are imported to the resulting
+image such as vignetting or inaccurate focusing. Besides the
+above disadvantages, one major problem is that OIS cannot be
+turn-off easily [40], which is not friendly to mobile developers
+who need gyros to align images. In this work, we enable the
+gyro image alignment on OIS cameras.
+III. ALGORITHM
+Our method is built upon convolutional neural networks. As
+the control algorithm of OIS only obtains the relative angular
+displacement of the current time [41], our method takes one
+gyro-based ﬂow Gab from the source frame Ia to the target
+frame Ib as input and produces OIS compensated ﬂow G′
+ab
+as output. Our pipeline consists of three modules: a gyro-
+based ﬂow estimator, an Essential Mixtures ﬂow estimator,
+and a fully convolutional network that compensates for the
+OIS motion. Fig. 2 illustrates the pipeline. First, the gyro-
+based ﬂows are generated according to the gyro readings
+(Fig. 2(a) and Sec. III-A), then they are fed into a network
+to produce OIS compensated ﬂows G′
+ab as output (Fig. 2(b)
+and Sec. III-C). To obtain the ground-truth rotations, we
+propose an Essential Mixtures model, so as to produce the
+Essential Mixtures ﬂows Eab (Fig. 2 (d) and Sec. III-B) as
+the guide to the network (Fig. 2 (c)). During the inference, the
+Essential Mixtures model is not required. The gyro readings
+are converted into gyro-based ﬂows and fed to the network for
+compensation.
+A. Gyro-Based Flow
+...
+...
+...
+...
+Fig. 3. Illustration of rolling shutter frames. tIa and tIb are the frame starting
+time. ts is the camera readout time and tf denotes the frame period (tf > ts).
+ta(i) and tb(i) represent the starting time of patch i in Ia and Ib.
+We compute rotations by compounding gyro readings con-
+sisting of angular velocities and timestamps. In particular,
+we read them from the HAL of android architecture for
+synchronization. Notably, there are three main layers in the
+android layout from top to bottom, which are the Framework
+and Application layer, the External Libraries and Runtime
+layer, and the HAL layer. We ﬁnd that the closer to the
+bottom, the more accurate the gyroscopic data is, avoiding
+the problem such as synchronization. This is because the
+time-delay between each layer causes misalignments between
+the angular velocity readings and the timestamps, e.g., the
+interference of operating system. We ﬁnd that this is crucial for
+the whole system. The rotation vector n = (ωx, ωy, ωz) ∈R3
+is computed from gyro readings between frames Ia and
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 4 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+4
+Ib [20]. The rotation matrix R(t) ∈SO(3) can be produced
+according to the Rodrigues Formula [42].
+If the camera is global shutter, the homography is modeled
+as:
+H(t) = KR(t)K−1,
+(2)
+where K is the intrinsic camera matrix and R(t) denotes the
+camera rotation from Ia to Ib.
+In an RS camera, the ‘epipolar lines’ becomes ‘epipolar
+curves’ [43], as every row of the image is exposed at a
+slightly different time. Therefore, Eq.(2) is not applicable and
+a global homography matrix leads to erroneous since every
+row of the image has slightly different rotation matrices. In
+practice, assigning each row of pixels with a rotation matrix
+is unnecessary. We group several consecutive rows into a row
+patch and assign each patch with a rotation matrix. Fig. 3
+shows an example. Let ts denotes the camera readout time
+that is the time duration between the exposure of the ﬁrst row
+and the last row of pixels:
+ta(i) = tI + ts i
+N ,
+(3)
+where ta(i) denotes the start of the exposure of the i-th patch
+in Ia as shown in Fig. 3, tI denotes the starting timestamp
+of the corresponding frame, N denotes the number of patches
+per frame. The end of the exposure is:
+tb(i) = ta(i) + tf,
+(4)
+where tf = 1/FPS is the frame period. Here, the homogra-
+phy between the i-th row at frame Ia and Ib can be modeled
+as:
+H = KR (tb) R⊤(ta) K−1,
+(5)
+where R (tb) R⊤(ta) can be computed by accumulating
+rotation matrices from ta to tb.
+In our implementation, we divide the image into 6 patches
+which computes a homography array containing 6 horizontal
+homographies between two consecutive frames. We convert
+the homography array into a ﬂow ﬁeld [36] so that it can be
+fed as input to a convolutional neural network. For every pixel
+p in the Ia, we have:
+p′ = H(t)p,
+(u, v) = p′ −p,
+(6)
+computing the offset for every pixel produces a gyro-based
+ﬂow Gab.
+B. Essential Mixtures
+Before introducing our model of Essential Mixtures, we
+brieﬂy review the process of estimating the essential matrix. If
+the camera is global-shutter, every row of the frame is imaged
+simultaneously at a time. Let p1 and p2 be the projections
+of the 3D point X in the ﬁrst and second frame, p1 = P1X
+and p2 = P2X, where P1 and P2 represent the projection
+matrices. Given the camera intrinsic matrix K. The essential
+matrix satisﬁes the equation [21]:
+p1
+⊤K−T EK−1p2 = 0
+(7)
+where p1 = (x1, y1, 1)T and p2 = (x′
+1, y′
+1, 1)T .
+Then we compute calibrated matching points ˆp1 = K−1p1
+and ˆp2 = K−1p2, then we can rewrite Eq.(7) as:
+ˆp1
+⊤E ˆp2 = 0,
+(8)
+where ˆp1 = ( ˆx1, ˆy1, 1)T and ˆp2 =
+ ˆx1
+′, ˆy1
+′, 1
+T . Let f be the
+9-element vector made up of E, then Eq.(7) can be written as:
+ ˆx1
+′ ˆx1, ˆx1
+′ ˆy1, ˆx1
+′, ˆy1
+′ ˆx1, ˆy1
+′ ˆy1, ˆy1
+′, ˆx1, ˆy1, 1
+
+f = 0,
+(9)
+given n correspondences, yields a set of linear equations:
+Af =
+
+
+ˆx1
+′ ˆp1
+T
+ˆy1
+′ ˆp1
+T
+ˆp1
+T
+...
+...
+...
+ˆ
+xn
+′ ˆpn
+T
+ˆyn
+′ ˆpn
+T
+ˆpn
+T
+
+f = 0.
+(10)
+Using at least 8 matching points yields a homogenous linear
+system, which can be solved under the constraint ∥f∥2 = 1 us-
+ing the Singular Value Decomposition(SVD) of A = UDV ⊤
+where the last column of V is the solution [21].
+In the case of the RS camera, Eq.(7) does not hold anymore,
+because projection matrices P1 and P2 vary across rows in-
+stead of being frame-global. Therefore, we introduce Essential
+Mixtures to assign each row patch with an essential matrix as
+illustrated in Fig. 4.
+To achieve it, we ﬁrst detect FAST features [44] and
+track them by KLT [45] between frames. A uniform feature
+distribution is crucial to model the Essential Mixtures model,
+so we modify the detection threshold as [3], [46]. Moreover, to
+model RS effects, we divide a frame into N patches, resulting
+in N unknown essential matrices Ei to be estimated per frame.
+If we estimate each essential matrix independently, discontinu-
+ity is unavoidable. We propose to smooth neighboring matrices
+during the estimation as shown in Fig. 2 (d), where a point
+ˆp1 not only contributes to its own patch but also inﬂuences its
+nearby patches weighted by the distance. The essential matrix
+for point ˆp1 is then the mixture:
+E(ˆp1) =
+N
+X
+i=1
+Eiwi(ˆp1),
+(11)
+where wi(ˆp1) is the gaussian weight with the mean equaling
+to the middle of each patch, and the sigma σ = 0.001 ∗h,
+where h represents the frame height.
+To ﬁt an Essential Mixtures Ei given a pair of calibrated
+matching points (ˆp1, ˆp2), we rewrite Eq.(7) as:
+0 = ˆpT
+1 Eˆp1 ˆp2 =
+N
+X
+i=1
+wi (ˆp1) · ˆpT
+1 Eiˆp2
+(12)
+where ˆpT
+1 Eiˆp2 can be transformed into:
+Ai
+ˆp1fi =
+ ˆx′
+1ˆpT
+1
+ˆy′
+1ˆpT
+1
+ˆpT
+1
+
+fi,
+(13)
+where fi denotes the vector formed by concatenating the
+columns of Ei. Combining Eq.(12) and Eq.(13) yields a 1×9i
+linear constraint:
+
+w1(ˆp1)A1
+ˆp1 . . . wi(ˆp1)Ai
+ˆp1
+
+|
+{z
+}
+Aˆ
+p1
+
+
+
+f1
+...
+fi
+
+
+
+|
+{z
+}
+f
+= Aˆp1f = 0.
+(14)
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 5 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+5
+«
+«
+«
+Fig. 4. Illustration of computing Essential Mixtures. Given 2 consecutive frames, an array of essential matrix can be computed, i.e., Essential Mixtures. Given
+the essential mixtures, rotation matrix and translation matrix can be produced by decomposing essential matrix, so Essential Mixtures is transformed into a
+set of rotation matrix. Follow the Eq. III-A, an array of homography can be recovered which is then converted into motion ﬁeld Eab.
+Aggregating all linear constraints Aˆpj for every calibrated
+match point (ˆpj, ˆpj+1) yields a homogenous linear system
+Af = 0 that can be solved under the constraint ∥f∥2 = 1
+via SVD.
+For robustness, if the number of feature points in one patch
+is inferior to 8, Eq.(14) is under constrained. Therefore, we
+add a regularizer to constrain λ
+Ai
+ˆp −Ai−1
+ˆp
+
+2 = 0 to the
+homogenous system with λ = 1.
+During the estimation, we apply RANSAC [47] in our
+mixture model to reject outliers. In the ﬁrst iteration, we select
+a random sample of 8 matching points per patch to compute
+the fundamental mixture. Then in each patch, for each putative
+correspondence we calculate the symmetric epipolar distance
+[48] d⊥:
+d⊥=
+p⊤
+i Eppi+1
+
+
+
+1
+Ep
+⊤pi
+
+2
++
+1
+∥Eppi+1∥2
+
+,
+(15)
+where Ep denotes the essential matrix in the p-th patch. We
+compute the number of inliers where d⊥< threshould = 0.2,
+and choose the essential mixture with the largest number of
+inliers.
+1) Rotation-Only Homography: Given the essential matrix
+Ei, it can be decomposed into camera rotations and transla-
+tions, where only rotations Ri are retained. We use Ri to form
+a rotation-only homography similar to Eq.(2) and convert the
+homography array into a ﬂow ﬁeld as Eq.(6). We call this ﬂow
+ﬁeld as Essential Mixtures Flow Eab. Note that, Ri is spatially
+smooth. Ei is smooth, so does Eab.
+C. Network Structure
+The architecture of the network is shown in Fig. 2. It utilizes
+a backbone of UNet [49] which consists of a series of convo-
+lutional and downsampling layers with skip connections. The
+input to the network is gyro-based ﬂow G′
+ab and the ground-
+truth target is Essential Mixtures ﬂow Eab. Our network aims
+to produce a ﬂow of size 2 × H × W which compensates for
+motions generated by OIS between G′
+ab and Eab. Besides,
+the network is fully convolutional which accepts input of
+arbitrary sizes. Table I-II shows the network conﬁguration of
+our model. Given 2 input frames, we ﬁrst resize frames and
+adjust the camera intrinsic parameters to compute a gyro-
+based ﬂow Gab at the spatial resolution of 800x608. Our
+encoder consists of 5 convolutional layers that downscales the
+TABLE I
+NETWORK CONFIGURATION FOR ENCODER.
+Layer
+Kernel
+Strided
+Input shape
+Output shape
+Conv1
+3x3
+1
+2x608x800
+32x608x800
+Conv2
+3x3
+1
+32x608x800
+32x608x800
+MaxPool1
+2x2
+2
+32x608x800
+32x304x400
+Conv3
+3x3
+1
+32x304x400
+64x304x400
+Conv4
+3x3
+1
+64x304x400
+64x304x400
+MaxPool2
+2x2
+2
+64x304x400
+64x152x200
+Conv5
+3x3
+1
+64x152x200
+128x152x200
+Conv6
+3x3
+1
+128x152x200
+128x152x200
+MaxPool3
+2x2
+2
+128x152x200
+128x76x100
+Conv7
+3x3
+1
+128x76x100
+256x76x100
+Conv8
+3x3
+1
+256x76x100
+256x76x100
+MaxPool4
+2x2
+2
+256x76x100
+256x38x50
+Conv9
+3x3
+1
+256x38x50
+512x38x50
+Conv10
+3x3
+1
+512x38x50
+512x38x50
+TABLE II
+NETWORK CONFIGURATION FOR DECODER. * INDICATES THE FEATURE
+FROM ENCODER VIA SKIP CONNECTION.
+Layer
+Kernel
+Strided
+Input shape
+Output shape
+UpSample
+2x2
+-
+512x38x50
+512x76x100
+Concat
+-
+-
+512 + 256∗
+768
+Conv1
+3x3
+1
+768x76x100
+256x76x100
+Conv2
+3x3
+1
+256x76x100
+256x76x100
+UpSample
+2x2
+-
+256x76x100
+256x152x200
+Concat
+-
+-
+256 + 128∗
+384
+Conv3
+3x3
+1
+384x152x200
+128x152x200
+Conv4
+3x3
+1
+128x152x200
+128x152x200
+UpSample
+2x2
+-
+128x152x200
+128x304x400
+Concat
+-
+-
+128 + 64∗
+192
+Conv5
+3x3
+1
+192x304x400
+64x304x400
+Conv6
+3x3
+1
+64x304x400
+64x304x400
+UpSample
+2x2
+-
+64x304x400
+64x608x800
+Concat
+-
+-
+64 + 32∗
+96
+Conv7
+3x3
+1
+96x608x800
+32x608x800
+Conv8
+3x3
+1
+32x608x800
+32x608x800
+Conv9
+3x3
+1
+32x608x800
+2x608x800
+ﬂow map from 2x608x800 to 512x50x38. Each convolutional
+layer is followed by an Instance Normalization [50] and a
+ReLU activation function. For the decoder which also contains
+5 convolutional layers, it upsamples the feature maps from
+512x50x38 back to 2x608x800 with skip connections [51].
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 6 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+6
+5(
+0)
+//
+/7
+Fig. 5. A glance at our evaluation dataset. Our dataset contains 4 categories,
+regular(RE), moving-foreground(MF), low-light(LL) and low-texture(LT).
+Each category contains 350 pairs, a total of 1400 pairs, with synchronized
+gyroscope readings.
+Fig. 6.
+We mark the correspondences manually in our evaluation set for
+quantitative metrics. For each pair, we mark 6 ∼8 point matches.
+IV. EXPERIMENTAL RESULTS
+A. Dataset
+Previously, there are some dedicated datasets that are de-
+signed to evaluate the homography estimation [14] or the
+image deblurring with the artiﬁcial-generated gyroscope-frame
+pair [36], whether none of them combine real gyroscope
+readings with corresponding video frames. So we propose a
+new dataset and benchmark GF4.
+Training Set To train our network, we record a set of videos
+with the gyroscope readings using a hand-held OIS cellphone
+Xiaomi CC9pro. We choose scenes with rich textures so
+that sufﬁcient feature points can be detected to calculate
+the Essential Mixtures model. The videos last 300 seconds,
+yielding 9,000 frames in total. Note that, the scene type is
+not important as it can provide enough features as needed for
+Essential Mixtures estimation.
+Evaluation Set For the evaluation, we capture scenes with
+different types, to compare with image-based registration
+methods. Our dataset contains 4 categories, including reg-
+ular (RE), low-texture (LT), low-light (LL), and moving-
+TABLE III
+COMPARISONS WITH NON-OIS CAMERA.
+Non-OIS Camera
+OIS Camera
+Ours
+Geometry Distance
+0.688
+1.038
+0.709
+foregrounds (MF) frame-gyroscope pairs. Each scene contains
+350 pairs. So, there are 1400 pairs in the dataset. We show
+some examples in Fig. 5. For quantitative evaluation, we man-
+ually mark 6 ∼8 point correspondences per pair, distributing
+uniformly on frames. Fig. 6 shows some examples.
+B. Implementation Details
+Our network is trained on 9k rich-texture frames with
+resolution of 608x800 pixels over 1k epoches by an Adam
+optimizer [52] whose lr = 1.0 × 10−4, β1 = 0.9, β2 = 0.999.
+The batch size is 8, for each epoch, all 9k data are used, so
+there are 1125 steps for one epoch, For every 50 epochs, the
+learning rate is reduced by 20%. The entire training process
+costs about 50 hours. The implementation is in PyTorch and
+the network is trained on one NVIDIA RTX 2080 Ti.
+C. Comparisons with non-OIS camera
+1) Qualitative Comparisons: We compare our method with
+non-OIS cameras. In general, if the OIS motion could be
+compensated successfully, our method should perform equally
+well as non-OIS cameras. For comparison, ideally, we should
+use one camera with OIS turn on and off. However, the OIS
+cannot be turned off easily. Therefore, we use two cell phones
+with similar camera intrinsics, the one with OIS is Xiaomi
+CC9Pro equipped with Snapdragon 730G and the other one
+without OIS is Qualcomm QRD equipped with Snapdragon
+7150, and letting them capture the same scene twice with
+similar motions. The evaluation set contains 4 categories,
+including RE, LT, LL, and MF. Each category contains 50
+pairs. Fig. 7 shows some examples. Fig. 7 (a) shows the
+input frames. Fig. 7 (b) shows the gyro alignment on a non-
+OIS camera. As seen, images can be well aligned. Fig. 7 (c)
+shows the gyro alignment on an OIS camera. Due to the OIS
+interferences, images cannot be aligned directly using the gyro.
+Fig. 7 (d) shows our results. With OIS compensation, images
+can be well aligned on OIS cameras.
+2) Quantitative Comparisons: We also calculate quantita-
+tive values. Similarly, we mark the ground-truth for evaluation.
+The average geometry distance between the warped points and
+the manually labeled GT points are computed as the error
+metric (the lower the better). Table III shows the results.
+Our result 0.709 is comparable with non-OIS camera 0.688
+(slightly worse), while no compensation yields 1.038, which
+is much higher.
+D. Comparisons with Image-based Methods
+In order to show the importance and robustness of the gyro-
+based alignment and highlight the importance of enabling this
+capability on OIS cameras. We compare with image-based
+methods that look at image content.
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 7 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+7
+D,QSXW
+E1RQ2,6&DPHUD
+F2,6&DPHUD
+G2XUV
+
+
+Fig. 7. Comparisons with non-OIS cameras. (a) two input frames. (b) gyro alignment results on the non-OIS camera. (c) gyro alignment results on the OIS
+camera. (d) our OIS compensation results. Without OIS compensation, clear misalignment can be observed in (c) whereas our method can solve this problem
+and be comparable with non-OIS results in (b).
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 8 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+8
+2XUV
+,QSXW
+6,)75$16$&
+0HVK)ORZ
+'HHS+RPRJUDSK\
+D
+E
+F
+G
+H
+I
+Fig. 8. Comparisons with image-based methods. We compare with SIFT [18] + RANSAC [19], Meshﬂow [8], and the recent deep homography [14] method.
+We show examples covering all scenes in our evaluation dataset. Our method can align images robustly while image-based methods contain some misaligned
+regions.
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 9 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+9
+TABLE IV
+QUANTITATIVE COMPARISONS ON THE EVALUATION DATASET. THE BEST PERFORMANCE IS MARKED IN RED AND THE SECOND-BEST IS IN BLUE.
+1)
+RE
+LT
+LL
+MF
+Avg
+2) I3×3
+7.098(+2785.37%)
+7.055(+566.19%)
+7.035(+540.13%)
+7.032(+767.08%)
+7.055(+639.32%)
+3) GYRO + OIS
+1.127(+358.13%)
+1.250(+18.04%)
+1.158(+5.37%)
+1.295(+59.68%)
+1.209(+26.54%)
+4) SIFT [18]+ RANSAC [19]
+0.340(+38.21%)
+6.242(+489.42%)
+2.312(+110.37%)
+1.229(+51.54%)
+2.531(+165.21%)
+5) SIFT [18] + MAGSAC [53]
+0.213(−13.41%)
+5.707(+438.90%)
+2.818(+156.41%)
+0.811(+0.00%)
+2.387(+150.17%)
+6) ORB [54] + RANSAC [19]
+0.653(+165.45%)
+6.874(+549.10%)
+1.136(+3.37%)
+2.27(+179.90%)
+2.732(+186.43%)
+7) ORB [54] + MAGSAC [53]
+0.919(+273.58%)
+6.859(+547.69%)
+1.335(+21.47%)
+2.464(+203.82%)
+2.894(+203.30%)
+8) SOSNET [55] + RANSAC [19]
+0.246(+0.00%)
+5.946(+461.47%)
+1.977(+79.89%)
+0.907(+11.84%)
+2.269(+137.78%)
+9) SOSNET [55] + MAGSAC [53]
+0.309(+25.61%)
+5.585(+427.38%)
+1.972(+79.44%)
+1.142(+40.81%)
+2.252(+136.00%)
+10) SURF [31] + RANSAC [19]
+0.343(+39.43%)
+3.161(+198.49%)
+2.213(+101.36%)
+1.420(+75.09%)
+1.784(+86.98%)
+11) SURF [31] + MAGSAC [53]
+0.307(+24.80%)
+3.634(+243.15%)
+2.246(+104.37%)
+1.267(+56.23%)
+1.863(+95.28%)
+12) D2-Net [56] + RANSAC [19]
+1.246(+406.50%)
+1.419(+33.99%)
+1.345(+22.38%)
+2.109(+160.05%)
+1.529(+60.31%)
+13) D2-Net [56] + MAGSAC [53]
+1.694(+588.62%)
+2.005(+89.33%)
+2.078(+89.08%)
+2.621(+223.06%)
+2.099(+119.99%)
+14) R2D2 [57] + RANSAC [19]
+0.596(+142.28%)
+1.059(+0.00%)
+1.099(+0.00%)
+1.063(+31.07%)
+0.954(+0.00%)
+15) R2D2 [57] + MAGSAC [53]
+3.483(+1315.85%)
+6.441(+508.22%)
+4.413(+301.55%)
+2.621(+223.18%)
+4.2395(+344.28%)
+16) MeshFlow [8]
+0.843(+242.68%)
+7.042(+564.97%)
+1.729(+57.32%)
+1.109(+36.74%)
+2.681(+180.93%)
+17) Deep Homography [14]
+1.342(+445.53%)
+1.565(+47.78%)
+2.253(+105.00%)
+1.657(+104.32%)
+1.704(+78.60%)
+18) Ours
+0.580(+135.77%)
+0.964(−8.97%)
+0.658(−40.13%)
+0.690(−14.92%)
+0.723(−24.23%)
+1) Qualitative Comparisons:
+Firstly, we compare our
+method with one frequently used traditional feature-based
+algorithm, i.e. SIFT [18] and RANSAC [19] that compute a
+global homography, and another feature-based algorithm, i.e.
+Meshﬂow [8] that deforms a mesh for the non-linear motion
+representation. Moreover, we compare our method with the
+recent deep homography method [14].
+Fig. 8 (a) shows a regular example where all the methods
+work well. Fig. 8 (b), SIFT+RANSAC fails to ﬁnd a good
+solution, so does deep homography, while Meshﬂow works
+well. One possible reason is that a single homography cannot
+cover the large depth variations. Fig. 8 (c) illustrates a moving-
+foreground example that SIFT+RANSAC and Meshﬂow can-
+not work well, as few features are detected on the background,
+whereas Deep Homography and our method can align the
+background successfully. A similar example is shown in Fig. 8
+(d), SIFT+RANSAC and Deep Homography fail. Meshﬂow
+works on this example as sufﬁcient features are detected in
+the background. In contrast, our method can still align the
+background without any difﬁculty. Because we do not need
+the image contents for the registration. Fig. 8(e) is an example
+of low-light scenes, and Fig. 8(f) is a low-texture scene. All
+the image-based methods fail as no high-quality features can
+be extracted, whereas our method is robust.
+2) Quantitative
+Comparisons:
+We
+also
+compare
+our
+method with other feature-based methods quantitatively via
+the geometry distance. For the feature descriptors, we choose
+SIFT [18], ORB [54], SOSNet [34], SURF [31], D2-Net [56]
+and R2D2 [57]. For the outlier rejection algorithms, we
+choose RANSAC [19] and MAGSAC [53]. The errors for
+each category are shown in Table IV followed by the overall
+averaged error, where I3×3 refers to a 3×3 identity matrix as
+a reference. In particular, feature-based methods sometimes
+crash, when the error is larger than I3×3 error, we set the
+error equal to I3×3 error. Regarding the motion model, from
+4) to 15) and 17) are single homography, 16) is mesh-based,
+and 3) is a homography array. In Table IV, we mark the best
+performance in red and the second-best in blue.
+As shown, except for comparing to feature-based methods
+in RE scenes, our method outperforms the others for all
+categories. It is reasonable because, in regular(RE) scenes, a
+set of high-quality features is detected that allows to output a
+good solution. In contrast, gyroscopes can only compensate for
+rotational motions, which decreases scores to some extent. For
+the rest scenes, our method beats the others with an average
+error being lower than the 2nd best by 24.32%. Especially for
+low-light(LL) scenes, our method computes an error that is at
+least lower than the 2nd best by 40.13%.
+PLQLPL]H
+
+
+
+/ORVV
+
+Fig. 9.
+Regression of the homography array using the fully connected
+network. For each pair of frames Ia and Ib, a homography array is computed
+by using gyro readings, which is fed to the network. On the other side, an
+Essential Mixtures model is produced as target to guide the training process.
+E. Ablation Studies
+1) Fully Connected Neural Network: Our network is fully
+convolutional, where we convert gyroscope data into homog-
+raphy arrays, then into ﬂow ﬁelds which can be regarded
+as image input to the network. However, there is another
+option where we can directly input homography arrays as
+input. Similarly, on the other side, the Essential Mixtures
+are converted into rotation-only homography arrays and then
+used as guidance. Fig. 9 shows the pipeline, where we test
+two homography representations, including 3×3 homography
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 10 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+10
+matrix elements and H4pt representation from [58] that repre-
+sents homography by 4 motion vectors. The network is fully
+connected and L2 loss is adopted for the regression. We adopt
+the same training data as described above. The result is that
+both of representations do not converge, where the H4pt is
+slightly better than directly regressing matrix elements.
+Perhaps, there exist other representations or network struc-
+tures that may work well or even better than our current
+proposal. Here, as the ﬁrst try, we have proposed a working
+pipeline and want to leave the improvements as future works.
+2) Global Essential vs. Mixtures: To verify the effective-
+ness of our Essential Mixtures model, we compare it with a
+global essential matrix. Here, we choose the evaluation dataset
+of the regular scenes to alleviate the feature problem. We
+estimate the global essential matrix and Essential Mixtures,
+then convert to the rotation-only homographies, respectively.
+Finally, we align the images with rotation-only homographies
+accordingly. An array of homographies from Essential Mix-
+tures produces an error of 0.451, which is better than the
+error of 0.580 produced by a single homography from a global
+essential matrix. It indicates that the Essential Mixtures model
+is functional in the case of RS cameras.
+Moreover, we generate GT with the two methods and train
+our network, respectively. As shown in Table V, the network
+trained on Essential Mixtures-based GT outperforms the global
+essential matrix, which demonstrates the effectiveness of our
+Essential Mixtures.
+TABLE V
+THE PERFORMANCE OF NETWORKS TRAINED ON TWO DIFFERENT GT.
+Ground Truth
+RE
+LT
+LL
+MF
+Avg
+Global Fundamental
+0.930
+1.189
+0.769
+0.917
+0.951
+Fundamental Mixtures
+0.580
+0.964
+0.658
+0.690
+0.723
+TABLE VI
+THE PERFORMANCE OF NETWORKS WITH DIFFERENT BACKBONES.
+RE
+LT
+LL
+MF
+Avg
+R2UNet [59]
+0.716
+0.988
+0.649
+0.711
+0.766
+AttUNet [60]
+0.846
+1.072
+0.754
+1.025
+0.924
+R2AttUNet [59], [60]
+0.638
+1.013
+0.637
+0.736
+0.756
+Ours
+0.580
+0.964
+0.658
+0.690
+0.723
+TABLE VII
+THE INFERENCE TIME OF NETWORKS WITH DIFFERENT BACKBONES.
+R2UNet [59]
+AttUNet [60]
+R2AttUNet [59], [60]
+Ours
+Time
+122.930 ms
+50.333 ms
+127.899 ms
+30.084 ms
+3) Backbone: We choose the UNet [49] as our network
+backbone, we also test several other variants [59], [60]. Except
+for AttUNet [60], performances are similar, as shown in
+Table VIII. Note that R2AttUNet [59], [60] is the combination
+of R2Unet and AttUnet which is implemented by ourselves.
+Moreover, the computing complexity comparisons are illus-
+trated in Fig. VII at an input resolution of (512, 640), we
+ﬁnd that achieving similar performances, UNet [49] is 4 times
+faster than R2AttUNet.
+4) Loss function: L1loss is adopted for the regression in
+our experiments. We also test several strong regression loss
+functions including HingeLoss, XSigmoid, L2loss, LogCosh,
+and SmoothL1. The model trained by L1loss performs the
+best on average, and HingeLoss is more suitable to solve
+classiﬁcation problems, so it performs poorly on our regression
+problems.
+TABLE VIII
+THE PERFORMANCE OF NETWORKS WITH DIFFERENT LOSS FUNCTIONS.
+RE
+LT
+LL
+MF
+Avg
+HingeLoss
+7.202
+7.410
+7.058
+7.044
+7.179
+XSigmoid
+0.598
+0.969
+0.665
+0.744
+0.744
+L2loss
+0.573
+0.967
+0.670
+0.753
+0.741
+LogCosh
+0.580
+0.957
+0.649
+0.746
+0.733
+SmoothL1
+0.577
+0.954
+0.688
+0.697
+0.729
+Ours
+0.580
+0.964
+0.658
+0.690
+0.723
+V. CONCLUSION
+We have presented a DeepOIS pipeline for the compensation
+of OIS motions for gyroscope image registration. We have
+captured the training data as video frames as well as their
+gyro readings by an OIS camera and then calculated the
+ground-truth motions with our proposed Essential Mixtures
+model under the setting of rolling shutter cameras. For the
+evaluation, we have manually marked point correspondences
+on our captured dataset for quantitative metrics. The results
+show that our compensation network works well compared
+with non-OIS cameras and outperforms other image-based
+methods. In summary, a new problem is proposed and we
+show that it is solvable by learning the OIS motions, such that
+gyroscope can be used for image registration on OIS cameras.
+The main limitation of our framework is that it is restricted
+to rotations only. For some applications, such as video stabi-
+lization, combining gyroscope data and image content could
+improve the accuracy and robustness of constructing camera
+motion. Future work could investigate fusing sensor data and
+image content to compensate for the OIS motion.
+Our code and dataset will be released to facilitate more
+research in this direction.
+REFERENCES
+[1] M. Brown and D. G. Lowe, “Recognising panoramas,” in Proc. ICCV,
+pp. 1218–1227, 2003.
+[2] J. Zaragoza, T.-J. Chin, M. S. Brown, and D. Suter, “As-projective-as-
+possible image stitching with moving dlt,” in Proc. CVPR, pp. 2339–
+2346, 2013.
+[3] H. Guo, S. Liu, T. He, S. Zhu, B. Zeng, and M. Gabbouj, “Joint video
+stitching and stabilization from moving cameras,” IEEE Trans. on Image
+Processing, vol. 25, no. 11, pp. 5491–5503, 2016.
+[4] B. Wronski, I. Garcia-Dorado, M. Ernst, D. Kelly, M. Krainin, C. Liang,
+M. Levoy, and P. Milanfar, “Handheld multi-frame super-resolution,”
+ACM Trans. Graphics, vol. 38, no. 4, pp. 28:1–28:18, 2019.
+[5] S. Liu, L. Yuan, P. Tan, and J. Sun, “Bundled camera paths for video
+stabilization,” ACM Trans. Graphics, vol. 32, no. 4, 2013.
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 11 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+11
+[6] J. Gao, S. J. Kim, and M. S. Brown, “Constructing image panoramas
+using dual-homography warping,” in Proc. CVPR, pp. 49–56, 2011.
+[7] S. Liu, J. Chen, C.-H. Chang, and Y. Ai, “A new accurate and fast
+homography computation algorithm for sports and trafﬁc video analysis,”
+IEEE Trans. on Circuits and Systems for Video Technology, vol. 28,
+no. 10, pp. 2993–3006, 2017.
+[8] S. Liu, P. Tan, L. Yuan, J. Sun, and B. Zeng, “Meshﬂow: Minimum
+latency online video stabilization,” in Proc. ECCV, vol. 9910, pp. 800–
+815, 2016.
+[9] A. Dosovitskiy, P. Fischer, E. Ilg, P. H¨ausser, C. Hazirbas, V. Golkov,
+P. van der Smagt, D. Cremers, and T. Brox, “Flownet: Learning optical
+ﬂow with convolutional networks,” in Proc. ICCV, 2015.
+[10] J. Revaud, P. Weinzaepfel, Z. Harchaoui, and C. Schmid, “Epicﬂow:
+Edge-preserving interpolation of correspondences for optical ﬂow,” in
+Proc. CVPR, pp. 1164–1172, 2015.
+[11] J. Chen, J. Lai, Z. Cai, X. Xie, and Z. Pan, “Optical ﬂow estimation
+based on the frequency-domain regularization,” IEEE Trans. on Circuits
+and Systems for Video Technology, vol. 31, no. 1, pp. 217–230, 2020.
+[12] M. Zhai, X. Xiang, R. Zhang, N. Lv, and A. El Saddik, “Optical ﬂow
+estimation using dual self-attention pyramid networks,” IEEE Trans. on
+Circuits and Systems for Video Technology, vol. 30, no. 10, pp. 3663–
+3674, 2019.
+[13] K. Lin, N. Jiang, S. Liu, L.-F. Cheong, M. N. Do, and J. Lu, “Direct
+photometric alignment by mesh deformation.,” in Proc. CVPR, pp. 2701–
+2709, 2017.
+[14] J. Zhang, C. Wang, S. Liu, L. Jia, J. Wang, J. Zhou, and J. Sun, “Content-
+aware unsupervised deep homography estimation,” in Proc. ECCV, 2020.
+[15] D. Sun, X. Yang, M.-Y. Liu, and J. Kautz, “Pwc-net: Cnns for op-
+tical ﬂow using pyramid, warping, and cost volume,” in Proc. CVPR,
+pp. 8934–8943, 2018.
+[16] L. Tang, G. Hamarneh, and K. Iniewski, “Medical image registration: A
+review,” Medical imaging: technology and applications, vol. 1, pp. 619–
+660, 2013.
+[17] X. Zhao, J. Liu, X. Wu, W. Chen, F. Guo, and Z. Li, “Probabilistic
+spatial distribution prior based attentional keypoints matching network,”
+IEEE Trans. on Circuits and Systems for Video Technology, 2021.
+[18] D. G. Lowe, “Distinctive image features from scale-invariant keypoints,”
+Int. J. Comput. Vis., vol. 60, no. 2, pp. 91–110, 2004.
+[19] M. A. Fischler and R. C. Bolles, “Random sample consensus: A
+paradigm for model ﬁtting with applications to image analysis and
+automated cartography,” Commun. ACM, vol. 24, no. 6, pp. 381–395,
+1981.
+[20] A. Karpenko, D. Jacobs, J. Baek, and M. Levoy, “Digital video stabi-
+lization and rolling shutter correction using gyroscopes,” CSTR, vol. 1,
+no. 2011, p. 2, 2011.
+[21] R. Hartley and A. Zisserman, Multiple view geometry in computer vision.
+Cambridge university press, 2003.
+[22] Q. Shan, W. Xiong, and J. Jia, “Rotational motion deblurring of a rigid
+object from a single image,” in Proc. ICCV, pp. 1–8, IEEE, 2007.
+[23] S. Liu, B. Xu, C. Deng, S. Zhu, B. Zeng, and M. Gabbouj, “A hybrid
+approach for near-range video stabilization,” IEEE Trans. on Circuits
+and Systems for Video Technology, vol. 27, no. 9, pp. 1922–1933, 2017.
+[24] S. Majumder and N. Kehtarnavaz, “Vision and inertial sensing fusion
+for human action recognition: A review,” IEEE Sensors Journal, 2020.
+[25] W. Huang and H. Liu, “Online initialization and automatic camera-imu
+extrinsic calibration for monocular visual-inertial slam,” in IEEE Inter-
+national Conference on Robotics and Automation (ICRA), pp. 5182–
+5189, 2018.
+[26] D. Guse and B. M¨uller, “Gesture-based user authentication for mobile
+devicesusing accelerometer and gyroscope.,” in Informatiktage, pp. 243–
+246, 2012.
+[27] T. H. M. Zaki, M. Sahrim, J. Jamaludin, S. R. Balakrishnan, L. H.
+Asbulah, and F. S. Hussin, “The study of drunken abnormal human
+gait recognition using accelerometer and gyroscope sensors in mobile
+application,” in 2020 16th IEEE International Colloquium on Signal
+Processing & Its Applications (CSPA), pp. 151–156, 2020.
+[28] C.-W. Chiu, P. C.-P. Chao, and D.-Y. Wu, “Optimal design of magneti-
+cally actuated optical image stabilizer mechanism for cameras in mobile
+phones via genetic algorithm,” IEEE Trans. on Magnetics, vol. 43, no. 6,
+pp. 2582–2584, 2007.
+[29] D. Yeom, “Optical image stabilizer for digital photographing apparatus,”
+IEEE Trans. on Consumer Electronics, vol. 55, no. 3, pp. 1028–1031,
+2009.
+[30] J.-M. Koo, M.-W. Kim, and B.-K. Kang, “Optical image stabilizer for
+camera lens assembly,” Feb. 10 2009. US Patent 7,489,340.
+[31] H. Bay, T. Tuytelaars, and L. V. Gool, “SURF: speeded up robust
+features,” in Proc. ECCV, vol. 3951, pp. 404–417, 2006.
+[32] E. Rublee, V. Rabaud, K. Konolige, and G. R. Bradski, “ORB: an
+efﬁcient alternative to SIFT or SURF,” in Proc. ICCV, pp. 2564–2571,
+2011.
+[33] K. M. Yi, E. Trulls, V. Lepetit, and P. Fua, “LIFT: learned invariant
+feature transform,” in Proc. ECCV, vol. 9910, pp. 467–483, 2016.
+[34] Y. Tian, X. Yu, B. Fan, F. Wu, H. Heijnen, and V. Balntas, “Sosnet:
+Second order similarity regularization for local descriptor learning,” in
+Proc. CVPR, pp. 11016–11025, 2019.
+[35] H. Le, F. Liu, S. Zhang, and A. Agarwala, “Deep homography estimation
+for dynamic scenes,” in Proc. CVPR, pp. 7652–7661, 2020.
+[36] J. Mustaniemi, J. Kannala, S. S¨arkk¨a, J. Matas, and J. Heikkila,
+“Gyroscope-aided motion deblurring with deep networks,” in 2019
+IEEE Winter Conference on Applications of Computer Vision (WACV),
+pp. 1914–1922, 2019.
+[37] C. Jia and B. L. Evans, “Online calibration and synchronization of
+cellphone camera and gyroscope,” in IEEE Global Conference on Signal
+and Information Processing, pp. 731–734, 2013.
+[38] V. Siddha, K. Ishiguro, and G. A. Hernandez, “Hardware abstraction
+layer,” Aug. 28 2012. US Patent 8,254,285.
+[39] K. Sato, S. Ishizuka, A. Nikami, and M. Sato, “Control techniques for
+optical image stabilizing system,” IEEE Trans. on Consumer Electronics,
+vol. 39, no. 3, pp. 461–466, 1993.
+[40] S. S. Nasiri, M. Kiadeh, Y. Zheng, S.-H. Lin, and S. Sheena, “Optical
+image stabilization in a digital still camera or handset,” May 1 2012.
+US Patent 8,170,408.
+[41] F. La Rosa, M. C. Virz`ı, F. Bonaccorso, and M. Branciforte, “Op-
+tical image stabilization (ois),” STMicroelectronics. Available online:
+http://www. st. com/resource/en/white paper/ois white paper. pdf (ac-
+cessed on 12 October 2017), 2015.
+[42] J. S. Dai, “Euler–rodrigues formula variations, quaternion conjugation
+and intrinsic connections,” Mechanism and Machine Theory, vol. 92,
+pp. 144–152, 2015.
+[43] Y. Dai, H. Li, and L. Kneip, “Rolling shutter camera relative pose:
+Generalized epipolar geometry,” in Proc. CVPR, pp. 4132–4140, 2016.
+[44] M. Trajkovi´c and M. Hedley, “Fast corner detection,” Image and vision
+computing, vol. 16, no. 2, pp. 75–87, 1998.
+[45] J. Shi et al., “Good features to track,” in Proc. CVPR, pp. 593–600,
+1994.
+[46] M. Grundmann, V. Kwatra, D. Castro, and I. Essa, “Calibration-free
+rolling shutter removal,” in ICCP, pp. 1–8, 2012.
+[47] M. A. Fischler and R. C. Bolles, “Random sample consensus: a paradigm
+for model ﬁtting with applications to image analysis and automated
+cartography,” Communications of the ACM, vol. 24, no. 6, pp. 381–395,
+1981.
+[48] R. Ranftl and V. Koltun, “Deep fundamental matrix estimation,” in Proc.
+ECCV, pp. 284–299, 2018.
+[49] O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks
+for biomedical image segmentation,” in International Conference on
+Medical image computing and computer-assisted intervention, pp. 234–
+241, Springer, 2015.
+[50] D. Ulyanov, A. Vedaldi, and V. Lempitsky, “Instance normalization: The
+missing ingredient for fast stylization,” arXiv preprint arXiv:1607.08022,
+2016.
+[51] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image
+recognition,” in Proc. CVPR, pp. 770–778, 2016.
+[52] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,”
+arXiv preprint arXiv:1412.6980, 2014.
+[53] D. Barath, J. Matas, and J. Noskova, “Magsac: marginalizing sample
+consensus,” in Proc. CVPR, pp. 10197–10205, 2019.
+[54] E. Rublee, V. Rabaud, K. Konolige, and G. Bradski, “Orb: An efﬁcient
+alternative to sift or surf,” in Proc. ICCV, pp. 2564–2571, 2011.
+[55] Y. Tian, X. Yu, B. Fan, F. Wu, H. Heijnen, and V. Balntas, “Sosnet:
+Second order similarity regularization for local descriptor learning,” in
+Proc. CVPR, pp. 11016–11025, 2019.
+[56] M. Dusmanu, I. Rocco, T. Pajdla, M. Pollefeys, J. Sivic, A. Torii, and
+T. Sattler, “D2-net: A trainable cnn for joint description and detection
+of local features,” in Proc. CVPR, pp. 8092–8101, 2019.
+[57] D. Barath, J. Noskova, M. Ivashechkin, and J. Matas, “Magsac++, a fast,
+reliable and accurate robust estimator,” in Proc. CVPR, pp. 1304–1312,
+2020.
+[58] D. DeTone, T. Malisiewicz, and A. Rabinovich, “Deep image homogra-
+phy estimation,” arXiv preprint arXiv:1606.03798, 2016.
+[59] M. Z. Alom, M. Hasan, C. Yakopcic, T. M. Taha, and V. K. Asari,
+“Recurrent residual convolutional neural network based on u-net (r2u-
+net) for medical image segmentation,” arXiv preprint arXiv:1802.06955,
+2018.
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+=== PAGE 12 ===
+1051-8215 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TCSVT.2021.3103281, IEEE
+Transactions on Circuits and Systems for Video Technology
+12
+[60] O. Oktay, J. Schlemper, L. L. Folgoc, M. Lee, M. Heinrich, K. Misawa,
+K. Mori, S. McDonagh, N. Y. Hammerla, B. Kainz, et al., “Atten-
+tion u-net: Learning where to look for the pancreas,” arXiv preprint
+arXiv:1804.03999, 2018.
+Shuaicheng Liu received the Ph.D. and M.Sc. de-
+grees from the National University of Singapore,
+Singapore, in 2014 and 2010, respectively, and
+the B.E. degree from Sichuan University, Chengdu,
+China, in 2008. In 2015, he joined the University
+of Electronic Science and Technology of China
+and is currently an Associate Professor with the
+Institute of Image Processing, School of Information
+and Communication Engineering, Chengdu, China.
+His research interests include computer vision and
+computer graphics.
+Haipeng Li received the M.Sc. degree from the
+Institut Mines-Telecom Atlantique Bretagne Pays
+de la Loire, Brest, France, in 2020, and the B.E.
+degree from the University of Electronic Science and
+Technology of China, Chengdu, China, in 2017. In
+2019, he joined Megvii and is now the Assistant Re-
+searcher in Megvii Research Chengdu. His research
+interests include image processing and computer
+vision.
+Zhengning Wang received the B.E. and Ph.D.
+degrees from the Southwest Jiaotong University
+(SWJTU), Chengdu, China, in 2000 and 2007, re-
+spectively. From 2009 to 2011, he worked as post-
+doctoral fellow in the second research institute of
+Civil Aviation Administration of China (CAAC),
+where he served as a project leader on the Re-
+mote Air Trafﬁc Control Tower. He is currently
+an associate professor at the school of Electronic
+Engineering, University of Electronic Science and
+Technology of China (UESTC). From October 2014,
+he was visiting Media Communication Lab at University of Southern Cali-
+fornia (USC), USA as a visiting scholar for one year. His research interests
+are image and video processing, computer vision, multimedia communication
+systems and applications.
+Jue Wang received the B.E. and M.Sc. degrees from
+the Department of Automation, Tsinghua University,
+Beijing, China, in 2000 and 2003, respectively, and
+the Ph.D. degree in Electrical Engineering from the
+University of Washington, Seattle, WA, USA, in
+2007. He is currently a Senior Director of Megvii.
+Before that he has been a Principle Research Scien-
+tist at Adobe Research for nine years. He received
+the Microsoft Research Fellowship and the Yang
+Research Award from the University of Washington
+in 2006. He is a senior member of IEEE and ACM.
+His research interests include image and video processing and computational
+photography.
+Shuyuan Zhu received the Ph.D. degree from The
+Hong Kong University of Science and Technol-
+ogy (HKUST), Hong Kong, in 2010. From 2010
+to 2012, he worked at HKUST and Hong Kong
+Applied Science and Technology Research Institute
+Company Ltd., respectively. In 2013, he joined the
+University of Electronic Science and Technology of
+China and is currently a Professor with the School
+of Information and Communication Engineering. His
+research interests include image/video compression
+and image processing. He is a member of IEEE CAS
+Society. He received the Top 10% Paper Award at IEEE ICIP-2014 and the Top
+10% Paper Award at VCIP-2016. He was the Special Session Chair of Image
+Super-Resolution at IEEE DSP2015. He served as the Committee Member
+for IEEE ICME-2014, VCIP-2016, and PCM-2017.
+Bing Zeng received the B.E. and M.Sc. degrees in
+Electronic Engineering from the University of Elec-
+tronic Science and Technology of China (UESTC),
+Chengdu, China, in 1983 and 1986, respectively, and
+the Ph.D. degree in Electrical Engineering from the
+Tampere University of Technology, Tampere, Fin-
+land, in 1991. He worked as a Postdoctoral Fellow
+with the University of Toronto from September 1991
+to July 1992 and as a Researcher with Concordia
+University from August 1992 to January 1993. Then
+he joined the Hong Kong University of Science and
+Technology (HKUST). After 20 years of service, he returned to the UESTC
+in the summer of 2013, through Chinas 1000-Talent-Scheme. At UESTC, he
+leads the Institute of Image Processing to work on image and video processing,
+3-D and multiview video technology, and visual big data. During his tenure
+with the HKUST and UESTC, he graduated more than 30 Master’s and Ph.D.
+students, received about 20 research grants, ﬁled 8 international patents, and
+published more than 250 papers. He served as an Associate Editor for the
+IEEE TCSVT for 8 years and recived the Best Associate Editor Award in
+2011. He was General Co-Chair of the IEEE VCIP-2016, held in Chengdu,
+China, in November 2016. He is currently on the Editorial Board of Journal
+of Visual Communication and Image Representation and serves as General
+Co-Chair of PCM-2017. He was the recipient of a 2nd Class Natural Science
+Award (the ﬁrst recipient) from the Ministry of Education of China in 2014
+and was elected as an IEEE Fellow in 2016 for contributions to image and
+video coding.
+Authorized licensed use limited to: University of Electronic Science and Tech of China. Downloaded on December 15,2021 at 05:08:42 UTC from IEEE Xplore.  Restrictions apply. 

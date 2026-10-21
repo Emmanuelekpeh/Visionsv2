@@ -1,0 +1,18 @@
+{
+  "id": "s03",
+  "prompt": "shot 2",
+  "purpose": "",
+  "scale": "medium",
+  "camera": "zoom-in",
+  "camera_suggestion": null,
+  "seconds": 1.5,
+  "scene": "sc1",
+  "subject": "",
+  "energy": 0.2,
+  "beat": "develop",
+  "take": "t01",
+  "created": "2026-10-14 11:55:16",
+  "render_inputs": null,
+  "updated": "2026-10-14 11:55:16",
+  "seed": 1406
+}

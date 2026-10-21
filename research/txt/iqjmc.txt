@@ -1,0 +1,700 @@
+The Electrophysiological Perspectives of Essential, Enhanced Physiological,                                  Nawras S. Najim 
+and Physiological Tremors. 
+ 
+J Fac Med Baghdad                                                            86                                                           Vol.64 No. 2, 2022  
+The Electrophysiological Perspectives of Essential, Enhanced 
+Physiological, and Physiological Tremors 
+ 
+DOI: https://doi.org/10.32007/jfacmedbagdad.6421921. 
+ 
+Nawras S. Najim*                      MBChB 
+Abdulnasir H. Ameer**            MBChB, PhD (Physiology) 
+Azad A. Mohammed***            FICMS 
+ 
+ 
+      This work is licensed under a Creative Commons Attribution-Noncommercial 4.0 International License. 
+ 
+Abstract:  
+Background: The most frequent movement issue seen in clinical practice is tremors. It is known as 
+repetitive, involuntary oscillations. The diagnostic process for tremor patients can be time-consuming and 
+complicated, as the identification of “Essential Tremor” and its distinction from other types of tremor. 
+Objectives: This study aimed to describe the electrophysiological findings of essential, enhanced 
+physiological, and physiological tremors, using surface electromyography and an accelerometer. 
+Patients and Methods: The study included 24 patients with essential tremors, 10 patients with enhanced 
+physiological tremors, and 10 patients with physiological tremors. We assessed the frequency, amplitude, 
+and muscular contraction pattern of tremors during rest, posture, and a 1 kg load. 
+ Results: The tremor frequency of essential tremor patients was about 4.2-10.1 Hertz, while enhanced 
+physiological tremor and physiological tremor were increased to 6.1–12.7 Hertz and 5.1-10.2 Hertz, 
+respectively. The essential tremor group muscle contraction pattern was predominantly synchronous, as do 
+all enhanced physiological, and physiological tremor patients, but with more fine low amplitude muscle 
+bursts. By varying the tremor frequency and the weight load effect, tremor analysis could discriminate 
+essential from enhanced physiological, and physiological tremors. 
+Conclusions: The tremor analysis using surface electromyography and an accelerometer is sufficient to 
+differentiate between essential tremors, enhanced physiological tremors, and physiological tremors. 
+Keywords: Frequency, Accelerometry, Surface electromyography, Spectral analysis. 
+Introduction: 
+ 
+In clinical practice, the most prevalent movement 
+disorder is tremor (1). Repetitive, involuntary 
+oscillations of one or more bodily parts characterize it. 
+Alternating 
+or 
+simultaneous 
+contractions 
+of 
+antagonistic and agnostic muscles with reciprocal 
+innervation result in tremors. Classifying a tremor 
+depends on its genesis, phenomenology, location, and 
+frequency. It manifests in both healthy persons and as a 
+manifestation of a movement disorder, which is 
+typically neuropathic in origin (2–5). Physiological 
+tremor (PT), which is innate to healthy people, is often 
+unnoticed due to its slight amplitude. It has a frequency 
+range of 8 to 13 Hz, with an adult dominant rate of 10  
+ 
+* Coresponding Author:Dept. of Physiology, College of 
+Medicine, University of Baghdad, Iraq. Corresponding 
+Author’s Email: Nawrassabah88@gmail.com 
+** Dept. of Physiology , College of Medicine , 
+University of Baghdad.  
+Email: Nasiramer@comed.uabaghdad.edu.iq  
+***Neuroscience Hospital.. 
+Email: azadakram1986@gmail.com 
+ 
+ 
+Hz and somewhat lower rates in kids and the elderly. 
+The frequency of physiological tremors ranges from the 
+proximal to distal sections of an upper limb for example 
+7 to 10 Hz at the wrist and 12 to 30 Hz at the 
+metacarpophalangeal joint (3). Stress, exhaustion, 
+emotion, drugs, and other factors that enhance 
+sympathetic activity can cause an increase in the 
+amplitude of healthy people's tremors to result in 
+enhanced physiological tremor (EPT), which can be 
+seen during or shortly after times of increased muscle 
+activity, such as during exercise. Each hand and all of 
+the fingers are affected in the same way by this postural 
+tremor, which has a frequency of 8 to 12 Hz (lower in 
+kids and the elderly) (6). Essential tremor (ET) is a 
+prevalent neuropathic condition manifested by the so 
+called action tremor, which is subdivided into a postural 
+and kinetic tremor  (7). A postural tremor arises when a 
+subject deliberately maintains a pose against gravity for 
+example maintaining arms outstretched. Kinetic tremor 
+manifests itself during voluntary movement. The 
+frequency range of essential tremors is between 4 and 
+12 Hz (8–10). The primary features of each tremor are 
+JFac Med Baghdad 
+2022; Vol.64, No. 2 
+Received: June, 2022 
+Accepted: June, 2022 
+Published: July, 2022 
+Open 
+Access                                                                                   Original Article        
+
+The Electrophysiological Perspectives of Essential, Enhanced Physiological,                                  Nawras S. Najim 
+and Physiological Tremors. 
+ 
+J Fac Med Baghdad                                                            87                                                           Vol.64 No. 2, 2022  
+amplitude and frequency, which are utilized to 
+characterize the kind and severity of the tremor  (11). 
+Many 
+methods 
+exist 
+for 
+measuring 
+tremors. 
+Neurologists routinely use spiral drawing and 
+handwriting as the most common subjective clinical 
+methods. Nevertheless, due to their accessibility, 
+noninvasive nature, and affordability as diagnostic 
+tools, accelerometer, and surface electromyography 
+electrode techniques are gaining popularity and are 
+considered the gold standard for determining tremor 
+frequency and amplitude, they also provide an objective 
+measurement  (12). Fast Fourier transform (FFT, PSD) 
+based techniques are widely used to determine the 
+frequency and amplitude of the tremor  (13–15). The 
+prominent peak in the power spectral density (PSD) 
+determines the tremor frequency, but the area beneath 
+this peak can be used to determine the tremor 
+amplitude. The objectives of this study were to describe 
+the results obtained with surface electromyography and 
+an accelerometer for the evaluation of tremors and to 
+analyze their ability to discriminate oscillations in 
+Essential Tremors, enhanced physiological tremors, 
+and physiological tremors. 
+ 
+Patients and Methods: 
+Patients: Our research is a cross-sectional study 
+performed at the neurophysiology unit in Al-Shaheed 
+Ghazi Al-Hariri Hospital in Baghdad during the period 
+from 1 November-2021-28 February-2022. The study 
+groups included 24 patients with essential tremors, ten 
+patients with enhanced physiological tremor. and ten 
+patients with physiological tremor, who attended the 
+neurophysiology unit after referral from the Neurology 
+Department in Baghdad Teaching Hospital. Inclusion 
+criteria included all adult males and females with 
+tremors who were at least 18 years old and capable of 
+walking independently without aids. Exclusion criteria 
+included cardiologic and other neurologic conditions 
+that interfered with the phenotype of tremor. After a 
+thorough explanation of the study procedures, all 
+patients gave their verbal consent to participate in it. 
+The ethical committee of the college of medicine / 
+University of Baghdad gave its approval to the research. 
+Methods: In this work, a Natus EMG machine was 
+used along with KEYPOINT.NET Software version 
+2.40, four EMG surface electrodes, and one 
+unidirectional piezoelectric accelerometer. The patient 
+sat in a comfortable chair with pronated arms resting on 
+the armrests, while his /her hands were free in the air. 
+Based on the clinical observation and patient’s history, 
+the upper limb with the most severe Tremor was chosen 
+for the recording. The electrodes were implanted in the 
+longitudinal axis of the flexor and extensor carpi ulnaris 
+muscles, 2–3 cm apart. The accelerometer was affixed 
+to the dorsal region of the index finger of the same hand.  
+In addition, a ground electrode is placed on the patient 
+with no placement preference. Using the following 
+aspects, the frequency and amplitude of patients' 
+tremors were determined: 
+ The forearms are supported by the armrests while 
+the hands are hanging in the air, unattached to the chair. 
+  Instruct the patient to extend the wrist against 
+gravity while maintaining a pronated forearm on the 
+armrest and extending the hand beyond the armrest's 
+edge. 
+ The weights are affixed on dorsum of the affected 
+hand to observe the impact of a 1kg weight load on the 
+main frequency peak of postural Tremor. The sampling 
+rate ranged from 800 Hz to 24 kHz, and the 60-second 
+signal recording segments were used for the analysis. In 
+the case of the electromyograph, the data that was 
+captured will be a time series exhibiting a change in 
+voltage over time, and in the case of the accelerometer, 
+the data will display a change in acceleration over time. 
+The signals were reviewed in this shape to ensure that it 
+is free of artifacts and to observe the pattern of 
+antagonistic 
+muscle 
+activation 
+(alternating 
+or 
+synchronous) and burst duration. To determine 
+Tremor's amplitude and frequency, Fast Fourier 
+transformation is applied to transform data from the 
+time domain to the frequency domain. A tremor’s 
+frequency can be determined by looking for distinct 
+great peaks in its accelerometry spectrum, while its 
+amplitude can be calculated by looking at the total 
+power value (as represented by the area under the curve) 
+(8). 
+ 
+Statistical Analysis:  
+Data management was done using the statistical 
+package SPSS (version 25). Numerical data and 
+normally distributed data were analyzed using the 
+ANOVA test and compared using the Post hoc Tukey 
+test, with (P-values ≤ 0.05) being considered as 
+statistically significant. 
+ 
+Result: 
+The demographic distribution of the study groups by 
+age, age of tremor onset, and tremor duration are 
+illustrated in Table (1). 
+Table (1): Distribution of the ET, EPT, and PT 
+patients by age, and tremor characteristics. 
+Parameter 
+ 
+ET 
+EPT 
+PT 
+Age 
+Mean 
+±SD 
+45.29 
+±11.69 
+27.71 
+±6.75 
+21.2 
+±2.86 
+Median 
+(Range) 
+44  
+(27-75) 
+28  
+(18-38) 
+21  
+(18-25) 
+Age of onset 
+Mean 
+±SD 
+33.88 
+±14.38 
+25.43 
+±7.39 
+17.2 
+±3.03 
+Median 
+(Range) 
+31.5  
+(10-74) 
+26  
+(16-37) 
+18  
+(14-20) 
+Duration 
+Mean 
+±SD 
+11.42 
+±5.88 
+2.29 
+±1.38 
+4.0 
+±2.24 
+Median 
+(Range) 
+10  
+(1-20) 
+2  
+(1-5) 
+4  
+(1-7) 
+*ET: essential tremor, EPT: enhanced physiological tremor, PT: 
+physiological tremor, SD: standard deviation. 
+
+The Electrophysiological Perspectives of Essential, Enhanced Physiological,                                  Nawras S. Najim 
+and Physiological Tremors. 
+ 
+J Fac Med Baghdad                                                            88                                                           Vol.64 No. 2, 2022  
+ Table (2): Tremor frequency of resting, posture, 
+and loaded of ET, EPT, and PT patients. 
+*ANOVA test was used for the difference between independent 
+means; a P-value ≤ 0.05 was regarded as statistically significant. 
+ 
+The tremor frequency of essential tremor individuals at 
+rest, posture, and 1Kg weight were approximately 4.2-
+10.1 
+Hertz, 
+but 
+the 
+frequency 
+of 
+enhanced 
+physiological, and physiological tremors increased to 
+6.1-12.7 Hertz and 5.1-10.2 Hertz, respectively. with 
+statistically significant group differences (P-value ≤ 
+0.05). Figure (1) compares the tremor frequencies of 
+patients with ET, EPT, and PT. 
+Figure (1): Mean tremor frequencies for ET, EPT, 
+and PT patients, in Hz.  
+The weight load impact significantly reduces the 
+frequency of enhanced physiological, and physiological 
+tremor, by more than 1 Hertz. Compared to essential 
+tremor patients who showed no decrease or a decrease 
+lesser than 1 Hertz. There was no large difference 
+between the EPT and PT patients in terms of tremor 
+frequency at rest and posture (P-value ≥ 0.05), as 
+illustrated in Tables (2), and (3).  
+ 
+Table (3): Comparison of the frequency at resting, 
+posture, and loaded between pairs of tremor groups. 
+Paramet
+er 
+1st Tremor Group 
+2nd Tremor Group 
+P-
+value 
+ 
+Resting 
+Hz 
+Essential  
+Enhanced 
+physiological  
+0.001 
+Essential  
+Physiological  
+0.014 
+Enhanced 
+physiological 
+Physiological  
+0.995 
+ 
+Posture 
+Hz 
+Essential  
+Enhanced 
+physiological  
+0.001 
+Essential  
+Physiological  
+0.014 
+Enhanced 
+physiological  
+Physiological  
+0.995 
+ 
+Loaded 
+Hz 
+Essential  
+Enhanced 
+physiological  
+<0.00
+1 
+Essential  
+Physiological  
+0.001 
+Enhanced 
+physiological  
+Physiological  
+0.006 
+*By the Post hoc Tukey test, A P-value ≤ 0.05 was regarded as 
+statistically significant. 
+ 
+The major tremor muscle contraction pattern of the 
+essential tremor was synchronized in (83.3%) of 
+essential tremor patients and the remaining (16.7%) 
+demonstrated an alternating pattern. While (100%) of 
+enhanced physiological tremor and physiological 
+tremor patients, was a synchronized pattern with more 
+fine low amplitude muscle bursts as illustrated in 
+Figures (2), and (3).  
+Figure (2): Muscle contractions in essential tremors 
+demonstrate synchronization. 
+Figure (3): Enhanced physiological tremor 
+produces finely synchronized muscular  ntractions. 
+0
+5
+10
+15
+Rest
+Postural
+Loaded 1 Kg
+Essential tremor
+Enhanced physiological tremor
+Physiological tremor
+Parameter 
+ 
+ET 
+EPT 
+PT 
+P-
+value 
+Resting 
+Hz 
+Mean 
+±SD 
+6.93 
+±1.28 
+9.06 
+±1.62 
+8.8 
+±1.11 
+<0.001 
+Median 
+(Range) 
+6.8  
+(4.2-
+9.5) 
+8.5 
+ (7.2-
+11.3) 
+8.86  
+(7-9.9) 
+Posture 
+Hz 
+Mean 
+±SD 
+7.03 
+±1.49 
+11.73 
+±0.86 
+9.32 
+±1.18 
+<0.001 
+Median 
+(Range) 
+6.8  
+(4.5-
+10.1) 
+11.8  
+(10.3-
+12.7) 
+9.7  
+(7.3-10.2) 
+Loaded 
+Hz 
+Mean 
+±SD 
+6.68 
+±1.45 
+9.13 
+±1.44 
+6.22 
+±0.65 
+<0.001 
+Median 
+(Range) 
+6.6  
+(4.4-
+9.9) 
+9.3  
+(6.1-
+10.3) 
+6.4  
+(5.1-6.7) 
+
+The Electrophysiological Perspectives of Essential, Enhanced Physiological,                                  Nawras S. Najim 
+and Physiological Tremors. 
+ 
+J Fac Med Baghdad                                                            89                                                           Vol.64 No. 2, 2022  
+Discussion: 
+Tremor is a frequent clinical symptom that can be 
+classified as a resting tremor, positional tremor, or 
+intentional tremor. The most prevalent subtype of 
+tremor is the Essential Tremor. In this study, the 
+frequency range of ET tremor was 4.2–10.1 Hz, but the 
+frequency ranges of EPT and PT tremor were 6.1–12.7 
+Hz and 5.1-10.2 Hz, respectively, which are slightly 
+higher and overlap with ET. Normal tremor frequency 
+is determined by the limb oscillation rather than any 
+central oscillator frequency. A limb oscillation can be 
+modified by external loading. This point was examined 
+to distinguish tremors originating from a central 
+oscillator. During the loaded condition, the tremor 
+frequency of all normal physiological tremors decreases 
+by more than 1 Hertz, while only a little proportion of 
+patients with essential tremors show a decrease of larger 
+than 1 Hz (10). In our study, we revealed that the weight 
+load impact significantly reduces the frequency of 
+enhanced physiological, and physiological tremor, with 
+a reduction higher than 1 Hertz compared to essential 
+tremor patients who showed no decrease or a decrease 
+of less than 1 Hz. The tremor frequency of the ET 
+subjects was substantially different from that of the EPT 
+and PT subjects for several situations, including rest, 
+posture, and weight bearing (1) kg (P-value ≤ 0.05), 
+whereas there was no substantial difference between the 
+tremor frequency of the EPT and PT subjects at rest and 
+posture (P-value ≥ 0.05) as shown in Tables (2), and (3). 
+Our study examined the association between EMG 
+bursts in agonist and antagonist muscle pairs. For ET, 
+muscle contraction was a mainly synchronous 
+contraction in (83.3%) of patients, and alternating 
+contraction was uncommon. while all EPT and PT were 
+synchronized. The present results agree with previous 
+studies which investigated muscle contraction patterns 
+in tremor patients (2, 11, and 16). An interesting finding 
+in the present study was that one patient with ET has a 
+muscle contraction pattern that slips over the course of 
+a few minutes, in which the same agonist and antagonist 
+muscle pair show transitions from synchronous to 
+alternating contractions. Such results were reported by 
+a 
+previous 
+study 
+(17). 
+Essential, 
+enhanced 
+physiological, and physiological tremors can be 
+diagnosed via electrophysiological tremor analysis. The 
+technology is established by accelerometers and 
+electrodes for electromyography. It is a simple, non-
+invasive, and cost-effective diagnostic technique that is 
+widely available. However, large samples are required 
+for further research due to the small sample size of the 
+current study. Future research will be conducted 
+following therapy for essential tremor and idiopathic 
+tremors in conjunction with a clinical evaluation scale. 
+ 
+Conclusions: 
+Accelerometer and EMG can be used in clinical 
+settings. By the variation of the tremor frequency and 
+the weight load effect, it could discriminate ET from 
+EPT and PT in which tremor frequency is constant in 
+individuals with a central oscillator, as in the case of 
+essential tremors, but inconsistent in patients with a 
+peripheral oscillator, a mechanical reflex oscillator as 
+EPT or a mechanical oscillation as PT.  
+ 
+Conflict of interest:  
+None. 
+ 
+Author’s contributions: 
+Nawras Sabah Najim: Contributed to study conception,  
+study design, data analysis, interpretation, drafting  
+of the manuscript, and critical revision. 
+Abdulnasir Hussin Ameer: Supervisor, and contributed 
+to study conception, study design, data analysis, 
+interpretation, drafting of the manuscript, and critical 
+revision. 
+Azad Akram Mohammed: Contributed to study 
+conception, study design, and drafting of the 
+manuscript. 
+ 
+References: 
+1. Hirtz D, Thurman DJ, Gwinn-Hardy K, Mohamed M, 
+Chaudhuri AR, Zalutsky R. How common are the 
+“common” neurologic disorders?. Neurology. 2007; 
+Vol. 68, p. 326–37.  
+2. Zhang J, Xing Y, Ma X, Feng L. Differential 
+Diagnosis of Parkinson Disease, Essential Tremor,  and 
+Enhanced Physiological Tremor with the Tremor 
+Analysis 
+of 
+EMG. 
+2017; 
+Available 
+from: 
+https://doi.org/10.1155/2017/1597907 
+3. Ropper AH, Samuels MA, Klein JP, Prasad S. 
+PRINCIPLES 
+oF 
+NEUROLOGY 
+ELEVENTH 
+EDITION; 2019.  
+4. Hall JE, Guyton AC. Guyton and Hall Textbook of 
+Medical Physiology; 2016. 
+5. 
+Hess 
+CW, 
+Pullman 
+SL. 
+Tremor: 
+Clinical 
+Phenomenology and Assessment Techniques [Internet]. 
+2005; Available from: http://www.tremorjournal.org 
+6. Lenka A, Jankovic J. Tremor Syndromes: An Updated 
+Review. Frontiers in Neurology. Frontiers Media S.A.; 
+2021; Vol. 12. 
+7. Khalid Al-Saffar. Essential Tremor the new 
+guidelines of the American Academy of Neurology. J 
+Fac Med Baghdad. 2006;48(1).  
+8. Vial F, Kassavetis P, Merchant S, Haubenberger D, 
+Hallett M. How to do an electrophysiological study of 
+tremor. Elsevier B.V. Clinical Neurophysiology 
+Practice; 2019. Vol. 4, p. 134–42.  
+9. Buijink AWG, Contarino MF, Koelman JHTM, 
+Speelman JD, van Rootselaar AF. How to tackle tremor 
+- systematic review of the literature and diagnostic 
+work-up. Frontiers in Neurology. 2012; OCT.  
+10. Gironell A, Kulisevsky J, Pascual-Sedano B, 
+Barbanoj M. Routine Neurophysiologic Tremor 
+
+The Electrophysiological Perspectives of Essential, Enhanced Physiological,                                  Nawras S. Najim 
+and Physiological Tremors. 
+ 
+J Fac Med Baghdad                                                            90                                                           Vol.64 No. 2, 2022  
+Analysis as a Diagnostic Tool for Essential Tremor: A 
+Prospective Study. J Clin Neurophysiol.2004; Vol. 21.  
+11. Burne JA, Hayes MW, Fung VSC, Yiannikas C, 
+Boljevac D. The contribution of tremor studies to 
+diagnosis of Parkinsonian and essential tremor: A 
+statistical 
+evaluation. 
+Journal 
+of 
+Clinical 
+Neuroscience. 2002;9(3):237–42.  
+12. Andrade AO, Pereira AA, de Almeida MFS, 
+Cavalheiro GL, Paixão APS, Fenelon SB, et al. Human 
+Tremor: Origins, Detection and Quantification. In: 
+Practical Applications in Biomedical Engineering. 
+InTech; 2013.  
+13. Chiad JS, Bedaiwi BA, Idrees MY: ANALYSIS and 
+MITIGATION of HAND ARM POWER TOOLS 
+VIBRATION. Journal of Engineering and Sustainable 
+Development [Internet]. 2016;20(05). Available from: 
+www.jeasd.org. 
+14. Karam NA, Abdul Razzaq B, Mahdi AS. Spectral 
+Analysis of Remote Sensing Data. Iraqi Journal of 
+Science. 2016; Vol. 57.  
+15. Mahdi JF. Frequency analyses of human voice 
+using fast Fourier transform. Iraqi Journal of Physics. 
+2015; Vol. 13.  
+16. Jackson L, Klassen BT, Hassan A, Bower JH, 
+Matsumoto JY, Coon EA, et al. Utility of tremor 
+electrophysiology studies. Clinical Parkinsonism & 
+Related Disorders. 2021; 5:100108.  
+17. Boose A, Spieker S, Jentgens C, Dichgans J. Wrist 
+tremor: investigation of agonist-antagonist interaction 
+by means of long-term EMG recording and cross-
+spectral analysis. Electroencephalography and clinical 
+Neurophysiology. 1996; Vol. 101. 
+ 
+ 
+ 
+ 
+ المنظورات
+الفيزيولوجيا الكهربائ
+ية ر لل
+عاش مجهول السبب، الفسيولوجي المعزز، والفسيولوج
+ي 
+ 
+الدكتورة نورس صباح نجم: بكلوريوس طب وجراحة عامة 
+ االستاذ الدكتورعبد الناصر حسين
+أ
+مير: كلية الطب/جامعة بغداد 
+ الدكتور
+آزاد أ :كرم محمد
+أخصائي 
+ طب
+الجملة العصبية 
+ 
+الخالصة:
+ 
+:خلفية البحث تعتبر ال
+رعشات 
+ .من أكثر مشاكل الحركة شيوعًا في الممارسة السريرية
+وتعرف ب التذبذبات المتكررة والالإرادية. يمكن أن تستغرق عمل ية
+التشخيص لمرضى الرعاش وقتًا طويالً و تكون معقدة ، ألن تحديد الرعاش األساسي وتمييزه عن األنواع األخرى من الرعاش يمكن أن يكون مستهلكًا
+للوقت ومعقدًا. 
+:األهداف 
+ باستخدام التخطيط الكهربائي السطحي للعضالت ومقياس التسارع ، هدفت هذه الدراسة إلى وصف النتائج الفيزيولوجية الكهربية للرعاش
+األساسي)(مجهول السبب والفسيولوجي والفسيولوجي المعزز. 
+:المواد وطرق العمل  إشتملت 
+ الدراسة على24
+ 
+ مريضا يعانون من رعشات أساسية ، و10
+ 
+ مرضى يعانون من
+إرتعاشات 
+ فسيولوجية معززة ، و10
+ 
+ مرضى
+برعشات 
+ فسيولوجية. قمنا بتقييم التردد والسعة ونمط
+اإلنقباض 
+ العضلي للرعاش أثناء الراحة والوضعية وحمل1 كجم. 
+ 
+:النتائج ت
+ردد 
+ الرعاش لمرضى الرعاش مجهول السبب كان حوالي4.2
+-
+10.1
+ 
+ هرتز ، بينما
+حدثت 
+ زيادة الرعاش الفسيولوجي المعزز والرعشة
+ الفسيولوجية إلى6.1
+-
+12.7
+ 
+ هرتز و5.1
+-
+10.2هرتز 
+ على التوالي. كان نمط تقلص العضالت لمجموعة الرعاش األساسي متزامنًا في الغالب ، كما هو
+الحال مع جميع مرضى الرعاش الفسيولوجي والفسيولوجي المعزز ، ولكن مع رشقات عضلية أكثر دقة 
+ منخفضة السعة. من خالل تغيير وتيرة الرعاش
+وتأثير حمل الوزن ، يمكن أن يميز تحليل الرعاش الرعاش األساسي من الرعاش الفسيولوجي المعزز والرعشة الفسيولوجية. 
+اإلستنتاجات: تحليل الرعاش باستخدام التخطيط الكهربائي السطحي للعضالت ومقياس التسارع كاف ٍ للتمييز بين الرعش ات األساسية
+و
+اإلرتعاش 
+الفسيولوجي المعزز والرعشات الفسيولوجية. 
+:مفتاح الكلمات 
+ ، التردد ، قياس التسارع
+ال تخطيط
+الكهربائي السطحي 
+.، التحليل الطيفي 

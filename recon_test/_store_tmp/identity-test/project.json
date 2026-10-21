@@ -1,0 +1,39 @@
+{
+  "schema": 2,
+  "slug": "identity-test",
+  "name": "Identity Test",
+  "concept": "a test",
+  "created": "2026-10-14 11:55:16",
+  "saved": "2026-10-14 11:55:17",
+  "logline": "",
+  "characters": "",
+  "scenes": [
+    {
+      "id": "sc1",
+      "name": "scene 1",
+      "palette": "warm-gold"
+    }
+  ],
+  "timeline": [
+    "s04",
+    "s02",
+    "s03",
+    "s01",
+    "s05"
+  ],
+  "settings": {
+    "fps": 16,
+    "shake_scale": 1.0,
+    "seed_base": 1103,
+    "technical_baseline": true,
+    "models": "off",
+    "frames": 16
+  },
+  "provenance": {},
+  "ideas": [],
+  "kept_ideas": [],
+  "proposal_path": null,
+  "problems": [],
+  "deliverable": null,
+  "history": []
+}

@@ -1,0 +1,3563 @@
+
+===== PAGE 1 =====
+GYRO-BASED MULTI-IMAGE DECONVOLUTION
+FOR REMOVING HANDSHAKE BLUR
+A DISSERTATION
+SUBMITTED TO THE DEPARTMENT OF ELECTRICAL
+ENGINEERING
+AND THE COMMITTEE ON GRADUATE STUDIES
+OF STANFORD UNIVERSITY
+IN PARTIAL FULFILLMENT OF THE REQUIREMENTS
+FOR THE DEGREE OF
+DOCTOR OF PHILOSOPHY
+Sung Hee Park
+August 2014
+
+===== PAGE 2 =====
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                      http://creativecommons.org/licenses/by-nc/3.0/us/
+ 
+ 
+ 
+This dissertation is online at: http://purl.stanford.edu/bw930hk0750
+ 
+© 2014 by Sung Hee Park. All Rights Reserved.
+Re-distributed by Stanford University under license with the author.
+This work is licensed under a Creative Commons Attribution-
+Noncommercial 3.0 United States License.
+ii
+
+===== PAGE 3 =====
+I certify that I have read this dissertation and that, in my opinion, it is fully adequate
+in scope and quality as a dissertation for the degree of Doctor of Philosophy.
+Marc Levoy, Primary Adviser
+I certify that I have read this dissertation and that, in my opinion, it is fully adequate
+in scope and quality as a dissertation for the degree of Doctor of Philosophy.
+Mark Horowitz
+I certify that I have read this dissertation and that, in my opinion, it is fully adequate
+in scope and quality as a dissertation for the degree of Doctor of Philosophy.
+Stephen Rock
+Approved for the Stanford University Committee on Graduate Studies.
+Patricia J. Gumport, Vice Provost for Graduate Education
+This signature page was generated electronically upon submission of this dissertation in 
+electronic format. An original signed hard copy of the signature page is on file in
+University Archives.
+iii
+
+===== PAGE 4 =====
+Abstract
+Digital snapshots have become one of the most common ways that people record and
+share their experiences in everyday life. Most users would like to take high-quality
+photographs with their mobile phones or tablets. However, even with recent advances
+in mobile digital cameras, it is still challenging to capture satisfactory images, espe-
+cially in low-light situations. In low-light situations, long exposures are inevitable to
+improve the image quality, but, in turn, handshake blur becomes signiﬁcant. Accord-
+ingly, image deblurring techniques that aim to remove this blur have been intensively
+studied. Nevertheless, most image deblurring methods are brittle and computation-
+ally expensive, making them hardly usable in practice.
+This dissertation presents a new gyro-based multi-image deblurring system that
+handles various challenges in real-world situations. Instead of capturing a single long
+exposure image, a burst of shorter exposure images is captured along with gyroscope
+data being recorded at the same time. Any camera shake that occurred during the
+capture is accurately estimated from the gyroscope data and captured images. Finally,
+all captured images are jointly deblurred to obtain a sharp and noise-free image of
+the scene.
+Because both camera motion and the scene are accurately measured with a better
+capture method, gyro-based multi-image deblurring is more robust than previous
+approaches while its computational burden is signiﬁcantly reduced. To demonstrate
+the eﬀectiveness and eﬃciency of the proposed method, image deblurring is applied
+to full-resolution imagery of natural scenes captured using a mobile camera and an
+attached gyroscope.
+In addition to the implementation, this dissertation discusses a key question that
+iv
+
+===== PAGE 5 =====
+applies to any multi-image deblurring method: How many images should be cap-
+tured, and what should their exposure times be? By quantifying the amount of noise
+ampliﬁed by deblurring, an analysis is provided to estimate how well multi-image de-
+blurring can be done with given exposure parameters. Then, an important property of
+multi-image deblurring is presented: Multi-image deconvolution does not beneﬁt from
+increasing exposure time beyond a certain threshold. The noise reduction granted by
+increasing exposure time is mostly oﬀset by the noise ampliﬁcation incurred by the
+more extreme deblurring. Based on this analysis, diﬀerent capture strategies are com-
+pared in various photographic situations, demonstrating that multi-image deblurring
+is a robust approach that works in low-light situations when other methods fail.
+v
+
+===== PAGE 6 =====
+Acknowledgments
+Performing the research at Stanford would not have been such a wonderful experience
+without the support, inspiration, and guidance of many good people.
+First and foremost, I want to thank my advisor Professor Marc Levoy.
+This
+dissertation could not have been possible without his continuous support and en-
+couragement. He is one of the most enthusiastic mentors with boundless knowledge
+in computer graphics and cameras, and I was very lucky to begin my career as a
+computational photography researcher with his excellent guidance. Professor Mark
+Horowitz is also a great mentor who shared his keen insight on systems and hardware
+design when I was deep in the midst of seemingly overwhelming problems. I’m also
+grateful to Professor Steve Rock, who provided excellent advice when I began the
+research that goes into this dissertation and helped the development of the ideas that
+actually work.
+Thanks to all colleagues at Stanford. Eddy Talvala, Andrew Adams, Zhengyun
+Zhang, David Jacobs, Jongmin Baek, Jen Dolson, Noy Cohen and Michael Broxton
+were great friends, oﬃcemates, and collaborators on many projects. They were always
+willing to help when I was stuck at any type of problem and taught me how to become
+a good researcher. I also would like to thank Kalpana Seshadrinathan and Oscar
+Nestares at Intel Labs. It was a great pleasure to work together on the projects that
+oﬀered valuable hands-on experience in real systems.
+Thanks to my Korean friends who made my life much more interesting at Stan-
+ford: Jaewon Yang, Youngsik Kim, Kietae Kwon, Myunghwan Kim, Hyungchai Park,
+Sanghoek Kim, Euijong Whang, Heeyoung Lee, Hyoukjoong Lee, Seonghyun Paik,
+Donguk Moon and Hyungmin Cho.
+vi
+
+===== PAGE 7 =====
+Most importantly, I would like to thank my parents for their endless support that
+made me go through my PhD studies. It was them who got me motivated to try
+new things and made me a whole person. And ﬁnally, thank you for everything,
+Seokyoung. I look forward to starting the next chapter of our lives together.
+vii
+
+===== PAGE 8 =====
+Contents
+Abstract
+iv
+Acknowledgments
+vi
+1
+Introduction
+1
+1.1
+Capture Strategies for Removing Handshake Blur . . . . . . . . . . .
+2
+1.2
+Using a Gyroscope for Removing Handshake Blur . . . . . . . . . . .
+4
+1.3
+Comparing the Performance of Diﬀerent Capture Strategies . . . . . .
+6
+1.4
+Contributions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+7
+2
+Related Work
+9
+2.1
+Improving Image Deblurring . . . . . . . . . . . . . . . . . . . . . . .
+9
+2.1.1
+Modeling Camera Shake Blur
+. . . . . . . . . . . . . . . . . .
+9
+2.1.2
+Multi-Image Approaches to Reducing Motion Blur . . . . . . .
+10
+2.2
+Inertial Sensors and Their Applications in Images and Videos
+. . . .
+11
+2.2.1
+Gyroscope Technologies
+. . . . . . . . . . . . . . . . . . . . .
+12
+2.2.2
+Challenges in Using Inertial Sensor Measurements . . . . . . .
+13
+2.2.3
+Reducing Camera Shake Blur Using Inertial Sensors . . . . . .
+16
+2.3
+Finding Good Capture Strategies . . . . . . . . . . . . . . . . . . . .
+17
+3
+Gyro-Based Camera Motion Estimation
+19
+3.1
+Image Formation with Camera Motion . . . . . . . . . . . . . . . . .
+19
+3.1.1
+Image Noise Model . . . . . . . . . . . . . . . . . . . . . . . .
+20
+3.1.2
+Modeling Spatially-Varying Camera Shake Blur . . . . . . . .
+22
+viii
+
+===== PAGE 9 =====
+3.2
+Measuring Camera Motion Using a Gyroscope . . . . . . . . . . . . .
+25
+4
+Gyro-Based Multi-Image Deblurring
+30
+4.1
+Hardware Platform . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+31
+4.2
+Removing Camera Shake Blur . . . . . . . . . . . . . . . . . . . . . .
+32
+4.2.1
+Multi-Image Deblurring
+. . . . . . . . . . . . . . . . . . . . .
+33
+4.2.2
+Align-and-Average
+. . . . . . . . . . . . . . . . . . . . . . . .
+34
+4.3
+Experimental Results . . . . . . . . . . . . . . . . . . . . . . . . . . .
+35
+4.4
+Handling Moving Objects and Over-Exposed Regions . . . . . . . . .
+39
+5
+Performance of Multi-Image Deconvolution
+44
+5.1
+Non-Blind Multi-Image Deconvolution Based on Wiener Estimation .
+45
+5.2
+Derivation of Noise Ampliﬁcation Factor . . . . . . . . . . . . . . . .
+46
+5.3
+Modeling the Noise Ampliﬁcation Factor with Exposure Parameters .
+49
+6
+Analysis of Alternative Capture Strategies
+55
+6.1
+Performance of Capture Strategies . . . . . . . . . . . . . . . . . . . .
+56
+6.2
+The Eﬀect of Image Priors . . . . . . . . . . . . . . . . . . . . . . . .
+57
+6.3
+The Eﬀect of Various Parameters . . . . . . . . . . . . . . . . . . . .
+60
+6.4
+Comparing Capture Strategies in Real-World Situations . . . . . . . .
+61
+6.4.1
+Simulation Results: An n-Shot Burst . . . . . . . . . . . . . .
+63
+6.4.2
+Simulation Results: Fixed Total Capture Time . . . . . . . . .
+69
+6.5
+Guidelines for Choosing Capture Strategies . . . . . . . . . . . . . . .
+72
+7
+Conclusion
+75
+7.1
+Limitations
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+75
+7.2
+Further Applications . . . . . . . . . . . . . . . . . . . . . . . . . . .
+76
+7.2.1
+Removing Blur in Moving Objects . . . . . . . . . . . . . . . .
+77
+7.2.2
+Gyro-Based High Dynamic Range Photography for
+Hand-held Devices
+. . . . . . . . . . . . . . . . . . . . . . . .
+77
+7.3
+Closing Remarks
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+78
+Bibliography
+79
+ix
+
+===== PAGE 10 =====
+List of Tables
+2.1
+An overview of gyroscope technologies
+. . . . . . . . . . . . . . . . .
+12
+2.2
+Previous works that use inertial sensors for reducing camera shake blur
+17
+6.1
+Summary of the performance of multi-image deconvolution in various
+capture situations . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+56
+x
+
+===== PAGE 11 =====
+List of Figures
+1.1
+A trade-oﬀbetween image noise and camera shake blur . . . . . . . .
+2
+1.2
+Capture strategies for removing handshake blur . . . . . . . . . . . .
+4
+1.3
+Penetration of inertial sensors in mobile phones and tablets . . . . . .
+5
+1.4
+Comparison between blind and non-blind deblurring . . . . . . . . . .
+6
+2.1
+Gyroscope drift caused by unstable bias
+. . . . . . . . . . . . . . . .
+14
+2.2
+The eﬀect of gyroscope drift and time delay on a blur kernel . . . . .
+15
+3.1
+Our image noise model . . . . . . . . . . . . . . . . . . . . . . . . . .
+21
+3.2
+Our model for representing camera shake blur . . . . . . . . . . . . .
+23
+3.3
+A pair-wise comparison for gyroscope drift correction . . . . . . . . .
+26
+3.4
+The eﬀectiveness of our gyroscope drift correction . . . . . . . . . . .
+29
+4.1
+An overview of our gyro-based multi-image deblurring system
+. . . .
+31
+4.2
+A tablet with a gyroscope sensor board attached . . . . . . . . . . . .
+32
+4.3
+Two deblurred images obtained from our system . . . . . . . . . . . .
+35
+4.4
+Comparison between output images obtained from diﬀerent approaches
+37
+4.5
+An example with local motion in the scene . . . . . . . . . . . . . . .
+38
+4.6
+An overview of our image blending method for handling moving objects
+and over-exposed regions . . . . . . . . . . . . . . . . . . . . . . . . .
+40
+4.7
+Detecting moving objects and over-exposed regions
+. . . . . . . . . .
+42
+4.8
+Output images after handling moving objects and over-exposed regions
+43
+5.1
+An example of n-image deconvolution . . . . . . . . . . . . . . . . . .
+48
+5.2
+Camera motion simulation for diﬀerent exposure parameters . . . . .
+50
+xi
+
+===== PAGE 12 =====
+5.3
+Average noise ampliﬁcation factor measured from simulation based on
+real camera motion . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+51
+5.4
+Splitting exposures into ﬁrst- and second-half exposures . . . . . . . .
+52
+5.5
+Uncorrelated blur for long exposure times
+. . . . . . . . . . . . . . .
+53
+6.1
+Two scenes used for simulations with image priors . . . . . . . . . . .
+58
+6.2
+The performance of align-and-average and multi-image deconvolution
+with image priors . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+59
+6.3
+The eﬀect of changing each parameter on the performance of align-
+and-average and multi-image deconvolution . . . . . . . . . . . . . . .
+61
+6.4
+A simulation pipeline for comparing capture strategies
+. . . . . . . .
+62
+6.5
+Two examples of ground truth scenes used for our simulations. . . . .
+64
+6.6
+Comparison between capture strategies: an n-shot burst (image insets)
+65
+6.7
+Comparison between capture strategies: an n-shot burst (plots)
+. . .
+67
+6.8
+Comparison between capture strategies: an n-shot burst captured with
+a longer focal length
+. . . . . . . . . . . . . . . . . . . . . . . . . . .
+68
+6.9
+Comparison between capture strategies: the Brasserie scene with ﬁxed
+total capture time . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+70
+6.10 Comparison between capture strategies: the Tequila Bar scene with
+ﬁxed total capture time (image insets)
+. . . . . . . . . . . . . . . . .
+71
+6.11 Comparison between capture strategies: the Tequila Bar scene with
+ﬁxed total capture time (plots)
+. . . . . . . . . . . . . . . . . . . . .
+72
+xii
+
+===== PAGE 13 =====
+Chapter 1
+Introduction
+In recent years, digital cameras have become an almost ubiquitous component in mo-
+bile devices, making digital photography a part of everyday life. Most users would
+like to take high-quality photographs with their mobile phones or tablets. However,
+although the performance of digital cameras in mobile devices has signiﬁcantly im-
+proved because of recent advances in image sensor technology and software processing,
+it is still challenging to capture satisfactory images, especially in low-light situations.
+In such low-light situations, handshake blur has signiﬁcant eﬀects on image quality
+when hand-held devices are used. Long exposure times are often inevitable to reduce
+the amount of image noise, but, in turn, the images may suﬀer from blur due to
+handshake occurred during the capture.
+Because of this trade-oﬀbetween image
+noise and camera shake blur, which is illustrated in Figure 1.1, it is not trivial to
+capture an image that is sharp and clean of noise at the same time.
+To overcome this trade-oﬀand generate compelling images, this dissertation
+presents a gyro-based multi-image deblurring system that combines two techniques:
+gyroscope-based camera motion estimation and non-blind multi-image deconvolution.
+This system captures a burst of images while the gyroscope data is recorded at the
+same time. Then, the camera shake that occurred during the capture is estimated
+from both the gyroscope data and image data. Finally, based on the estimated cam-
+era motion, all captured images are jointly deconvolved to generate a clean and sharp
+image. Although these two techniques have individually been the subject of previous
+1
+
+===== PAGE 14 =====
+CHAPTER 1. INTRODUCTION
+2
+Longer exposure time
+Less noise
+More blur
+More noise
+Less blur
+Figure 1.1: A trade-oﬀbetween image noise and camera shake blur. When a single
+image is captured in low-light situations, it is challenging to capture an image that
+is sharp and clean at the same time. When short exposure times are used (shown
+on the left), the captured image may be degraded by high noise level. On the other
+hand, an image captured with long exposure times (shown on the right) suﬀers from
+camera shake blur.
+studies, the combination of them allows us to implement a new image deblurring sys-
+tem that is both eﬀective and eﬃcient enough to be used in practical mobile systems.
+This image deblurring system beneﬁts from two key ideas. First, it adopts a bet-
+ter capture strategy to obtain a good set of images that will be combined after the
+capture. This multi-image approach provides repeated observations of the scene that
+preserve more information. Second, a gyroscope is used to directly measure the cam-
+era motion. Because it measures both camera motion and the scene as accurately as
+possible, the estimation becomes more robust than previous image deblurring meth-
+ods while signiﬁcantly reducing computational costs.
+1.1
+Capture Strategies for Removing Handshake
+Blur
+A capture strategy refers to a way of determining a set of capture parameters, such
+as the number of shots in a burst, exposure time and analog gain used for the burst.
+This is more general than exposure metering that chooses exposure time and analog
+gain for a single image capture. Choosing the number of shots becomes an important
+factor when both noise and handshake blur are involved.
+
+===== PAGE 15 =====
+CHAPTER 1. INTRODUCTION
+3
+To reduce the amount of blur caused by camera shake, two approaches are com-
+monly used: align-and-average and image deblurring. Although both approaches aim
+to solve the same problem, they are based on the two ends of the capture strategy
+spectrum. On one end is the capture strategy that uses a short exposure time to
+capture multiple images that are assumed to be blur-free but noisy. The align-and-
+average method merges these captured images after alignment to reduce noise. On
+the other end is the strategy of capturing a clean but blurry image using a long ex-
+posure time. From this single image, a sharp image is recovered by image deblurring.
+However, there exists a middle ground between these two ends of capture strategies.
+A set of images can be captured with intermediate exposure time, hence with some
+small amount of blur, and jointly deconvolved to recover the latent image. This ap-
+proach is called multi-image deblurring. These approaches are illustrated in Figure
+1.2.
+Multi-image deblurring has several advantages over other approaches. Exposure
+times used in align-and-average must be very short in order to avoid excessive hand-
+shake blur, and, as noted above, a short exposure time may result in poor image
+quality that makes alignment diﬃcult and may not even be short enough to com-
+pletely eliminate hand shake blur. In contrast, multi-image deblurring is applicable
+to a wider range of exposure times because the blur can be removed computationally,
+and is thus more eﬀective in low-light situations. In addition, multi-image deblurring
+is more robust and eﬃcient than single-image deblurring. When multiple images are
+captured, each image contains diﬀerent blur caused by diﬀerent camera motion, and
+thus preserves frequency components of the scene that are complementary to those
+captured in the other images. By combining these images, multi-image deblurring sig-
+niﬁcantly improves the quality of output image and reduces ringing artifacts caused
+by missing frequency components.
+
+===== PAGE 16 =====
+CHAPTER 1. INTRODUCTION
+4
+Output image
+Input images
+Image
+Alignment
+Average
+(a) Align-and-average
+Output image
+Input image
+Camera
+Motion
+Estimation
+Non-Blind
+Image 
+Deblurring
+Single-Image Deblurring
+(b) Single-image deblurring
+Output image
+Input images
+Camera
+Motion
+Estimation
+Non-Blind
+Multi-Image 
+Deblurring
+Multi-Image Deblurring
+(c) Multi-image deblurring
+Figure 1.2: Capture strategies for removing handshake blur. (a) A burst of short
+exposure shots are captured. The captured images are assumed to be noisy but with
+little blur. (b) A long exposure is used to capture a blurry and clean image. (c) A
+set of images are captured with an intermediate exposure time. These images contain
+some small amount of blur. Note that image-based approaches are assumed for image
+alignment and camera motion estimation.
+1.2
+Using a Gyroscope for Removing Handshake
+Blur
+Inertial sensors, in particular accelerometers and gyroscopes, became a must-have
+component in recent mobile devices. The launch of the Nintendo Wii game consoles
+and the Apple iPhone brought these sensors into the consumer electronics mass-
+market [44]. Since then, the uses of micro-electro-mechanical systems (MEMS) iner-
+tial sensors expanded rapidly as shown in Figure 1.3. Their manufacturing cost has
+decreased [16] and these sensors are expected to enable future applications in mobile
+
+===== PAGE 17 =====
+CHAPTER 1. INTRODUCTION
+5
+2007
+2008
+2009
+2010
+2011
+2012
+2013
+2014
+2015
+0
+10
+20
+30
+40
+50
+60
+70
+80
+Penetration Rate (%)
+ 
+ 
+Accelerometers
+Gyroscopes
+Figure 1.3: Penetration of inertial sensors in mobile phones and tablets. By 2015, Yole
+D´eveloppement [15] estimates that more than half of all mobile phones and tablets
+are expected to have gyroscopes.
+devices such as user interface control, image and video stabilization and augmented
+reality.
+Recent progress in image deblurring was enabled by the use of inertial sensors
+[30, 55, 7, 51].
+A gyroscope measures the rotational component of motion, while
+an accelerometer records translational motion of the sensor. These measurements
+eliminate the problem of camera motion estimation, and signiﬁcantly improve image
+deblurring. As Figure 1.4 illustrates, blind deblurring requires estimating the camera
+motion and the scene at the same time. This is an ill-posed problem that consists
+of two tightly connected subproblems, each of which is challenging.
+Although it
+can be solved by an iterative optimization method that alternates between these
+two subproblems, blind deblurring is considered brittle and computationally heavy
+because the optimization heavily relies on complicated image prior models to obtain
+a plausible result. In contrast, if the camera motion is known by the measurements
+from the sensors, image deblurring becomes non-blind and more tractable because
+non-blind deblurring is solved only once.
+
+===== PAGE 18 =====
+CHAPTER 1. INTRODUCTION
+6
+Camera
+Motion
+Estimation
+Non-Blind
+Deblurring
+(a) Blind estimation
+Camera
+Motion
+Non-Blind
+Deblurring
+(b) Non-blind estimation
+Figure 1.4: Comparison between blind and non-blind deblurring. Blind deblurring is
+an ill-posed problem that requires solving iteratively two tightly connected subprob-
+lems. This is considered brittle and computationally heavy. In contrast, if camera
+motion is known, the problem becomes non-blind and more tractable because non-
+blind deblurring is solved only once.
+1.3
+Comparing the Performance of Diﬀerent Cap-
+ture Strategies
+A key question about any multi-image deblurring method is: for a given total capture
+time, how many images should be captured, and what should their exposure times
+be? Answering this question requires a method that estimates how well deblurring
+performs in a given photographic situation. However, this is a challenging problem
+because the performance of image deblurring depends on various factors such as the
+scene statistics, the characteristics of applied blur, and exposure parameters used for
+the capture.
+This dissertation provides a theoretical analysis that answers an important part
+of this question. In particular, a method of estimating the performance of multi-
+image deconvolution based on a noise ampliﬁcation factor is proposed. This method
+relates the performance with exposure parameters, which are intuitive and easily
+applicable in practice. Then, this dissertation proves the following property: Multi-
+image deconvolution does not beneﬁt from increasing exposure time beyond a certain
+threshold. This result goes against the common thought that longer exposure times
+improve the image quality. When camera shake blur exists, increasing exposure time
+does not help because the noise introduced by computationally removing additional
+blur cancels the reduced photon noise in captured images.
+Finally, the performance of diﬀerent capture strategies is compared. Our analysis
+
+===== PAGE 19 =====
+CHAPTER 1. INTRODUCTION
+7
+focuses on comparing multi-image deconvolution and align-and-average, which can
+be considered as a special case of multi-image deconvolution when handshake blur is
+negligible. Both approaches are compared in various scenarios to show that multi-
+image deblurring is applicable to a wider range of photographic situations compared
+to align-and-average. Then, guidelines are formulated to help users to determine how
+to capture and process images to get the best output in real-world situations.
+1.4
+Contributions
+The ﬁrst contribution of this dissertation is an implementation of gyro-based multi-
+image deblurring system that handles various practical issues. These issues include
+gyroscope drift correction, spatially-varying blur that includes oﬀ-center rotational
+blur, time synchronization between image data and gyroscope data, electronic rolling
+shutter, and handling moving objects and over-exposed regions. All these issues add
+complexity to the system, but they must be included in order to produce high-quality
+images.
+The second contribution is an analysis that allows us to compare the performance
+of diﬀerent capture strategies. Based on this analysis, following key points are demon-
+strated:
+• Multi-image deconvolution does not beneﬁt from increasing exposure time be-
+yond a certain threshold.
+• Multi-image deconvolution is a good capture strategy in low-light situations
+when align-and-average fails.
+In the following chapter, a review of other related works on various subproblems
+is described. Then, the next two chapters will describe the implementation details of
+our gyro-based camera motion estimation (Chapter 3) and image deblurring system
+(Chapter 4). Following our analysis of the performance of multi-image deconvolution
+(Chapter 5), Chapter 6 will compare the performance of align-and-average and multi-
+image deconvolution and formulate guidelines for choosing good strategies. Finally,
+Chapter 7 will conclude the dissertation, suggesting some future research directions.
+
+===== PAGE 20 =====
+CHAPTER 1. INTRODUCTION
+8
+The gyro-based multi-image deblurring system is also discussed in a paper pub-
+lished at CVPR 2014 [46]. This dissertation includes the results of additional exper-
+iments beyond those reported in this paper.
+
+===== PAGE 21 =====
+Chapter 2
+Related Work
+Before we describe our image deblurring system, it is valuable to examine a number
+of well-studied problems in computational photography that are closely related to
+this system. Section 2.1 reviews the basic building blocks in multi-image deblurring.
+Then, Section 2.2 provides an overview on the issues related to using inertial sensors
+and compares previous works on image deblurring system based on inertial sensors.
+Finally, previous works on comparing capture strategies are presented in Section 2.3.
+2.1
+Improving Image Deblurring
+We focus on two topics that are related to our multi-image deblurring: how camera
+shake blur is modeled and how multiple images are used to reduce motion blur.
+2.1.1
+Modeling Camera Shake Blur
+When a camera moves during an exposure, a captured image becomes blurry as the
+sensor integrates the relative motion between the camera and the scene. The pose of
+the camera continuously changes during an exposure, and each pose gives a slightly
+diﬀerent view of the same scene. The diﬀerence between these views causes camera
+shake blur.
+Many blur models assume a spatially uniform blur [35, 54, 11], which means that
+9
+
+===== PAGE 22 =====
+CHAPTER 2. RELATED WORK
+10
+the shape of blur is identical across the entire image. This assumption allows the
+blur to be modeled with a well-known 2-D convolution between the scene and a blur
+kernel that represents the shape of the blur. The main advantage of this approach is
+that the frequency domain analysis is available to characterize the blur. In addition,
+the applied blur can be eﬃciently removed in the frequency domain. However, this
+uniform blur model is often violated in practice because in-plane rotation is usually
+a signiﬁcant contributor to actual camera shake [36]. Thus, this blur model should
+be applied only in small local windows that satisfy the uniform blur assumption.
+A common approach in modeling camera shake blur is to use geometric represen-
+tation of camera motion, which inherently gives spatially-varying blur. Although we
+need six degrees of freedom (DOF) to describe full camera motion [30], 3-axis rotation
+[60] or in-plane translation and rotation [19] is commonly used as well. The 3-axis
+rotation model is a reasonable approximation because the rotational component is
+the dominant factor of camera shake. In practice, there are only small changes in
+the camera position during capture, and thus, the amount of blur caused by cam-
+era translation is negligible for suﬃciently distant scenes. K¨ohler et al. [33] show
+that 3-DOF approximation of full camera motion agrees well with real camera shake
+measurements.
+2.1.2
+Multi-Image Approaches to Reducing Motion Blur
+In addition to single-image deblurring methods, a number of multi-image approaches
+based on diﬀerent data captures have been proposed.
+One category of approaches relies on align-and-average methods. In astronomical
+photography, lucky imaging methods have been popularly used, dating back to the
+1970s [17]. These methods select images that have undergone the least degradation
+due to atmospheric turbulence, and merge them after alignment. This idea is ex-
+tended in various recent works in computational photography to reduce the amount
+of motion blur or to denoise video stream. These methods are predicated on accurate
+alignment between images, which can be done based on a global transformation [56],
+a global alignment with local adjustments [29], optical ﬂow [39, 49], or gyroscope
+
+===== PAGE 23 =====
+CHAPTER 2. RELATED WORK
+11
+measurements [51].
+Another category is called multi-image deblurring. Papers taking this popular
+approach share the observation that combining images with diﬀerent shapes of blur
+makes deblurring stable [50, 12, 11]. Li et al. [38] remove blur in video frames to
+generate a sharp panorama image.
+Agrawal et al.
+[5] deliberately vary exposure
+times to capture blurry images with diﬀerent shapes of blur for an object moving
+at a constant speed. Cho et al. [13] estimate multiple motions within the scene.
+However, these methods are based on blind estimation, which is still a challenge. We
+use gyroscope measurements to make the estimation non-blind.
+Other sets of data are assumed to improve the image quality in low-light situations.
+A pair of ﬂash and no-ﬂash images [48], or a pair of noisy and blurry images [63, 57]
+can be captured. These methods aim to fuse only the good properties of the two
+images. Sharp image details come from ﬂash image or noisy image, while good color
+information is transferred from long exposure shot.
+2.2
+Inertial Sensors and Their Applications in Im-
+ages and Videos
+The emergence of MEMS inertial sensors enabled new approaches to solve a number
+of well-studied problems in computational photography and computer vision.
+By
+using the rich data provided by inertial sensors, the complexity of handling image
+and videos captured from hand-held devices is signiﬁcantly reduced. For example,
+applications such as video stabilization and rolling shutter correction [31, 20, 26],
+motion tracking [24, 37] and camera shake removal [30, 7, 55, 51, 46] beneﬁt from this
+new technology and many solutions are eﬃcient enough to be implemented in mobile
+devices.
+In this section, we address a number of practical issues in combining image data
+and inertial sensor data, and review previous works that tackle these problems. Then,
+we focus on image deblurring systems that use inertial sensors and compare them with
+our system.
+
+===== PAGE 24 =====
+CHAPTER 2. RELATED WORK
+12
+Technology
+Principle
+Applications
+Price per axis
+RLG, FOG
+Sagnac eﬀect
+Navigation
+systems
+> $ 2000
+MEMS
+Coriolis force
+Consumer
+electronics
+< $ 2
+Table 2.1: An overview of gyroscope technologies. Although conventional gyroscope
+technologies can provide higher performances, MEMS gyroscopes dominate consumer
+electronics market because of their low requirements in size, power and cost [6, 58].
+2.2.1
+Gyroscope Technologies
+Before discussing details about using inertial sensors, a brief overview of gyroscope
+technologies is provided, which is summarized in Table 2.1. More details can be found
+in [34, 62].
+Conventional gyroscope technologies, such as ring laser gyroscopes (RLG) and
+ﬁber optic gyroscopes (FOG), are based on the Sagnac eﬀect.
+These gyroscopes
+monitor the diﬀerence in the propagation time between two laser beams, which is
+aﬀected by the rate of sensor rotation.
+Because of their high performance, these
+gyroscopes are used in inertial navigation systems in guided missiles, submarines and
+aircrafts. However, their size and cost are prohibitively large to be used in consumer
+mobile devices.
+In contrast, MEMS gyroscopes can be fabricated in micrometer scales.
+Most
+MEMS gyroscopes contain a vibrating mechanical structure that is aﬀected by the
+Coriolis force caused by the sensor rotation. By sensing the Coriolis force, the angu-
+lar velocity of the sensor is measured. These micromachined, low-power and low-cost
+gyroscopes are widely adopted in consumer devices, enabling numerous novel applica-
+tions in mobile platforms. However, their performance is often degraded by unstable
+bias, and practical issues must be properly handled to obtain more reliable measure-
+ments. The following section will describe how these challenges are tackled.
+
+===== PAGE 25 =====
+CHAPTER 2. RELATED WORK
+13
+2.2.2
+Challenges in Using Inertial Sensor Measurements
+Here, we list a few practical issues that aﬀect the accuracy and reliability of inertial
+sensor measurements:
+• Unstable bias A bias refers to zero-rate output, which is a non-zero oﬀset that
+exists independent of sensor motion. The amount of bias is aﬀected by various
+factors, such as temperature, vibrations and mechanical stress [6, 58], and thus
+slowly varies with time.
+• Unknown time delay between image data and sensor data Timestamps
+obtained from diﬀerent sensors in the system suﬀer from unknown time de-
+lay caused by data transfer, buﬀering, and software stack delays in operating
+systems. This delay varies randomly.
+• Electronic rolling shutter In contrast to a global shutter, an electronic rolling
+shutter scans across the frame either in vertical or horizontal direction to read
+out pixel values. Thus, each row or column is captured at a slightly diﬀerent
+time.
+• Gravity oﬀset Accelerometers measure proper acceleration that includes grav-
+itational acceleration, which must be subtracted to obtain the acceleration due
+to the motion.
+• Oﬀ-center rotations The measurements from gyroscopes are not aﬀected by
+the position of rotation center, and thus cannot distinguish oﬀ-center rotations
+with the same angular rate.
+Among these issues, we discuss more about the eﬀect of unstable bias. A bias
+causes drift in estimation after integration, and the amount of drift accumulates with
+time, as illustrated in Figure 2.1b and Figure 2.1c. When accelerometers are used, this
+drift becomes more critical because the measurements are integrated twice to obtain
+the translational component. Figure 2.1a shows the variation of bias measured from a
+gyroscope used in our system. Each measurement was obtained more than 30 minutes
+
+===== PAGE 26 =====
+CHAPTER 2. RELATED WORK
+14
+−0.5
+0
+0.5
+Sample index
+Bias (deg / s)
+ 
+ 
+x axis
+y axis
+z axis
+(a) Bias measurements
+0
+Time (s)
+Ang Vel (deg / s)
+ 
+ 
+w/ bias
+w/o bias
+(b) Bias in gyroscope data
+0
+Time (s)
+Ang Pos (deg)
+ 
+ 
+w/ bias
+w/o bias
+(c) Drift caused by bias
+Figure 2.1: Gyroscope drift caused by unstable bias. (a) Unstable bias in a gyroscope.
+Each sample represents the bias measurement for a gyroscope used in our system
+(Invensense MPU-6050). (b) Two gyroscope data are simulated with and without
+applying a bias, which is modeled as a constant oﬀset. (c) The bias causes drift after
+integration. The gap between two curves represents the amount of drift. Note that
+the bias may cause more than a pixel deviation when the time is longer than 1
+6s for
+our system.
+after the previous one. The standard deviation of the samples is (0.21, 0.12, 0.17)◦/s
+for x, y and z axis, respectively, which produces more than a pixel of deviation if the
+total capture time is longer than 1
+6s for our system. When a long period of time is
+considered, this bias must be properly compensated.
+Figure 2.2 demonstrates how these issues may aﬀect the result of blur kernel
+estimation, which is a common task in image deblurring. Diﬀerent bias values make
+the end point of motion trajectory drift in a blur kernel as shown in Figure 2.2a. When
+multiple images are considered, this drift also causes misalignment between frames.
+Figure 2.2b shows that blur kernels may be estimated from the camera motion that
+corresponds to a wrong time window because of unknown time delay.
+
+===== PAGE 27 =====
+CHAPTER 2. RELATED WORK
+15
+(a) Gyroscope drift
+(b) Gyroscope time delay
+Figure 2.2: The eﬀect of gyroscope drift and time delay on a blur kernel. A set of blur
+kernels is simulated with diﬀerent values of gyroscope bias and time delay, while the
+exposure time for each blur kernel is not changed. (a) Each blur kernel is obtained by
+applying diﬀerent bias values that are randomly selected. Gyroscope drift aﬀects the
+end point position of the motion trajectory. (b) Each blur kernel reﬂects the motion
+within a time window that is shifted by a time delay. Five samples of time delays
+with the same spacing were selected.
+Thus, most applications that capture both image frames and inertial sensor mea-
+surements must be designed to handle these practical issues. The requirement for
+estimation accuracy varies between diﬀerent applications. For example, video stabi-
+lization may tolerate small amount of error while image deblurring usually requires a
+pixel-accuracy blur estimation to avoid artifacts and minimize remaining blur.
+Kelly and Sukhatme [32] propose a self-calibration method that estimates the
+sensor-to-sensor transform, the gyroscope and accelerometer biases and the gravity
+vector based on the unscented Kalman ﬁlter. However, they use inertial sensors that
+have higher performance than the ones in current mobile devices and model sensor bias
+as Gaussian random walk process, which may not hold in practice. Jia and Evans [27]
+propose an online calibration method for cellphone camera and gyroscope based on
+an extended Kalman ﬁlter, and consider electronic rolling shutter and the time delay
+as well. Karpenko et al. [31] and Ringaby and Forss´en [51] also calibrate gyroscope
+to handle electronic rolling shutter, gyroscope bias and time delay. However, all these
+methods rely on feature point tracking applied to video frames, which may become
+less accurate if images are degraded by handshake blur.
+When both gyroscope and accelerometer are used, bias in gyroscope is often ne-
+glected because the drift caused by an accelerometer is much more signiﬁcant [30, 7].
+Joshi et al. [30] repeatedly apply their image deblurring method with possible bias
+values and then picks the best result. This approach is slow and only the bias in an
+accelerometer, not gyroscope, is handled. Bae et al. [7] correct accelerometer drift
+
+===== PAGE 28 =====
+CHAPTER 2. RELATED WORK
+16
+by comparing the histograms of blur kernels. Our gyroscope drift correction method
+takes advantage of capturing multiple images, while these two methods are limited
+to the single-image case.
+2.2.3
+Reducing Camera Shake Blur Using Inertial Sensors
+The most commercially successful solution for reducing camera shake blur is optical
+image stabilization embedded in consumer digital cameras. An optical image stabi-
+lizer shifts either a ﬂoating lens element or the image sensor to compensate for the
+vibration detected by gyroscopes and keeps the optical path to the sensor stable.
+Recently, optical stabilizers are also adopted in cell phone cameras such as the ones
+in Nokia Lumia 920 [1] and HTC One M7 [2]. Although these stabilizers are known
+to be eﬀective, they add size and cost to traditional camera modules.
+A diﬀerent direction of research focuses on computational methods for reducing
+camera shake blur. Table 2.2 summarizes the previous approaches that use inertial
+sensor for camera motion estimation. Joshi et al. [30] propose a single image de-
+blurring method that uses both gyroscope and accelerometer. This method handles
+6-DOF camera motion with accelerometer drift correction. Bae et al. [7] extend the
+previous method to handle depth-dependent blur by using a depth sensor. ˇSindel´aˇr
+and ˇSroubek [55] implement a gyro-based image deblurring method in a mobile phone.
+Although these previous methods show some promise, they are limited to captur-
+ing a single image. In contrast, our method beneﬁts from capturing a burst of images.
+There are two main advantages in the multi-image approach. First, deconvolution
+becomes signiﬁcantly more stable. Second, practical issues such as gyroscope drift
+can be handled more eﬃciently by using multiple images. Ringaby and Forss´en [51]
+also capture multiple images, but the result is obtained by averaging captured images
+after alignment. Our method can further reduce the amount of blur and is more
+robust in low-light situations.
+Our method uses only gyroscope data, not accelerometer data, because rotation is
+the dominant factor that causes blur and the translation of a camera can be ignored
+for suﬃciently distant scenes. Another reason is that the bias in accelerometers is very
+
+===== PAGE 29 =====
+CHAPTER 2. RELATED WORK
+17
+Number of
+images
+Inertial
+sensors
+Gyro drift
+correction
+Processing method
+Joshi et al. [30]
+single
+accel, gyro
+no
+image deblurring
+Bae et al. [7]
+single
+accel, gyro
+no
+image deblurring
+ˇSindel´aˇr and
+ˇSroubek [55]
+single
+gyro
+no
+image deblurring
+Ringaby and
+Forss´en [51]
+multiple
+gyro
+yes
+align-and-average
+Our method
+multiple
+gyro
+yes
+image deblurring
+Table 2.2: Previous works that use inertial sensors for reducing camera shake blur.
+strong and separating gravity from their measurement is not trivial. Instead, we cor-
+rect the drift in gyroscope data and handle oﬀ-center rotations without accelerometer
+data to make an accurate estimation of rotational movements.
+2.3
+Finding Good Capture Strategies
+Capturing a good set of data is a key task that can improve the performance of
+computational photography applications. There exist many previous works that focus
+on what capture strategies are best for their applications.
+Several papers on high dynamic range (HDR) imaging address this issue of ﬁnding
+a set of optimal parameters. Hasinoﬀet al. [22] show that the optimal choice of
+exposure time and analog gain signiﬁcantly improves the signal-to-noise ratio (SNR)
+of the merged HDR result. This improvement comes from using high analog gains
+as they are useful for suppressing read noise while reducing the total capture time.
+This idea is adopted in a few HDR metering methods that determine scene-speciﬁc
+parameters in real time on mobile devices [53, 18].
+Comparing the capture strategies for camera motion deblurring has been studied
+by Zhang et al. [64]. Their analysis concludes that align-and-average works better
+than single-image deconvolution when total capture time is kept the same. Mitra
+et al. [43] prove that deblurring a long exposure shot is better than taking a short
+exposure shot in low-light situations. However, their blur model is limited to 1-D
+
+===== PAGE 30 =====
+CHAPTER 2. RELATED WORK
+18
+rectilinear blur. Our analysis, for the ﬁrst time, extends previous analyses to the case
+when multi-image deconvolution is used. In addition, our analysis is based on real
+measurements of camera shake blur and is applicable to more practical situations.
+Boracchi and Foi [8] perform a series of experiments to show the relation between
+the performance of single-image deconvolution and exposure time and observe that
+restoration error of single-image deconvolution is stabilized after reaching a minimum.
+We prove this observation for the case of multi-image deconvolution and suggest how
+capture parameters can be selected based on this observation.
+
+===== PAGE 31 =====
+Chapter 3
+Gyro-Based Camera Motion
+Estimation
+Any image deblurring method requires solving two subproblems: camera motion es-
+timation and non-blind image deblurring. When gyroscope data is available, these
+two subproblems signiﬁcantly beneﬁt from direct measurement of camera motion. In
+this chapter, we describe our approach to the ﬁrst subproblem: gyro-based camera
+motion estimation.
+To start with, we present our image formation model that describes the char-
+acteristics of noise and camera shake blur, which is an essential component of any
+theoretical analysis of image deblurring method. Then, our gyroscope drift correc-
+tion method is proposed to tackle various practical issues encountered when gyroscope
+data is used along with image data.
+3.1
+Image Formation with Camera Motion
+The principal drawback of using a short exposure time in low light is image noise.
+Lengthening the exposure decreases noise, while it increases handshake blur. It is
+therefore important that we deﬁne a noise model that allows us to handle handshake
+blur. We begin by describing an image noise model for when the camera is stable,
+and then extend it to include the eﬀect of camera motion.
+19
+
+===== PAGE 32 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+20
+3.1.1
+Image Noise Model
+We adopt a common aﬃne model [40, 22] to describe the noise characteristics of a
+captured image and show how the characteristics depend on the scene and capture
+parameters. This model assumes that image noise consists of two components: pho-
+ton noise and read noise. Depending on the photographic situation, the dominant
+component of these two types of noise determines the characteristics of total image
+noise.
+Photon noise reﬂects the ﬂuctuation in the number of photons that are collected
+by a pixel. The total number of collected photons, which follows the Poisson distri-
+bution, is determined by the scene brightness and the duration of exposure. Because
+the variance of this noise is equal to the number of collected photons, photon noise
+becomes more important when the scene is brighter and longer exposure times are
+used. When a large number of photons is involved, the Poisson distribution can be
+approximated by the Gaussian distribution whose variance is related as
+σ2
+photon ∝tΦ
+(3.1)
+where σ2
+photon is the photon noise variance, t is exposure time and Φ is scene brightness.
+In contrast, read noise includes other noise sources that are scene-independent,
+such as the noise coming from the image sensor readout circuitry and quantization
+noise. Figure 3.1 shows our image noise formation model. Two Gaussian noise sources
+are assumed before and after analog ampliﬁcation. This comes from the observation
+that the properties of read noise are also aﬀected by the choice of analog gain [64, 22].
+The variance of read noise σ2
+read is represented as
+σ2
+read = g2σ2
+r0 + σ2
+r1
+(3.2)
+where g is analog gain, σ2
+r0 and σ2
+r1 are the variances of readout noise applied before
+and after analog ampliﬁcation, respectively. This two-component model is valid when
+exposure times are short enough to avoid dark current noise, typically much less than
+a second.
+
+===== PAGE 33 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+21
+Scene
+Analog 
+Gain
+Photon 
+Integration
+Quantized 
+Digital Image
+Photon 
+Noise
+Read
+Noise
+Read 
+Noise
+ADC
+Figure 3.1: Our image noise model. We assume images captured by an image sensor
+are degraded by two types of noise: photon noise and read noise. Photon noise reﬂects
+the ﬂuctuation in the number of collected photons, while read noise represents scene-
+independent noise sources that are applied before and after analog ampliﬁcation.
+We can formulate the noise model in terms of SNR. The aﬃne imaging model
+describes raw pixel values of image Y as the sum of noise-free image X and the
+zero-mean Gaussian noise N with standard deviation σN:
+Y = X + N.
+(3.3)
+The variance of N, σ2
+N, is modeled as the sum of photon noise variance σ2
+photon and
+read noise variance σ2
+read. The SNR of a captured image Y is written as
+SNR(Y ) = X
+σN
+=
+X
+q
+σ2
+photon + σ2
+read
+=
+c1gtΦ
+pc2g2tΦ + g2σ2
+r0 + σ2
+r1
+.
+(3.4)
+where c1 and c2 are conversion factors. The raw signal value is based on the as-
+sumption that the camera has a linear response, which usually holds for raw image
+data.
+When a very short exposure time is used, read noise is the dominant factor, i.e.,
+σ2
+read ≫σ2
+photon. In this case, increasing exposure time improves the SNR linearly:
+SNR(Y ) ∝t.
+(3.5)
+When exposure time becomes longer than a certain threshold, photon noise becomes
+
+===== PAGE 34 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+22
+dominant, and the SNR increases as the square root of exposure time:
+SNR(Y ) ∝
+√
+t.
+(3.6)
+This threshold shifts depending on the scene brightness.
+For darker scenes, this
+transition occurs in longer exposures.
+3.1.2
+Modeling Spatially-Varying Camera Shake Blur
+We use a geometric model to represent spatially-varying blur, and then adopt a
+uniform blur model as a local approximation. The geometric model expresses the blur
+as the sum of global transformations that represent a series of camera rotations. We
+assume that camera motion is dominated by rotation. This is a common assumption
+in image stabilization systems and is valid for suﬃciently distant scenes. The entire
+image is then divided into small rectangular blocks that are assumed to contain the
+spatially uniform blur. This approximation allows us to apply a theoretical analysis
+that provides useful insights into the deblurring process while reducing the complexity
+of implementation. Our model assumes that the scene is static and does not directly
+handle local motions. In addition, our model does not account for other types of blur,
+such as depth-dependent defocus blur and optical blur.
+Figure 3.2 shows examples of camera shake blur represented by our model. The
+camera axes are deﬁned as shown in Figure 3.2a, and Figure 3.2b shows an example
+of real blur. Like some other geometric models [60], our geometric model represents
+the angular rotation of the camera. However, the center of rotation is modeled as
+well because gyroscope measurements are not aﬀected by the rotation center. Note
+that two camera motion shown in Figure 3.2c and Figure 3.2d are not distinguished
+with gyroscope measurements. We represent the oﬀ-axis angular rotation at point r
+as
+R∆θ
+o {r} = R∆θ(r −o) + o
+(3.7)
+where R∆θ is a 3-axis rotation matrix for angular rotation ∆θ, and o = (ox, oy, oz)T is
+
+===== PAGE 35 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+23
+x
+y
+z
+(a) Camera axes
+(b) Example of camera shake blur
+(c) Rotation in z axis
+(d) Oﬀ-center rotation in z axis
+Figure 3.2: Our model for representing camera shake blur.
+We use a geometric
+model to represent spatially-varying blur based on 3-axis rotation of the camera.
+Subﬁgure (a) shows how the camera axes are deﬁned. An example of camera shake
+blur represented by our model is shown in (b). The center of rotation is also modeled
+because gyroscope measurements cannot distinguish two rotations shown in (c) and
+(d).
+the rotation center. If a rotation ∆θ(ts, tt) is applied during time window [ts, tt], then
+jth pixel pj = (xj, yj)T in the image plane is shifted to (xj′, yj′)T by the following
+relation deﬁned by H∆θ(ts,tt) in homogeneous coordinates:
+α(xj′, yj′, 1)T
+=
+H∆θ(ts,tt)(xj, yj, 1)T
+(3.8)
+=
+MfR∆θ(ts,tt)
+o
+{M −1
+f (xj, yj, 1)T}
+(3.9)
+where α is an unknown scaling factor, and Mf is the camera intrinsic matrix, which
+depends on focal length f. Given this model for rotation, the rotation-blurred image Y
+
+===== PAGE 36 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+24
+can be formulated as the sum of the time integration of all geometrically transformed
+latent images during the exposure window [ts, tt] plus noise:
+Y =
+Z tt
+ts
+A∆θ(ts,t)Xdt + N
+(3.10)
+where A∆θ represents the image resampling operator that performs the transformation
+H∆θ to all pj, X is the latent sharp image, and N is the Gaussian noise whose variance
+is given as in Equation 3.4. Note that H∆θ deﬁnes spatially-varying blur.
+The blur model expressed in Equation 3.10 can then be approximated with the
+uniform blur model for a small local window. A local window of blurry image Yi
+around pj, which is assumed to contain uniform blur, is represented as
+Yi = Kj
+i ⊗X + Ni
+(3.11)
+where Kj
+i is the 2-D blur kernel, ⊗is the 2-D convolution operator, and i denotes
+the input image index when multiple images are available. The kernel Kj
+i is speciﬁed
+by the exposure time window [ti
+s, ti
+t], which can be expressed in terms of capture
+parameters. The two ends of the window are deﬁned as follows:
+ti
+s
+=
+t1
+s + (i −1)tft
+(3.12)
+ti
+t
+=
+ti
+s + texp
+(3.13)
+where texp is the exposure time of a single shot and the frame time tft is the interval
+between frames. Then, the blur kernel Kj
+i is expressed as
+Kj
+i = 1
+nk
+nk−1
+X
+k=0
+δ(pj
+tis+k∆t −pj
+t1s)
+(3.14)
+where the time window is discretized with nk samples and the interval ∆t = ti
+t−ti
+s
+nk−1,
+and δ(·) is the discrete unit impulse function. Note that all entries in Kj
+i sum to one.
+In addition, t1
+s, the time when the ﬁrst exposure starts, is set as the reference time so
+that relative rotations between input images are preserved in the kernel.
+
+===== PAGE 37 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+25
+3.2
+Measuring Camera Motion Using a Gyroscope
+Although gyroscope measurements can be directly applied to evaluate the angular
+rotation in Equation 3.8, a drift correction method is applied beforehand whenever
+capture takes place to tackle the practical issues described in Section 2.2.2. Our drift
+correction method ﬁnds the best camera motion estimation that correlates gyroscope
+measurements with captured image frames.
+We model the angular rotation by accumulating the incremental changes given as
+∆θ(t, t + ∆t) = (ω(t + td) + ωd)∆t
+(3.15)
+where ω(t) is the rate of rotation measured with gyroscope, td is the time delay, ωd
+is the bias which causes drift, and ∆t denotes the time interval between gyroscope
+samples. Our method estimates the time delay td, the bias ωd and the rotation center
+o = (ox, oy, oz)T. We assume that the rotation center o does not move in z direction,
+oz = 0, and the variation in o is negligible during the capture.
+Our drift correction method is based on a series of pairwise comparisons and
+takes advantage of capturing multiple images. The pairwise comparison, which is
+demonstrated in Figure 3.3, quantiﬁes how well the captured images agree with the
+estimated camera motion. Similar cost functions are proposed in visual tracking [28]
+and image deblurring techniques [50]. Let us assume two capture images, which are
+blurry, are denoted as Y1 and Y2. Their blur kernels, represented as K1 and K2,
+respectively, are obtained based on gyroscope measurements and current estimation
+of ωd, td and o. Then, the two images are blurred again with the other image’s blur
+kernel. These two re-blurred images should be the same in the ideal case because the
+order of applying blur should not matter, i.e., convolution operator is commutative.
+The aggregated error between the two images represents the match score of current
+estimation of camera motion.
+Here, our complete drift correction method is described. We search for six param-
+eters, ωd, td, ox and oy, which minimize the objective function.
+First, we ﬁnd a reference input image Yiref that is observed to be the sharpest
+among the n input images. We assume that the sharpest image is the one whose blur
+
+===== PAGE 38 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+26
+Y1 = K1 ⊗X
+Y2 = K2 ⊗X
+K2 ⊗(K1 ⊗X)
+K1 ⊗(K2 ⊗X)
+⊗
+⊗
+Re-blur with the
+other’s kernel
+Two blurry
+images
+should match
+Captured images
+Figure 3.3: A pair-wise comparison for gyroscope drift correction.
+This pairwise
+comparison quantiﬁes how well the captured images agree with the estimated camera
+motion.
+kernel has maximum spatial variance.
+Second, we ﬁnd nc image blocks that contain sharp corners in Yiref. Rather than
+considering the entire scene, only a few number of distinct image blocks are used to
+reduce computational cost. These image blocks are assumed to have strong corner
+response [21] and contain uniform blur. The centers of the blocks are denoted as
+{cj}j=1,··· ,nc. We typically select nc = 12 and the size of an image block to be equal
+to the blur kernel size.
+Finally, we formulate a minimization problem:
+argmin
+ωd,ox,oy,td
+X
+i̸=iref
+X
+j
+∥W j
+i (Kj
+iref ⊗Yi −Kj
+i ⊗Yiref)∥2
+(3.16)
+where W j
+i is the weight applied to the jth block of the ith image. Note that this ob-
+jective function is evaluated by performing (n−1) pairwise comparisons with respect
+to the reference image Yiref. The weight is set as W j
+i = wjwiW jWi where W j is the
+binary mask that selects the local window around cj, Wi reﬂects the magnitude of
+gradient in Yi, wj is the distance from cj to the image center, and wi = |i −iref| is
+the temporal distance from the sharpest input image. The role of Wi is to avoid ﬂat
+regions that only contain noise. In addition, wj and wi are introduced to weight the
+
+===== PAGE 39 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+27
+region that is more aﬀected by the drift and to give consistent estimation throughout
+the camera motion.
+The eﬀect of electronic rolling shutter is considered when Kj
+i is obtained. Without
+loss of generality, let us assume electronic rolling shutter scans across the sensor
+vertically, from top to bottom. When blur kernels are generated by Equation 3.14,
+the exposure time window [ti
+s, ti
+t] is shifted as
+[ti
+s, ti
+t] + jy
+ny
+trs
+(3.17)
+where trs is the time required to readout whole image, jy is the image row of pixel j
+and ny is the image height. Our image sensor has trs =
+1
+15s.
+This optimization is performed using coordinate descent.
+To ﬁnd a minimum
+of the objective function, line search is performed for each variable in each iteration.
+Each variable takes steps until the objective function is reduced, and the search direc-
+tion is reversed with a reduced step size if no improvement is made. This optimization
+terminates when all variables reach a target precision and a local minimum is found.
+First, we search for (ωd, ox, oy) in a multi-scale pyramid to avoid prematurely ac-
+cepting local minima. Then, td is estimated at the ﬁnest scale, followed by reﬁning
+other parameters based on new td. Each step usually converges quickly, within 30
+iterations.
+Figure 3.4 shows the eﬀectiveness of our drift correction. A burst of eight images
+is captured to generate the output image in Figure 4.3b, and an inset is shown here.
+Figure 3.4a shows two sets of blur kernels obtained before and after applying our drift
+correction in red and yellow, respectively. The gap between these two sets shows the
+amount of drift that is compensated by our method. This correction makes signiﬁcant
+improvement in the deblurred result, as shown in Figure 3.4d and Figure 3.4f. An
+additional experiment is done to demonstrate the eﬀect of rolling shutter correction.
+The blur kernels after the correction are repeated in Figure 3.4b, and Figure 3.4c is
+obtained by applying our drift correction with trs = 0 to neglect the eﬀect of rolling
+shutter. Note that the shape of blur kernels is slightly diﬀerent between the two cases.
+This diﬀerence makes the result in Figure 3.4e more blurry than the result with all
+
+===== PAGE 40 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+28
+corrections in Figure 3.4f.
+Compared to other single-image approaches [30], our method is eﬃcient because
+the latent image is not necessary for the correction. Recovering the latent image
+requires complicated operations such as image deblurring and the latent image often
+contains deblurring artifacts.
+
+===== PAGE 41 =====
+CHAPTER 3. GYRO-BASED CAMERA MOTION ESTIMATION
+29
+(a) Blur kernels before and after drift correction
+(b) Drift correction with rolling shutter correction
+(c) Drift correction without rolling shutter correction
+(d) Before correction
+(e) w/o rolling shutter correction
+(f) With all corrections
+Figure 3.4: The eﬀectiveness of our gyroscope drift correction.
+Eight images are
+captured to generate the output image shown in Figure 4.3b. Subﬁgure (a) shows
+two sets of blur kernels before and after drift correction, which are represented in
+red and yellow, respectively. The deviation between the red and yellow kernels shows
+that the drift is actually signiﬁcant. When image deblurring is applied, the output
+image in (f) shows clear improvement after the correction. Two sets of blur kernels
+presented in (b) and (c) shows the diﬀerence caused by rolling shutter eﬀect. When
+the rolling shutter correction is not handled, the result image becomes slightly blurry
+as shown in (e).
+
+===== PAGE 42 =====
+Chapter 4
+Gyro-Based Multi-Image
+Deblurring
+Combining our gyro-based camera motion estimation and non-blind image deblur-
+ring together, we have built a complete system that produces high-quality images
+in low-light situations. Figure 4.1 shows an overview of our gyro-based multi-image
+deblurring system. We use a tablet to capture a burst of images while gyroscope data
+is recorded simultaneously. Then, our software processes these data to make an ac-
+curate estimation of camera motion by handling practical issues including gyroscope
+drift, time synchronization between image data and gyroscope data, electronic rolling
+shutter and rotation center estimation as described in Chapter 3. Finally, an output
+image is recovered via non-blind multi-image deconvolution.
+In this chapter, we detail our implementation of image deblurring system and
+provide real example images obtained from our system along with a few failure cases.
+These failure cases are caused by moving objects and over-exposed regions in the
+scene, which do not follow our image formation model. We demonstrate how the
+artifacts caused by these regions can be reduced by introducing an additional image
+blending operation.
+30
+
+===== PAGE 43 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+31
+Spatially-
+Varying
+Blur Estimation
+Gyroscope data
+Output image
+Multi-Image
+Deblurring
+Drift
+Correction
+Figure 4.1: An overview of our gyro-based multi-image deblurring system.
+4.1
+Hardware Platform
+Our capture application is implemented on an NVIDIA Tegra 3 Android developer
+tablet that supports FCam API [4] for ﬂexible capture conﬁgurations, as shown in
+Figure 4.2. The tablet is modiﬁed to rigidly attach an Atmel UC3-A3 Xplained and
+Invensense MPU-6050 [25] sensor board to obtain unﬁltered raw sensor data at high
+data rate.
+The sensor data is sent to the tablet through a USB connection at a
+maximum rate of 750 Hz. Human hands typically shake with a frequency of 10 Hz
+to 20 Hz [52], so this is more than enough for our purposes. The camera is able to
+capture 5M-pixel raw data at a maximum rate of 4 fps, and a maximum of n = 16
+images can be captured with a burst mode.
+Before the tablet is used in experiments, a one-time calibration is performed to
+ﬁnd parameters of the image formation model.
+A standard geometric calibration
+procedure [9] is applied to ﬁnd the camera intrinsic matrix Mf in Equation 3.9 and to
+remove geometric distortions. Note that the focal length of the camera f is included
+in Mf.
+In addition, the characteristics of the image sensor are estimated from a
+photometric calibration [23, 53]. First, a set of dark frames, which are images captured
+with the lens completely covered, is captured with diﬀerent analog gains to ﬁnd the
+read noise variance σ2
+r0 and σ2
+r1. Also, the mean of the dark frames is estimated for each
+analog gain factor so that it is subtracted from all raw data captures to compensate
+for the non-zero black level. Second, we capture another set of images that are lit
+by uniform illumination with diﬀerent brightness levels. The brightness Φ is measure
+
+===== PAGE 44 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+32
+(a) Front
+(b) Back
+Figure 4.2: A tablet with a gyroscope sensor board attached. An NVIDIA Tegra 3
+Android developer tablet is modiﬁed to attach an Invensense MPU-6050 sensor board
+to obtain unﬁltered raw sensor data. The sensor data is sent to the tablet through a
+USB connection.
+by a light meter, and the conversion factors c1 and c2 in Equation 3.4 are estimated
+by the least-squares method. For this estimation, we use the pixel values from the
+region around the optical center because they suﬀer less from the vignetting. Finally,
+the duration of rolling shutter trs is estimated. We follow a calibration process that is
+similar to the method described in [31]. After performing these calibrations, raw data
+captured from the image sensor can be properly processed based on the calibration
+result.
+4.2
+Removing Camera Shake Blur
+Our system provides two options for reducing handshake blur: multi-image deblurring
+and align-and-average. These methods are applied to the same set of captured data.
+Note that they also use the same estimation result of the camera motion measured
+by a gyroscope.
+
+===== PAGE 45 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+33
+4.2.1
+Multi-Image Deblurring
+Our non-blind multi-image deblurring is implemented by applying multi-image decon-
+volution to small image blocks. We assume the camera shake blur contained in each
+image block can be well approximated by uniform blur, and this assumption usually
+holds in practice for the block size we tested. The scene is divided into 36×24 blocks
+where each block covers about 2◦of the ﬁeld of view. An additional margin is added
+based on the blur size to avoid boundary artifacts.
+Our multi-image deconvolution is done by minimizing the objective function:
+n
+X
+i=1
+∥Yi −Ki ⊗X∥2 + λ ∥∇X∥α
+(4.1)
+where λ is the regularization weight and ∇X represents the gradients of X. This
+objective function consists of two terms: the data term and the regularization term.
+The data term denotes the sum of mean square error (MSE) between input images
+Yi and the modeled image. The regularization term represents the image prior model
+that is assumed for the deconvolution and the exponent α in Equation 4.1 determines
+the model. Here, we consider two models that are implemented in our system: the
+Gaussian prior and the sparse prior.
+The Gaussian prior corresponds to the case when the exponent α = 2. The main
+advantage of this model is that a simple analytic solution is available. In the frequency
+domain, the optimal estimate ¯X is derived as
+¯
+X =
+Pn
+i=1 K∗
+i Yi
+Pn
+k=1 |Kk|2 + λ(|Gx|2 + |Gy|2)
+(4.2)
+where Gx and Gy are the gradient ﬁlters in x and y directions, respectively, ¯
+X, Ki,
+Yi, Gx and Gy denote the Fourier transforms of ¯X, Ki, Yi, Gx and Gy, respectively.
+The deconvolution can be eﬃciently implemented by applying the frequency domain
+division in Equation 4.2. Note that this derivation is equivalent to the Wiener decon-
+volution that will be the basis of our theoretical analysis in Chapter 5.
+The sparse prior is assumed when α = 0.8. This prior prefers sharp image edges
+
+===== PAGE 46 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+34
+and thus usually gives more satisfactory results. However, the optimization is no
+longer convex and a closed-form solution is not available. We use an iterative re-
+weighted least squares process [42, 35] for this optimization and this method requires
+signiﬁcantly more computations compared to the case when the Gaussian prior is
+used.
+The next step requires determining the weight λ in Equation 4.1. Any deconvolu-
+tion method exhibits a trade-oﬀbetween reducing noise level and recovering a sharp
+latent image, and this trade-oﬀis largely controlled by the weight assigned to the
+prior. When we have a good observation of scene that can be considered as a ground
+truth, for example, when we simulate or have a tripod shot available, we search for
+the parameter λ in the range [0.001, 1] which gives the smallest MSE with the ground
+truth. Otherwise, we manually select one or use the default value of 0.01.
+4.2.2
+Align-and-Average
+Because the camera motion is already estimated by using gyroscope measurements,
+image alignment can be accurately done without referring to image data. Let us
+assume n input images {Yi}i=1,··· ,n need to be aligned to the reference camera position,
+which is the position at the start time of the ﬁrst exposure t1
+s, and Yi is captured during
+the exposure time window [ti
+s, ti
+t]. If we can select a good reference time ti
+align ∈[ti
+s, ti
+t]
+for each i, then Yi can be transformed to the reference by applying the angular rotation
+∆θ(ti
+align, t1
+s) as in Equation 3.8.
+However, in our situation, the input images may contain some amount of blur
+that is not negligible and image alignment between blurry images is not well deﬁned.
+Here, to give an aligned image that is sharp, we propose to select {ti
+align}i=1,··· ,n, the
+time in each exposure where the camera motion is stable, as
+ti
+align = argmax
+t:tis≤t≤ti
+t
+X
+j
+Kj
+i (Round{pj
+t −pj
+tis})
+(4.3)
+where Kj
+i is the blur kernel that represents the trajectory of the jth pixel pj
+t during
+the ith exposure, ti
+s ≤t ≤ti
+t, and Round{·} is the rounding operator. The rounding
+
+===== PAGE 47 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+35
+(a) Tequila table
+(b) Anthropologie
+Figure 4.3: Two deblurred images obtained from our system. Eight images are cap-
+tured from a single burst at 5M-pixel resolution, while gyroscope data is recorded
+simultaneously. All eight images are jointly deblurred to obtain an output image.
+Two insets for each example, represented in yellow boxes, are shown in Figure 4.4 to
+compare diﬀerent approaches.
+operation is used because Kj
+i is deﬁned in the discretized coordinates.
+4.3
+Experimental Results
+Now we show deblurred images obtained from our system in Figure 4.3. A burst of
+eight images are captured at 5M-pixel resolution for both examples. These examples
+are captured with per-shot exposure time of 353ms and 177ms respectively. Two
+input images with typical amount of blur are selected from eight images and shown
+in Figure 4.4. Note that these images are noisy with some amount of blur. Our
+deblurred results show clear improvement over any input image, with less blur and
+noise, and we recover more details compared to align-and-average, with negligible
+artifacts. Adopting the sparse prior gives more improvement compared to the case
+when the Gaussian prior is used.
+Figure 4.5 shows an example when there exists local motion in the scene.
+A
+burst of 16 images are captured at 5M-pixel resolution with per-shot exposure time
+of 135ms (Figure 4.5a). Two neutral density ﬁlters, 8× and 4×, are used to prevent
+
+===== PAGE 48 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+36
+pixel saturation. An output image in Figure 4.5c is obtained by applying multi-image
+deblurring with the Gaussian prior. Note that the surface of water is smoothly blurred
+as if a long exposure shot is captured with a tripod, while handshake blur on the cliﬀ
+and rocks is removed. Because image blocks with sharp details are used for our drift
+correction method, only the static regions are used to properly handle the drift. The
+errors caused by moving parts of the scene are averaged and blurred out in the output
+image.
+The running time for generating a deblurred image in Figure 4.3b is about 24.5s
+for the Gaussian prior with our unoptimized single-core CPU implementation. Drift
+correction takes 10.5s while the rest of the time is used for deconvolution. When the
+sparse prior is used, running time is about 20 minutes.
+
+===== PAGE 49 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+37
+Two typical input images
+Align-and-average Gaussian prior
+Sparse prior
+(a) Insets of Tequila table
+Two typical input images
+Align-and-average Gaussian prior
+Sparse prior
+(b) Insets of Anthropologie
+Figure 4.4: Comparison between output images obtained from diﬀerent approaches.
+The insets of two input images are shown with their blur kernels magniﬁed at 2×
+size. Note the diﬀerence in shape of blur in two insets, which demonstrates spatially-
+varying blur. The input images are jointly deblurred with two diﬀerent priors: the
+Gaussian prior and the sparse prior. These two deblurred images remove handshake
+blur more eﬀectively than the case when the input images are aligned and averaged.
+Note that the sparse prior eﬀectively recovers sharp edges.
+
+===== PAGE 50 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+38
+(a) Bonny Dune
+(b) Input image
+(c) Deblurred result
+Figure 4.5: An example with local motion in the scene. Our multi-image deblurring
+is applied with the Gaussian prior to a burst of 16 images. Two insets represented
+in yellow boxes are magniﬁed and shown in (b) and (c). Note that the surface of
+water is smoothly blurred as if a long exposure shot is captured with a tripod, while
+handshake blur on the cliﬀand rocks is removed.
+
+===== PAGE 51 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+39
+4.4
+Handling Moving Objects and Over-Exposed
+Regions
+Although our multi-image deconvolution method eﬀectively removes handshake blur
+in static regions, moving objects and over-exposed regions are not handled properly.
+These regions are considered as outliers because they do not follow our image forma-
+tion model described in Equation 3.11. Moving objects may suﬀer from excessive blur
+or ghosting artifacts caused by the object motion occurred during the entire capture
+time. In addition, pixel values in highlights may be clipped due to limited dynamic
+range of image sensor, and often cause artifacts after deconvolution.
+In this section, we propose an additional image blending step that follows non-
+blind multi-image deconvolution [47]. Our goal is not to handle outliers in a physically
+correct manner. Instead, we seek only to hide possible deconvolution artifacts. Figure
+4.6 provides an overview of our method. First, outliers are detected in the image
+obtained from multi-image deconvolution. Then, the pixel values around outliers are
+blended with the result of a patch-based denoising method. As a result, the blended
+image contains sharp details in static regions, while moving objects and over-exposed
+regions are reconstructed naturally.
+The main advantage of using a result from patch-based denoising methods is that
+outliers do not cause severe artifacts after denoising. These methods merge similar
+image patches to eﬀectively reduce noise in a reference image [10][14]. Because of
+the patch search stage, they are inherently robust to moving objects or misalignment
+between images.
+After the denoising, moving objects remain as blurry as in the
+reference image. However, the amount of the motion blur is much less than the case
+when multi-image deconvolution is used. Also, over-exposed regions do not cause
+artifacts because they are denoised in the same way as other regions.
+Let us describe more details about our method. The result image is denoted as
+e
+X, which is obtained by combining the result of deconvolution e
+Xdc and the denoised
+image e
+Xdn as follows:
+e
+X = W e
+Xdn + (1 −W) e
+Xdc
+(4.4)
+
+===== PAGE 52 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+40
+Patch-based
+Multi-Image
+Denoising
+Multi-Image
+Deconvolution
+Outlier
+Detection
+Image
+Blending
+Output image
+Input images
+Blend weight
+Figure 4.6: An overview of our image blending method for handling moving objects
+and over-exposed regions. Two images obtained from our multi-image deconvolu-
+tion and a patch-based multi-image denoising method are blended to hide possible
+artifacts.
+where W is the nonnegative blend weight that represents the result of outlier detec-
+tion. The weight W is expected to have higher values on outliers to make them rely
+more on e
+Xdn. This is estimated by ﬁnding the maximum residual error obtained by
+pair-wise comparisons that are similar to the one used for gyroscope drift correction
+in Section 3.2. First, we select a reference image Yiref, which is the sharpest among
+input images. Then, the residual error between Yiref and the other input images Yi
+is evaluated to quantify how these images deviate from the convolution blur model.
+A map of residual error Rerr is deﬁned as
+Rerr =
+max
+i̸=iref,c∈C ∥KT
+i ⊗KT
+iref ⊗(Ki ⊗Y c
+iref −Kiref ⊗Y c
+i )∥2
+(4.5)
+where C = {R, G, B} represents color channels and Y c
+i is a color channel of Yi. Note
+that Rerr represents the maximum error in any color channel at every pixel, and
+KT
+i and KT
+iref are used to align each error map to e
+Xdc. Finally, the blend weight is
+obtained as W = min(1, βRerr) where β is a positive scaling factor that tunes the
+blending.
+The denoised image e
+Xdn is obtained by applying a patch-based multi-image de-
+noising. First, all input images are globally aligned with Yiref by means of the aﬃne
+
+===== PAGE 53 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+41
+transform. Then, the non-local means method [10] implemented with the permuto-
+hedral lattice [3] is applied to n aligned images to obtain the result. The position
+vector in Gaussian ﬁltering has six principal component analysis (PCA) dimensions
+for the space of image patches, in addition to two spatial dimensions that represent
+x and y coordinates. A patch size of 13 × 13 pixels is used in our implementation.
+Figure 4.7a shows two examples obtained from our image blending operation.
+A burst of eight images was captured at 5M-pixel resolution and the total capture
+time was 2s. Figure 4.7b shows that outliers, a person moved during the capture
+and bright street lights, have high values in the weight maps to hide deconvolution
+artifacts. As shown in Figure 4.8d, the blended output contains only the better parts
+from the denoised image in Figure 4.8b and the deblurred image in Figure 4.8c, and
+shows minimum artifacts while recovering sharp details on the background.
+This
+image blending operation makes multi-image deconvolution more robust to handle
+real-world photographic situations.
+
+===== PAGE 54 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+42
+(a) Two output images
+(b) Blend weights for (a)
+Figure 4.7: Detecting moving objects and over-exposed regions. A burst of eight
+images are processed to handle outliers after image deblurring. Two result images
+are shown in (a) and their blend weights are presented in (b). Note that outliers are
+eﬀectively detected in (b). Six insets represented in yellow boxes are shown in Figure
+4.8 for further comparison.
+
+===== PAGE 55 =====
+CHAPTER 4. GYRO-BASED MULTI-IMAGE DEBLURRING
+43
+Static
+regions
+Moving
+objects
+Highlights
+(a) Reference input Yiref
+(b) Denoised image e
+Xdn
+Static
+regions
+Moving
+objects
+Highlights
+(c) Deblurred image e
+Xdc
+(d) Blended image e
+X
+Figure 4.8: Output images after handling moving objects and over-exposed regions.
+Six insets of examples in Figure 4.7 are shown. When multi-image deconvolution is
+applied, moving objects may suﬀer from excessive motion blur while over-exposed
+regions cause artifacts as shown in (c). To hide these artifacts, a patch-based method
+is applied to a reference image in (a) to get a denoised image shown in (b). Then,
+(b) and (c) are blended to obtain a result image in (d) by using the blend weight in
+Figure 4.7b. Note that the results eﬀectively hide artifacts while preserving sharpness
+in the background.
+
+===== PAGE 56 =====
+Chapter 5
+Performance of Multi-Image
+Deconvolution
+In the previous chapters, we discussed the implementation details of our gyro-based
+multi-image deblurring system and showed how our system can recover a clean and
+sharp image from a set of blurry images and gyroscope measurements. We now move
+on to the second part of this dissertation, which aims to answer following questions:
+How well will our deblurring be done with given capture parameters? How do we
+compare diﬀerent capture strategies and choose the one that will give best results?
+The ﬁrst step of answering these questions requires deﬁning how the performance
+of multi-image deconvolution can be modeled with given camera shake. In addition,
+a method is required to estimate what will be the performance when a certain set of
+capture parameters is used. Then, the performance can be compared between diﬀerent
+capture strategies. However, estimating the performance of image deblurring is a very
+challenging task because two factors are mixed together: camera shake blur and the
+scene. Although many image prior models are proposed, it is still hard to model the
+characteristics of the scene and estimate their inﬂuence on deconvolution.
+In this chapter, we propose a way of modeling the performance of multi-image
+deconvolution by using a noise ampliﬁcation factor. The noise ampliﬁcation factor
+quantiﬁes the amount of noise that is ampliﬁed by deconvolution. By understanding
+the properties of this factor, we can describe the performance in terms of exposure
+44
+
+===== PAGE 57 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+45
+time. Also, we prove an important property of noise ampliﬁcation factor: Average
+noise ampliﬁcation factor due to camera shake blur increases linearly with exposure
+time. Chapter 6 will explore the ramiﬁcations of this fact.
+5.1
+Non-Blind Multi-Image Deconvolution Based
+on Wiener Estimation
+When the blur kernel is available, the latent image can be recovered via non-blind
+multi-image deconvolution. Wiener deconvolution [61] is a standard frequency domain
+method for estimating a sharp image from multiple blurry observations. Although
+there exists other methods that are known to produce visually appealing results,
+the Wiener deconvolution allows us to provide a theoretical analysis to model its
+performance.
+Wiener deconvolution estimates a latent image X from n blurry images {Yi}i=1,··· ,n
+where each blurry image is formulated as in Equation 3.11. By minimizing the ex-
+pectation of squared estimation error, E
+ | ¯
+X −X|2
+, in the frequency domain, we
+get
+¯
+X =
+Pn
+i=1
+1
+σ2
+Ni K∗
+i Yi
+Pn
+k=1
+1
+σ2
+Nk |Kk|2 +
+1
+|X|2
+(5.1)
+where ¯X is the optimum estimate of X, Ki is the known ith blur kernel, n is the
+number of images, X, ¯
+X, Ki, and Yi denote the Fourier transforms of X, ¯X, Ki, and
+Yi, respectively, |X|2 is the power spectrum of X, Ni is the white Gaussian noise in
+the frequency domain with variance σ2
+Ni. Note that σ2
+Ni = nunvσ2
+Ni, where σ2
+Ni is the
+noise variance of Yi in the spatial domain, nu and nv are the numbers of pixels in each
+dimension. This estimation can be interpreted as the weighted average of individual
+estimates that are obtained from each image, and their weights are determined by
+input noise variance and the attenuation in the frequency domain caused by each blur.
+The image statistics, |X|2, is also considered in the estimation to suppress undesirable
+noise ampliﬁcation.
+
+===== PAGE 58 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+46
+By using the Parseval’s theorem, total MSE between X and ¯X over the whole
+image can be calculated either in the spatial domain (x, y) or in the frequency domain
+(u, v):
+MSE( ¯X) =
+1
+nxny
+X
+x,y
+E
+ | ¯X −X|
+2 =
+1
+n2
+un2
+v
+X
+u,v
+E
+ | ¯
+X −X|
+2
+(5.2)
+where nx and ny are dimensions in the spatial domain and are equal to nu and nv
+respectively. This estimation error is derived in the frequency domain as
+MSE( ¯X) =
+1
+n2
+un2
+v
+X
+u,v
+1
+Pn
+k=1
+1
+σ2
+Nk |Kk|2 +
+1
+|X|2
+.
+(5.3)
+Note that the denominator consists of two terms: power spectra of blur kernels and
+the image statistics.
+5.2
+Derivation of Noise Ampliﬁcation Factor
+To get some insight into the deconvolution procedure in Section 5.1, let us make two
+assumptions about the deconvolution and derive a noise ampliﬁcation factor. First,
+let us assume all input images are captured with the same exposure time t and analog
+gain g. In this case, the noise statistics for all images are identical, {σ2
+Ni}i=1,··· ,n = σ2
+N.
+Second, no prior on the image statistics is assumed. This is the case for an unbiased
+optimal estimator. The estimation no longer depends on the scene, and the term
+1
+|X|2
+in Equation 5.1 and Equation 5.3 can be ignored.
+When these two assumptions hold, Equation 5.3 reduces to
+MSE( ¯X) = γ σ2
+N
+n
+(5.4)
+where γ is the noise ampliﬁcation factor deﬁned as
+γ =
+1
+nunv
+X
+u,v
+1
+1
+n
+Pn
+i=1 |Ki(u, v)|2.
+(5.5)
+
+===== PAGE 59 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+47
+The main idea of the formulation of Equation 5.4 is that the estimation error is de-
+composed into two separate terms: camera shake blur and input noise. The ﬁrst term,
+the noise ampliﬁcation factor, depends only on the characteristics of the blur applied
+to the system. The second term represents input noise variance that is averaged over
+n images, and this term denotes the amount of noise when blur is negligible. Note
+that γ quantiﬁes the increase in high frequency noise when average power spectrum
+of the blur kernels is inverted in the deconvolution.
+Figure 5.1 shows an example of multi-image deconvolution when a burst is cap-
+tured with the same exposure parameters and no image prior is assumed for the
+deconvolution.
+The power spectra of eight blur kernels shown in Figure 5.1a are
+averaged to obtain the average power spectrum in Figure 5.1d. We estimate γ by
+averaging Figure 5.1e, which is the inversion of the average power spectrum, over
+the whole frequency domain.
+This example demonstrates each step of evaluating
+Equation 5.5.
+When the optimal estimate in Equation 5.1 is used, the SNR of the estimate can
+be obtained as
+SNR( ¯X) =
+√n
+√γ
+X
+σN
+.
+(5.6)
+By substituting our image noise model described in Equation 3.4, we have
+SNR( ¯X) =
+√n
+√γ
+c1gtΦ
+pc2g2tΦ + g2σ2
+r0 + σ2
+r1
+.
+(5.7)
+We use this SNR as a measure that quantiﬁes the performance of our image deconvo-
+lution method in the following analysis. If we can relate γ with exposure parameters,
+the performance can be estimated as a function of exposure parameters. Thus, un-
+derstanding the properties of γ is an essential task, which will be presented in the
+next section.
+
+===== PAGE 60 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+48
+(a) A set of blur kernels and their power spectra
+n=1
+n=2
+n=3
+n=4
+n=5
+n=6
+n=7
+n=8
+(b) Average power spectrum of n images
+n=1
+n=2
+n=4
+n=8
+(c) Multi-image deconvolution applied to n images
+1
+0
+(d) 1
+n
+Pn
+i=1 |Ki|2
+40
+1
+(e) 1/
+
+1
+n
+Pn
+i=1 |Ki|2
+Figure 5.1: An example of n-image deconvolution. Eight images are captured from
+a single instrumented hand-held capture. Subﬁgure (a) shows eight consecutive blur
+kernels, {Ki}i=1,··· ,n, and their power spectra, {|Ki|2}i=1,··· ,n, respectively.
+Multi-
+image deconvolution is applied using n images without any prior, to show the im-
+provement when more images are used. As the power spectra in (b) show, adding
+more images ﬁlls in missing frequency components. Although no prior is used, the
+output images in (c) are not severely degraded by noise when more than two images
+are used. In addition, each step of evaluating the noise ampliﬁcation factor γ for this
+example is demonstrated when n = 8. The eight power spectra in (a) are averaged
+as shown in (d), and the plot shown in (e) is obtained by taking the inverse of the
+average power spectrum. Then, this plot is averaged over the whole frequency domain
+to get γ = 15.96. Note that the evaluation of this factor represents the deconvolution
+process, and depends only on the given blur kernels.
+
+===== PAGE 61 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+49
+5.3
+Modeling the Noise Ampliﬁcation Factor with
+Exposure Parameters
+In this section we focus on understanding handshake blur in real-world situations. Our
+main tool for this analysis will be the noise ampliﬁcation factor deﬁned in Section 5.2,
+and we show how this factor is related to exposure parameters. The main challenge
+is that the blur is aﬀected by various factors: exposure settings (exposure time,
+frame-to-frame time, and number of shots), user, type of camera (weight, grip type,
+optics, and pixel size), and so on. In addition, camera shake blur is always diﬀerent
+from capture to capture, and thus, a large number of samples is required to ﬁnd
+meaningful statistics of the blur. To explore this high-dimensional parameter space,
+we use simulation to build an empirical model based on real measurements of camera
+shake.
+As a start, we built a database of camera shake by collecting 100 sequences of
+real camera motion that are measured by a gyroscope. Each user was asked to hold
+a tablet steady for a 20-second exposure, while images and gyroscope streams are
+recorded. This database allows us to create independent samples of camera motion
+by randomly selecting a small slice from a gyroscope stream. Figure 5.2 demonstrates
+the case when n = 8 images are captured for given texp and tft, and the start time of
+ﬁrst exposure t1
+s is randomly selected. Then, we can simulate various image capture
+scenarios, and evaluate ¯γ, the noise ampliﬁcation factor averaged over diﬀerent camera
+shakes.
+Figure 5.3 shows how ¯γ is related to exposure time under various combinations
+of parameter settings. As shown in Figure 5.3a, ¯γ is close to 1 when texp is very
+small because no blur exists. For longer exposures, ¯γ increases with exposure time
+as image becomes more blurry and more noise is ampliﬁed by deconvolution. If more
+number of images is captured, ¯γ is reduced because missing frequency components
+in an image can be preserved in other images. Figure 5.1a shows that diﬀerent blur
+preserves diﬀerent frequency information of the scene. The blue regions in the power
+spectra visualize missing frequency components that may cause severe artifacts after
+deconvolution. When multiple images are available, average power spectrum of these
+
+===== PAGE 62 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+50
+Angular velocity 
+(deg/s)
+Time (s)
+Figure 5.2: Camera motion simulation for diﬀerent exposure parameters. From a
+gyroscope measurement for a relatively long period, numerous independent camera
+motion samples can be simulated for diﬀerent capture strategies. For given n, expo-
+sure time texp and frame time tft, the start time of ﬁrst exposure t1
+s can be randomly
+selected to generate a camera motion sample. The time windows in red represent
+exposure windows when n = 8 images are captured.
+blur kernels contains less amount of blur region as shown in Figure 5.1b, and the
+deconvolution becomes more stable.
+The important observation is that ¯γ grows linearly with texp as shown in Figure
+5.3b: the ratio between ¯γ and texp remains constant when the exposure time per shot
+is long enough. This relation is more obvious when n is large, and is consistently
+observed among diﬀerent users (Figure 5.3c), or when diﬀerent frame times (Figure
+5.3d) or focal lengths of camera optics (Figure 5.3e) are used.
+We can explain this trend mathematically for large n and t as follows. Let us
+deﬁne the average power spectrum of blur kernels as
+¯Pt = 1
+ni
+X
+i
+|Ki,t|2
+(5.8)
+where Ki,t denotes ith sample of blur kernel for exposure time t, Ki,t is the Fourier
+transform of Ki,t, ni is the number of samples, and assume ¯Pt converges for large ni.
+Let us think of an image as the sum of ﬁrst- and second-half images with the same
+exposure time of 1
+2t. Then, we can split the blur kernel Ki,t into two as
+Ki,t = 1
+2
+
+Ki1, t
+2 + Ki2, t
+2
+
+(5.9)
+
+===== PAGE 63 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+51
+1
+4
+16
+63
+250
+1000
+0
+5
+10
+15
+20
+25
+30
+texp (ms)
+¯γ (dB)
+ 
+ 
+n=1
+n=2
+n=4
+n=8
+n=16
+(a) Number of shots n
+1
+4
+16
+63
+250
+1000
+−35
+−30
+−25
+−20
+texp (ms)
+texp / ¯γ (dB)
+ 
+ 
+n=1
+n=2
+n=4
+n=8
+n=16
+(b) Number of shots n
+1
+4
+16
+63
+250
+1000
+−30
+−25
+−20
+texp (ms)
+texp / ¯γ (dB)
+ 
+ 
+User 1
+User 2
+User 3
+User 4
+User 5
+n=2
+n=8
+(c) User
+1
+4
+16
+63
+250
+1000
+−30
+−25
+−20
+texp (ms)
+texp / ¯γ (dB)
+ 
+ 
+no frame gap
+long frame gap
+n=2
+n=8
+(d) Frame time tft
+1
+4
+16
+63
+250
+1000
+−35
+−30
+−25
+−20
+texp (ms)
+texp / ¯γ (dB)
+ 
+ 
+32mm
+64mm
+128mm
+(e) Focal length f
+Figure 5.3: Average noise ampliﬁcation factor measured from simulation based on
+real camera motion. Each plot shows how ¯γ varies when a diﬀerent parameter is
+changed as denoted by the plot captions. Subﬁgure (a) shows ¯γ while (b)-(e) plot
+the ratio between ¯γ and per-image exposure time texp. Note that the ratio becomes
+constant for long exposures, which means that ¯γ increases linearly with texp.
+
+===== PAGE 64 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+52
+Angular velocity 
+(deg/s)
+Time (s)
+(a) Splitting exposures into ﬁrst- and second-half exposures
+(b) Splitting blur kernels
+Figure 5.4: Splitting exposures into ﬁrst- and second-half exposures. (a) An example
+of exposure windows are shown when n = 8. Each exposure is equally split into two
+exposures. The exposures in red represent ﬁrst-half exposures and the yellow regions
+show second-half exposures. (b) Each corresponding blur kernel {Ki,t}i=1,··· ,n is also
+split into red and yellow kernels that represent {Ki1, t
+2}i=1,··· ,n and {Ki2, t
+2}i=1,··· ,n,
+respectively.
+where i1 and i2 denote the indices corresponding to ﬁrst- and second-half of i, respec-
+tively. Then, the power spectrum of Ki,t can be approximated as
+|Ki,t|2
+=
+1
+4
+Ki1, t
+2
+
+2
++
+Ki2, t
+2
+
+2
++ 2Re{Ki1, t
+2K∗
+i2, t
+2}
+
+(5.10)
+≈
+1
+4
+Ki1, t
+2
+
+2
++
+Ki2, t
+2
+
+2
+(5.11)
+if we assume the crosscorrelation term is negligible because consecutive blur kernels
+become uncorrelated for relatively long t. Then, we get the recursive relation for
+average power spectrum ¯Pt =
+1
+2 ¯P t
+2, which leads to ¯γn,t = 2¯γn, t
+2 for large n. This
+shows the linear relation for large n and t:
+¯γn,t ∝t.
+(5.12)
+To verify the assumption that blurs are uncorrelated for large t, we evaluate ¯γ
+
+===== PAGE 65 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+53
+1
+4
+16
+63
+250
+1000
+−35
+−30
+−25
+−20
+texp (ms)
+texp / ¯γ (dB)
+ 
+ 
+uncorrelated blur
+real blur
+Figure 5.5: Uncorrelated blur for long exposure times. The average noise ampliﬁca-
+tion factor ¯γ is evaluated by assuming that consecutive blur kernels are uncorrelated
+to each other.
+The result obtained from the approximation agrees well with real
+measurements when texp is longer than ∼50ms.
+by using the approximation for n = 16 and compare it with our evaluation shown in
+Figure 5.3b. When the approximation is adopted, blur kernels are split into two sets.
+Figure 5.4 shows an example of these two sets of blur kernels that correspond to ﬁrst-
+and second-half exposures. Then, the average power spectrum in the denominator
+of Equation 5.5 is evaluated by following the approximation described in Equation
+5.11. Figure 5.5 shows the results. When exposure time is short, the assumption
+does not hold because the shape of blurs is linear and consecutive blur kernels are
+strongly correlated. However, when exposure time is longer than ∼50ms, blurs be-
+come uncorrelated and the result obtained from the approximation agrees well with
+real measurements. This reduced correlation at time scales longer than 1/20 second
+makes sense, because human muscular handshake has a period of about 10 fps.
+Figure 5.3d shows another eﬀect that uncorrelated blurs have on ¯γ: uncorrelated
+blurs reduce ¯γ compared to correlated ones. Uncorrelated blurs preserve frequency
+components that are complementary to each other while correlated ones only repeat
+similar observations.
+Longer frame-to-frame time makes the blurs less correlated,
+which results in smaller ¯γ as shown in Figure 5.3d.
+In summary, when multi-image deconvolution is applied, we observed that the
+amount of noise ampliﬁcation increases linearly with exposure time for large n and t.
+This observation comes from the fact that camera shake blurs become uncorrelated
+
+===== PAGE 66 =====
+CHAPTER 5. PERFORMANCE OF MULTI-IMAGE DECONVOLUTION
+54
+to each other when exposure time is long enough. Note that we can generally assume
+blurs are uncorrelated after a certain time for any camera or any user. Thus, the
+linear relation in Equation 5.12 holds for any camera shake for large n and t.
+
+===== PAGE 67 =====
+Chapter 6
+Analysis of Alternative Capture
+Strategies
+Chapter 5 discussed how the performance of multi-image deconvolution can be quan-
+tiﬁed by using a noise ampliﬁcation factor. The characteristics of this noise ampli-
+ﬁcation factor are analyzed to ﬁnd its relation to various capture parameters. From
+the analysis, we proved that this factor increases linearly with exposure time for any
+camera shake.
+In this chapter, we put previous analyses together and ﬁnally present how well
+multi-image deconvolution will work in various photographic situations. We show an
+important property of multi-image deconvolution: Multi-image deconvolution does
+not beneﬁt from increasing exposure time beyond a certain threshold. This property
+plays a key role in determining good data sets to capture in low-light situations. Then,
+the performance of multi-image deconvolution is compared to align-and-average by
+performing simulations on real scenes. Finally, based on the comparison, guidelines
+are presented to help users to determine good capture strategies in real-world situa-
+tions.
+55
+
+===== PAGE 68 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+56
+no blur
+large blur
+¯γ = 1
+¯γ ∝t
+(a) Noise ampliﬁcation factor
+read noise
+photon noise
+σ2
+N = c
+σ2
+N ∝t
+(b) Noise characteristics
+no blur (¯γ = 1)
+large blur (¯γ ∝t)
+read noise
+dominant
+SNR ∝√ngt
+SNR ∝√ng
+√
+t
+photon noise
+dominant
+SNR ∝
+√
+nt
+SNR ∝√n
+(c) SNR for diﬀerent photographic situations
+Table 6.1: Summary of the performance of multi-image deconvolution in various
+capture situations. We assume that read noise before ampliﬁcation is negligible.
+6.1
+Performance of Capture Strategies
+When multi-image deconvolution is applied to a burst of images captured from a hand-
+held device, we showed that the SNR of the deconvolved result can be expressed as in
+Equation 5.7. As assumed in this analysis, we ﬁrst consider the case when no image
+prior is used in the deconvolution. Then, the analysis is extended to the case where
+image priors are used.
+To begin, let us consider diﬀerent photographic situations to get more insight
+into the relation between the SNR and capture parameters. Table 6.1 shows four
+diﬀerent situations depending on the property of the noise ampliﬁcation factor and
+input noise variance. As shown in Section 5.3 and Table 6.1a, the noise ampliﬁcation
+factor increases linearly with exposure time for long exposures, while it is close to 1
+when blur is negligible in captured images. The relation between input noise variance
+and exposure time is determined by the dominant source of noise as described in
+Section 3.1.1. As shown in Table 6.1b, when photon noise is dominant, the variance
+increases with exposure time. In contrast, the amount of noise is ﬁxed when read
+noise dominates. Here, we assume that read noise before ampliﬁcation is negligible.
+The relationships between output SNR and various capture parameters can be
+obtained for each situation, and are summarized in Table 6.1c. For all cases, the SNR
+increases with the square root of the number of images captured. Taking additional
+
+===== PAGE 69 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+57
+images is always beneﬁcial, but in turn, total capture time is increased.
+On the
+contrary, the eﬀect of changing exposure time depends on the photographic situations.
+Note that if no blur exists (ﬁrst column of Table 6.1c), then the analysis reduces to the
+case of align-and-average. When photon noise is dominant and large blur is involved
+(lower right cell of Table 6.1c), then the SNR does not improve with exposure time.
+This is an unexpected result because it is commonly thought that increasing exposure
+time helps to get images with better quality. This common thought is valid only when
+there is no handshake blur. When a hand-held device is used, the noise introduced
+by computationally removing additional blur cancels the improvement in SNR due to
+reduced shot noise in input images. In other words, longer exposures are preferable,
+at least to the point where handshake blur becomes intolerable, and if read noise is
+dominant, then this transition occurs at a longer exposure time. This property is
+already observed in Figure 5.3. The y axis, the ratio between ¯γ and exposure time,
+represents the SNR and the curves in the plot become ﬂat when exposure time is long
+enough.
+6.2
+The Eﬀect of Image Priors
+The analysis in the previous section is only based on the camera shake blur applied
+to the system, without considering the scene contents. Although we considered the
+scene brightness to model the properties of image noise, real-world scenes are more
+complicated to model and the results are strongly aﬀected by the choice of image
+prior model used in deconvolution.
+In this section, we empirically show what eﬀects image priors might have in the
+analysis. We compare two approaches in removing camera shake: align-and-average
+(AA) and multi-image deconvolution (MD). Both cases are tested with and without
+assuming image priors. To make a fair comparison between AA and MD when image
+priors are used, an additional denoising step is applied on the output of AA by
+applying Equation 4.2 with Ki = 1 and the Gaussian prior to suppress the same
+amount of noise as in MD. Given capture parameters, a burst of blurry images is
+simulated using real measurements of camera motion as described in Section 5.3.
+
+===== PAGE 70 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+58
+(a) Cafe
+(b) Oﬃce
+Figure 6.1: Two scenes used for simulations with image priors. Insets shown in yellow
+boxes are presented in Figure 6.2.
+These blurry images are jointly deconvolved, assuming that exact camera shake blur
+is known. The performance is evaluated by measuring the peak signal-to-noise ratio
+(PSNR) with respect to the ground truth scene, and the PSNR is averaged over many
+trials with diﬀerent camera motions.
+Two examples shown in Figure 6.1 are used for simulation when eight images
+are captured with a unity analog gain, and Figure 6.2 shows the simulation results.
+The PSNR of AA drops for long exposures because of the handshake blur, while the
+performance of MD remains stable. Using image priors usually gives better PSNR
+than the case without image priors, and the improvement in PSNR of MD approaches
+a horizontal asymptote for both cases, with and without image priors, as exposure
+time becomes suﬃciently long. Introducing a prior improves the PSNR, and it does
+not signiﬁcantly change the relation to exposure time as shown in Table 6.1c. As a
+result, an analysis based on the noise ampliﬁcation factor can still help estimate the
+performance of MD even when image priors are used.
+Also, note that when the same parameters and image prior are used, MD performs
+better than AA as shown in Figure 6.2b and Figure 6.2d for the Gaussian prior. This
+is not surprising as MD is a more sophisticated approach to handle blurry images and
+is expected to work better when the same input data is used. However, if diﬀerent
+
+===== PAGE 71 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+59
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+ 
+ 
+MD
+AA
+(a) Cafe, no prior
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+ 
+ 
+MD+S
+MD+G
+AA+G
+(b) Cafe, using priors
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+ 
+ 
+MD
+AA
+(c) Oﬃce, no prior
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+ 
+ 
+MD+S
+MD+G
+AA+G
+(d) Oﬃce, using priors
+Figure 6.2: The performance of align-and-average (AA) and multi-image deconvolu-
+tion (MD) with image priors. Two example scenes in Figure 6.1 are used for simula-
+tion. The curves are similar to Figure 5.3, but this time with priors. Subﬁgures (a)(c)
+are obtained with no prior used, while (b)(d) show the improvement when image pri-
+ors are employed. The sparse prior (S) shown with the blue curve gives slightly more
+improvement than the Gaussian prior (G) in green. A small region of output images
+for diﬀerent exposure times is shown. The insets in red boxes correspond to the out-
+put of AA while green boxes correspond to the output from MD. The performance
+follows the analysis in Table 6.1c even when image priors are used.
+
+===== PAGE 72 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+60
+parameters are used to capture the images for AA and MD, comparing the perfor-
+mance of two approaches becomes more complicated. Some examples of this case will
+be discussed in Section 6.4.
+6.3
+The Eﬀect of Various Parameters
+From the previous sections, we showed that two factors mainly aﬀect the performance
+of multi-image deconvolution: the amount of camera shake blur and the characteris-
+tics of image noise in captured images. These factors are dependent on given photo-
+graphic situation, which is described by various parameters. We assume the user has
+control of n, g, and texp, and faces variability in scene statistics and dynamic range,
+and camera noise model, optics, and so on. To understand the eﬀect of each factor,
+we performed simulation on the Cafe scene in Figure 6.1a, changing one axis of the
+parameter space at a time. The simulation results are shown in Figure 6.3.
+Let us consider the case when focal length of the optics is changed. Focal length
+is one of the main factors that determine the amount of camera shake blur. When
+longer focal lengths are used, camera motion is ampliﬁed more by the narrow ﬁeld of
+view. As shown in Figure 6.3a, the performance of AA is signiﬁcantly degraded with
+long focal lengths because the remaining blur after AA is no longer tolerable.
+Other parameters mainly aﬀect the properties of input image noise. Capturing
+more images reduces both photon noise and read noise, while making deconvolution
+stable at the same time (Figure 6.3b). Using higher analog gain helps to suppress
+read noise but does not aﬀect the amount of photon noise (Figure 6.3c). Brighter
+scenes irradiate more photons and thus give more photon noise (Figure 6.3d). The
+combined eﬀect of all these parameters determine the exposure time when photon
+noise is dominant. This exposure time is important to estimate when MD will not
+improve with exposure time anymore.
+
+===== PAGE 73 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+61
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+32 mm
+64 mm
+128 mm
+(a) Focal length f
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+n=4
+n=8
+n=16
+(b) Number of shot n
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+1x gain
+2x gain
+4x gain
+(c) Analog gain g
+1
+4
+16
+63
+250
+1000
+30
+40
+50
+texp (ms)
+PSNR (dB)
+0.5x
+1x
+2x
+(d) Scene brightness
+Figure 6.3: The eﬀect of changing each parameter on the performance of align-and-
+average (red) and multi-image deconvolution (green). The results are from simulation,
+and all cases assume the Gaussian prior. Focal length strongly aﬀects the range where
+align-and-average is eﬀective as shown in (a). Other parameters shown in (b)-(d)
+change the ratio between read noise and photon noise.
+6.4
+Comparing Capture Strategies in Real-World
+Situations
+In this section, our analysis is extended to handle various practical issues that exist in
+real-world scenarios. This is done by performing extensive simulations that simulate
+the whole processing pipeline from image formation to gyroscope drift correction and
+multi-image deconvolution as shown in Figure 6.4a. This simulation pipeline aims to
+produce more realistic image noise that contaminates captured images. Rather than
+
+===== PAGE 74 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+62
+Simulate 
+image
+blur
+Bayer 
+mosaic
+Gyroscope
+bias
+Demosaic
+Ground 
+truth
+scene
+Gyroscope
+drift
+correction
+MD or AA
+Output
+image
+Gaussian
+noise
+(a) Our simulation pipeline
+(A) Ground truth
+Blurry images
+simulated w/ noise
+Blurry images
+simulated w/o noise
+(B) Output from
+simulation w/ noise
+(C) Output from
+simulation w/o noise
+(b) Using two simulation results
+Figure 6.4: A simulation pipeline for comparing capture strategies. (a) Our simulation
+is designed to incorporate various practical issues that are common in real-world
+situations. (b) The simulation is repeated twice, with and without applying noise.
+Then, the amount of noise and remaining blur can be quantiﬁed separately. The noise
+is represented by the PSNR between B and C, while the sharpness is estimated using
+the SSIM [59] between A and C.
+adding independent Gaussian noise in the RGB space, the Gaussian noise is added
+to the Bayer images followed by demosaic operation. Image noise becomes strongly
+correlated between color channels and usually shown as color blobs or structured
+patterns after demosaicing.
+This correlated noise is more diﬃcult to handle [45].
+In addition, gyroscope drift correction is performed in the simulation pipeline. This
+correction can be considered equivalent to ﬁnding an alignment between input images,
+and its accuracy is critical to obtain compelling results from MD and AA. This
+simulation pipeline is repeated with diﬀerent camera motions to obtain a meaningful
+statistics of each capture strategy for given capture parameters.
+The main challenge in comparing diﬀerent strategies is that there exists a trade-
+oﬀbetween noise and blur. Thus, it is hard to decide whether we want to prefer
+
+===== PAGE 75 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+63
+noisy sharp images or slightly blurry ones with less noise. In addition, measuring the
+amount of noise or blur is not trivial because both factors aﬀect image quality metrics
+at the same time. The SNR, for example, only measures the combined eﬀect of noise
+and blur, with no control on which factor to consider more important. Also, most
+image sharpness metrics cannot distinguish image structures from noise and often
+prefer images with higher noise levels.
+To solve this problem, we propose to use two simulation results as shown in Figure
+6.4b. Our simulation pipeline is repeated twice, with and without applying noise when
+input images are formulated. When the noise is not applied in the simulation, output
+images will be clean while containing the same amount of blur that remains after MD
+or AA. Then, the amount of noise can be estimated separately from the remaining blur
+by evaluating the PSNR between the output images obtained from two simulations.
+In addition, the amount of remaining blur is quantiﬁed by measuring a full-reference
+image quality metric, structural similarity (SSIM) [59], between the ground truth and
+the output image obtained from the simulation without noise. Because the output
+image contains little noise, the metric can be robustly measured. We use these two
+metrics, PSNR and SSIM, to describe the trade-oﬀspace that represents blur and
+noise.
+6.4.1
+Simulation Results: An n-Shot Burst
+Let us begin with the case when the same number of images is captured for diﬀerent
+strategies. We mainly focus on comparing the performance of align-and-average (AA)
+and multi-image deconvolution with the Gaussian prior (MD+G). The relation be-
+tween the performance and per-image exposure time texp is discussed in the trade-oﬀ
+space.
+Figure 6.6 and Figure 6.7 show the results obtained from the two simulations
+described in Figure 6.4 when the Brasserie scene (Figure 6.5b) is used as the ground
+truth and an eight-shot burst is captured for each camera motion. A representative
+case is selected from simulation results that are repeated with diﬀerent camera motion,
+and shown in Figure 6.6. When AA is used, the PSNR increases with exposure time,
+
+===== PAGE 76 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+64
+10−2
+10−1
+ 100
+ 101
+Scene luminance (cd/m2)
+Frequency
+ 
+ 
+Brasserie
+Tequila Bar
+(a) Scene histogram
+(b) Brasserie
+(c) Tequila Bar
+Figure 6.5: Two examples of ground truth scenes used for our simulations. The scene
+histograms in (a) show that the Tequila Bar is darker than the Brasserie.
+as shown in Figure 6.7a. The amount of improvement is more than the case of MD+G
+because MD tends to amplify noise after deconvolution. However, long exposures are
+not necessarily desirable for AA because they decrease the SSIM, as shown in Figure
+6.7b. In contrast, the SSIM of MD+G is maintained higher than the AA’s for long
+exposures. However, it is also not desirable to use an exposure time longer than a
+certain point because high frequency components of the scene may have been lost
+and the gyroscope bias estimation becomes less accurate when handshake blur is
+intolerable. This relation is visualized in Figure 6.7c. Note that each point on the
+curve represents the expected performance of a capture strategy, and when diﬀerent
+exposure times are considered, the point moves along the trade-oﬀcurve. The upper
+
+===== PAGE 77 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+65
+texp=16 ms
+31 ms
+63 ms
+125 ms
+250 ms
+500 ms
+1000 ms
+MD+G
+AA
+Figure 6.6: Comparison between capture strategies: an n-shot burst (image insets).
+The Brasserie scene is used to simulate captures of an eight-shot burst for diﬀerent
+exposure times.
+Two approaches, AA and MD+G, are applied.
+Here, ﬁve small
+regions of the output images simulated with a representative camera motion is shown.
+Note that AA suﬀers from blur for long exposures. A possible choice of good exposure
+time for each approach is denoted in a red box. Figure 6.7 shows the plots for these
+simulation results.
+right region of the trade-oﬀspace is desirable because it presents capture strategies
+that give clean and sharp images. Thus, a good exposure time for each approach
+can be selected from this trade-oﬀcurve, and a possible choice is represented in
+Figure 6.7c. Note that when the same number of images is captured, MD+G usually
+outperforms AA as discussed in Section 6.2.
+One may wonder why the amount of blur contained in Figure 6.6a is less than what
+users may expect in real-world situations. One reason is that our camera motion is
+measured when the tablet was held steady, without considering the eﬀect of pressing
+the shutter button. To get more realistic amount of blur, our experiment is repeated
+with a focal length that is doubled. Figure 6.8 shows that the SSIM is decreased for
+both approaches because of the ampliﬁed blur. Also, output images for AA in Figure
+6.8a contain more blur. Again, from the trade-oﬀcurves, we selected two exposure
+
+===== PAGE 78 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+66
+times that give good results for both approaches, as shown in Figure 6.8a and Figure
+6.8b. Note that we reduced the exposure time for AA by a factor of two to avoid
+introducing more blur.
+
+===== PAGE 79 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+67
+1
+4
+16
+63
+250
+1000
+20
+30
+40
+50
+60
+70
+texp (ms)
+PSNR (dB)
+ 
+ 
+MD+G
+AA
+(a) PSNR
+1
+4
+16
+63
+250
+1000
+0.992
+0.994
+0.996
+0.998
+1
+texp (ms)
+SSIM
+ 
+ 
+MD+G
+AA
+(b) SSIM
+0.99
+0.992
+0.994
+0.996
+0.998
+1
+25
+35
+45
+55
+SSIM
+PSNR (dB)
+ 
+ 
+t=250ms
+t=63ms
+MD+G
+AA
+(c) Trade-oﬀspace
+0.995
+0.996
+0.997
+0.998
+0.999
+40
+45
+50
+55
+SSIM
+PSNR (dB)
+ 
+ 
+MD+G
+AA
+(d) Trade-oﬀspace w/ insets
+Figure 6.7: Comparison between capture strategies: an n-shot burst (plots). The
+plots obtained from the experiments in Figure 6.6 are shown. The trade-oﬀcurves
+shown in (c) are obtained by combining plots in (a) and (b). Also, a possible choice
+of good exposure time for each approach is represented in (c). In (d), a rectangular
+region in (c) is shown with image insets to visualize the trade-oﬀspace.
+
+===== PAGE 80 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+68
+texp=16 ms
+31 ms
+63 ms
+125 ms
+250 ms
+500 ms
+1000 ms
+MD+G
+AA
+(a) Image insets
+0.98
+0.984
+0.988
+0.992
+0.996
+1
+25
+35
+45
+55
+SSIM
+PSNR (dB)
+ 
+ 
+t=250ms
+t=31ms
+MD+G
+AA
+(b) Trade-oﬀspace
+0.988
+0.99
+0.992 0.994 0.996 0.998
+40
+45
+50
+55
+SSIM
+PSNR (dB)
+ 
+ 
+MD+G
+AA
+(c) Trade-oﬀspace w/ insets
+Figure 6.8: Comparison between capture strategies: an n-shot burst captured with a
+longer focal length. The experiment shown in Figure 6.6 and Figure 6.7 is repeated
+with 2× focal length. Note that output images for AA contain more amount of blur.
+Also, a good exposure time for each approach is marked in (b), but this time, the
+exposure time for AA is reduced to half.
+
+===== PAGE 81 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+69
+6.4.2
+Simulation Results: Fixed Total Capture Time
+Now let us consider the case when total capture time is ﬁxed and user wants to de-
+termine how many images to capture during the time. This case is hard to analyze
+theoretically because the number of shots is also a variable. Again, we use our simu-
+lation pipeline to compare capture strategies. Figure 6.9 shows the results when the
+Brasserie scene is used and total capture time is ﬁxed to 1s. We assume that the
+bandwidth of the camera system is high enough to capture 32 frames per second and
+the focal length is scaled by a factor of 2. Figure 6.9a shows that AA works well
+when n is large. Capturing more images results in shorter per-image exposure times,
+and thus, reduces the amount of handshake blur per image as well. In turn, the total
+amount of read noise accumulates with the number of captured images. The perfor-
+mance of MD+G is relatively stable. However, the output image becomes more noisy
+as more images are captured. The trade-oﬀcurves shown in Figure 6.9b and Figure
+6.9c represent that MD+G is able to produce sharper images with slightly more noise.
+As long as n is large and captured images are well aligned, both approaches generate
+comparable results that exist in diﬀerent points in the trade-oﬀspace. For this scene,
+taking n = 8 shots followed by MD+G or applying AA to a burst of n = 32 images
+can be considered as a good strategy, which is shown in Figure 6.9a and Figure 6.9b.
+Note that MD+G can generate good results with fewer images, compared to AA.
+However, the choice may be diﬀerent for darker scenes. For example, let us con-
+sider the Tequila Bar scene, which is considerably darker than the Brasserie as shown
+in Figure 6.5a. The simulation results for this scene are shown in Figure 6.10 and
+Figure 6.11. Note that output images in Figure 6.10a suﬀer from a higher noise level.
+When n = 32, our camera motion estimation failed due to the excessive amount
+of noise, and both approaches produced poor results. The output images in Figure
+6.10b are obtained by repeating the simulation with ground truth camera motion.
+The diﬀerence between the two results shows how error in camera motion estimation
+aﬀects the performance of two approaches. In these very low-light situations, it is not
+recommended to use the shortest exposure time to avoid blur. Instead, it is better to
+capture images with longer exposure times that allow accurate camera motion esti-
+mation, and then apply MD+G to remove handshake blur. Figure 6.11a and Figure
+
+===== PAGE 82 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+70
+n=2
+n=4
+n=6
+n=8
+n=16
+n=32
+MD+G
+AA
+(a) Image insets
+0.96
+0.98
+1
+45
+50
+55
+60
+SSIM
+PSNR (dB)
+ 
+ 
+n=8
+n=32
+MD+G
+AA
+(b) Trade-oﬀspace
+0.985
+0.99
+0.995
+50
+55
+60
+SSIM
+PSNR (dB)
+ 
+ 
+MD+G
+AA
+(c) Trade-oﬀspace w/ insets
+Figure 6.9: Comparison between capture strategies: the Brasserie scene with ﬁxed
+total capture time. The total capture time, which is set to 1s, is split between n shots
+with the same exposure time. AA gives slightly blurry images with less noise when n
+is large enough, while MD+G recovers more image details with more noise. As shown
+in (b) and (c), these two approaches provide results that lie in diﬀerent regions of the
+trade-oﬀspace. A possible choice of n for each approach is marked in (b), and the
+corresponding output image is denoted in a red box in (a).
+
+===== PAGE 83 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+71
+n=2
+n=4
+n=6
+n=8
+n=16
+n=32
+MD+G
+AA
+(a) Image insets, w/ our camera motion estimation
+n=2
+n=4
+n=6
+n=8
+n=16
+n=32
+AA
+(b) Image insets, w/ ground truth camera motion
+Figure 6.10: Comparison between capture strategies: the Tequila Bar scene with
+ﬁxed total capture time (image insets). As shown in (a), both methods fail when n is
+large because our camera motion estimation cannot handle the excessive amount of
+noise. The output images shown in (b) are obtained by repeating the simulation with
+ground truth camera motion. The diﬀerence between these outputs demonstrates
+the importance of accurate camera motion estimation. The trade-oﬀcurves for this
+experiment are shown in Figure 6.11.
+
+===== PAGE 84 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+72
+0.992
+42
+47
+52
+SSIM
+PSNR (dB)
+ 
+ 
+n=6
+n=8
+MD+G
+AA
+(a) Trade-oﬀspace
+0.993
+0.995
+0.997
+0.999
+45
+50
+SSIM
+PSNR (dB)
+ 
+ 
+MD+G
+AA
+(b) Trade-oﬀspace w/ insets
+Figure 6.11: Comparison between capture strategies: the Tequila Bar scene with
+ﬁxed total capture time (plots). In subﬁgure (a), two trade-oﬀcurves in solid lines
+represent the case when our camera motion estimation is used, while the curves in
+dashed lines correspond to the simulation results with ground truth camera motion.
+Although both methods fail for large n, MD+G can give better results than AA when
+smaller n is used and reach to the better part in the trade-oﬀspace shown in (a) and
+(b).
+6.11b demonstrate that MD+G can reach the better part in the trade-oﬀspace.
+6.5
+Guidelines for Choosing Capture Strategies
+Here we summarize some guidelines for choosing capture strategies that could be
+distilled from the various experiments preformed in the previous sections. Given a
+photographic situation, our goal is to determine how many images should be captured,
+what their exposure times should be, and which processing, AA or MD, should be
+applied.
+To begin, let us list some important points that should be considered when AA
+or MD is used:
+• Align-and-average There exists an upper bound in exposure time that gives
+tolerable amount of handshake blur.
+
+===== PAGE 85 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+73
+• Multi-image deblurring Exposure time can be increased up to the point at
+which read noise is negligible and handshake blur becomes intolerable. Also,
+the number of images should be large enough to make deconvolution stable.
+The amount of handshake blur is directly related to focal length of the optics.
+When a narrow ﬁeld of view is used, the required exposure time to avoid blur may
+be too short to capture any meaningful information on the scene. Also, handshake
+blur depends on the type of camera and user. These issues should be considered
+to determine when AA can give reliable results. In contrast, MD is relatively more
+ﬂexible with the choice of exposure time. However, there exists an upper bound in
+exposure time that beneﬁts MD. This point comes at shorter exposure times if the
+scene is brighter or if more images are captured.
+There are more rules that apply to both approaches. First, exposure time should
+be long enough to allow accurate camera motion estimation. Because accurate esti-
+mation is predicated on having low noise, there exists a lower bound on exposure time.
+This lower bound is aﬀected by both scene brightness and scene content. Second, ex-
+posure level, which is the combination of exposure time and analog gain, should be
+carefully determined to avoid over-exposing bright regions. When a scene with wide
+dynamic range is to be captured, the range of proper exposure levels can be limited.
+In addition, a few practical issues may limit the choice of capture parameters. For
+example, the eﬀective range of analog gain is restricted by the presence of read noise
+added before analog ampliﬁcation. Also, limitations in system bandwidth may bound
+the choice. For low-bandwidth camera systems, a blanking time may exist between
+exposures due to slow readout speed. This blanking time may signiﬁcantly reduce
+the eﬃciency of capture because no photon is collected during the time. Further, the
+memory buﬀer in the camera system, which is used to store captured images before
+they are processed, has a limited size, restricting the maximum value of n. Finally, n
+is bounded by the total capture time during which the photographer can expect the
+scene to hold still.
+In many situations, AA is preferred to MD because the former has lower compu-
+tational cost. A good strategy is to ﬁnd a parameter set that gives desired image
+quality with AA. However, it may not be possible for certain scenes, for example,
+
+===== PAGE 86 =====
+CHAPTER 6. ANALYSIS OF ALTERNATIVE CAPTURE STRATEGIES
+74
+in low-light environments when read noise is dominant or analog gain has already
+been maximized.
+In these situations, MD can provide an alternative with better
+performance.
+
+===== PAGE 87 =====
+Chapter 7
+Conclusion
+This dissertation presents a new image deblurring system that combines gyro-based
+camera motion estimation and non-blind multi-image deconvolution. Our method
+tackles various challenges encountered in real-world scenarios to allow practical im-
+plementation in mobile systems. Then, a theoretical analysis on multi-image decon-
+volution provides insight into capture strategy selection. The key insights can be
+summarized:
+Multi-image deconvolution is a robust method that is applicable to a wide range
+of low-light situations. When this method is used, exposure time can be increased up
+to a point when read noise is negligible and handshake blur becomes uncorrelated to
+each other.
+In this ﬁnal chapter, the limitations of our system are discussed, and we lay out
+a few possible directions to extend our system.
+7.1
+Limitations
+The success of our method depends on how faithful our models for image formation
+and blur representation can explain the real measurements from image sensor and
+gyroscope. In practice, the assumptions we made for the models are often violated
+75
+
+===== PAGE 88 =====
+CHAPTER 7. CONCLUSION
+76
+and these violations are the main cause of degradation. Here, we list a few cases.
+First, the translational component of camera motion may not be negligible. When
+objects are placed close to the camera, or when the user moves the camera around
+the scene, gyroscope data cannot provide accurate estimation anymore. During the
+gyroscope drift correction stage, the search of proper gyroscope bias is done in a
+constrained space that is deﬁned by our rotational model. When translation matters,
+we might relax our model and search for image translations as a reﬁnement step.
+Although full motion cannot be recovered, this additional step will ﬁnd the best
+camera motion that explains the captured images.
+Second, obtaining accurate timestamps for each exposure time window is not
+trivial. Although the length of exposure time can be considered deterministic in many
+camera systems, the blanking time between exposures is not easy to ﬁnd because there
+are unexpected time delays caused by the processing pipeline and occasional frame
+drops. Frame drops are one of the main causes of poor results in our implementation.
+If we allow exposure times to vary during the capture, then reconciling timestamps
+becomes more complicated and is speciﬁc to the camera system.
+Finally, when a very short exposure time is used with a longer frame time, our
+camera motion estimation may suﬀer from large gaps between frames. When long
+frame times are used in bandwidth-limited systems, neighboring image frames are
+less correlated to each other, and our estimation is more likely to stay in local min-
+ima. When images are sharp with tolerable amount of noise, image-based alignment
+methods can be a superior alternative.
+7.2
+Further Applications
+Here are a few more possible directions to extend our gyro-based multi-image deblur-
+ring method. Our method can be combined with other applications to make it more
+robust to tackle real-world situations.
+
+===== PAGE 89 =====
+CHAPTER 7. CONCLUSION
+77
+7.2.1
+Removing Blur in Moving Objects
+Our method only removes blur in static regions. Although the errors in moving objects
+do not cause severe artifacts in the multi-image approach, these objects remain blurry
+after deblurring.
+Our approach can be combined with other motion deblurring methods [5, 13]
+to remove local motion blur that exists in images captured from hand-held devices.
+The motion of moving objects can be separated from global blur caused by camera
+shake, which is measured by a gyroscope.
+As shown in Section 4.4, our camera
+motion estimation is robust to the existence of moving objects in the scene because
+static regions, which appear to be sharper than moving objects, guide our gyroscope
+bias estimation. Then, moving objects can be detected by Equation 4.5 and treated
+separately with blind motion deblurring methods. This approach can be extended to
+video data as well.
+7.2.2
+Gyro-Based High Dynamic Range Photography for
+Hand-held Devices
+In low-light situations, the use of multi-image deblurring methods is often restricted
+by their limited capability in handling wide dynamic range scenes. Longer exposure
+images can improve output images, but may also blow out interesting image features
+that exist in bright regions.
+Our gyro-based multi-image deblurring method can be easily extended to tackle
+this problem. Instead of capturing a burst with the same exposure parameters, we can
+deliberately vary exposure times among captures. A good capture strategy would be
+to take an image with short exposure time to preserve highlights and capture multiple
+images with long exposures to obtain dark regions, but with some blur. Based on
+the camera motion estimated from gyroscope data, these images are jointly deblurred
+to recover a sharp HDR image. Our multi-image deblurring, which is described in
+Equation 5.1, is not limited to handling images captured with the same exposures.
+With a small modiﬁcation to handle over-exposed regions in long exposures, our
+method can be applied to an HDR burst.
+
+===== PAGE 90 =====
+CHAPTER 7. CONCLUSION
+78
+This idea is similar to Lu et al. [41]. Our method improves their work by using
+gyroscope measurements. Also, it would be interesting to design a new HDR metering
+method for hand-held captures. Our analysis on the performance of capture strategies
+can help selecting capture parameters that are expected to give good results.
+7.3
+Closing Remarks
+The goal of computational photography is to extend the capabilities of digital pho-
+tography.
+In particular, this dissertation focuses on obtaining good images with
+hand-held devices in low-light situations where a traditional camera fails. In such
+situations, an attached gyroscope can be used to measure camera shake and then
+computationally recover high-quality images by combining blurry images captured
+from a burst capture. We hope that this gyro-based multi-image approach enables
+future computational photography applications that run on mobile devices.
+In addition, this dissertation analyzes how good capture strategies can be deter-
+mined for hand-held image captures.
+We hope that key insights provided in this
+dissertation inspire camera software designers and researchers in the ﬁeld of compu-
+tational photography to tackle various challenges in hand-held digital photography.
+
+===== PAGE 91 =====
+Bibliography
+[1] Nokia
+Lumia
+920.
+http://www.nokia.com/global/products/phone/
+lumia920/, 2012.
+[2] HTC One M7. http://www.htc.com/us/smartphones/htc-one-m7/, 2013.
+[3] Andrew Adams, Jongmin Baek, and Myers Abraham Davis.
+Fast high-
+dimensional ﬁltering using the permutohedral lattice. Computer Graphics Forum
+(Eurographics 2010), 29(2):753–762, 2010.
+[4] Andrew Adams, Eino-Ville Talvala, Sung Hee Park, David E. Jacobs, Boris
+Ajdin, Natasha Gelfand, Jennifer Dolson, Daniel Vaquero, Jongmin Baek, Marius
+Tico, Hendrik P. A. Lensch, Wojciech Matusik, Kari Pulli, Mark Horowitz, and
+Marc Levoy. The Frankencamera: an experimental platform for computational
+photography.
+ACM Transactions on Graphics (SIGGRAPH 2010), 29(4):29,
+2010.
+[5] Amit Agrawal, Yi Xu, and Ramesh Raskar. Invertible motion blur in video.
+ACM Transactions on Graphics (SIGGRAPH 2009), 28(3):95, 2009.
+[6] Riccardo Antonello and Roberto Oboe. MEMS gyroscopes for consumer and
+industrial applications. In Microsensors. InTech, 2011.
+[7] Hyeoungho Bae, Charless C. Fowlkes, and Pai H. Chou. Accurate motion de-
+blurring using camera motion tracking and scene depth. IEEE Workshop on
+Applications of Computer Vision, pages 148–153, 2013.
+79
+
+===== PAGE 92 =====
+BIBLIOGRAPHY
+80
+[8] Giacomo Boracchi and Alessandro Foi.
+Modeling the performance of im-
+age restoration from motion blur.
+IEEE Transactions on Image Processing,
+21(8):3502–3517, 2012.
+[9] Jean-Yves Bouguet.
+Camera calibration toolbox for matlab.
+http://www.
+vision.caltech.edu/bouguetj/calib_doc/, 2004.
+[10] Antoni Buades, Bartomeu Coll, and Jean-Michel Morel. A non-local algorithm
+for image denoising. IEEE Conference on Computer Vision and Pattern Recog-
+nition (CVPR 2005), 2:60–65, 2005.
+[11] Jian-Feng Cai, Hui Ji, Chaoqiang Liu, and Zuowei Shen. Blind motion deblurring
+using multiple images. Journal of Computational Physics, 228(14):5057–5071,
+2009.
+[12] Jia Chen, Lu Yuan, Chi-Keung Tang, and Long Quan. Robust dual motion de-
+blurring. IEEE Conference on Computer Vision and Pattern Recognition (CVPR
+2008), pages 1–8, 2008.
+[13] Sunghyun Cho, Yasuyuki Matsushita, and Seungyong Lee.
+Removing non-
+uniform motion blur from images. IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR 2007), pages 1–8, 2007.
+[14] Kostadin Dabov, Alessandro Foi, Vladimir Katkovnik, and Karen Egiazarian.
+Image denoising by sparse 3-d transform-domain collaborative ﬁltering. IEEE
+Transactions on Image Processing, 16(8):2080–2095, 2007.
+[15] Yole D´eveloppement. MEMS for cell phones and tablets. 2012.
+[16] Yole D´eveloppement. MEMS: Inertial MEMS manufacturing trends. 2014.
+[17] David L. Fried. Probability of getting a lucky short-exposure image through
+turbulence. Journal of the Optical Society of America, 68(12):1651–1657, 1978.
+[18] Orazio Gallo, Marius Tico, Roberto Manduchi, Natasha Gelfand, and Kari Pulli.
+Metering for exposure stacks. Computer Graphics Forum (Eurographics 2012),
+31(2pt2):479–488, 2012.
+
+===== PAGE 93 =====
+BIBLIOGRAPHY
+81
+[19] Ankit Gupta, Neel Joshi, C. Lawrence Zitnick, Michael Cohen, and Brian Cur-
+less. Single image deblurring using motion density functions. European Confer-
+ence on Computer Vision (ECCV 2010), pages 171–184, 2010.
+[20] Gustav Hanning, Nicklas Forslow, Per-Erik Forss´en, Erik Ringaby, David Torn-
+qvist, and Jonas Callmer. Stabilizing cell phone video using inertial measurement
+sensors. IEEE International Conference on Computer Vision Workshops, pages
+1–8, 2011.
+[21] Chris Harris and Mike Stephens. A combined corner and edge detector. Alvey
+Vision Conference, pages 147–151, 1988.
+[22] Samuel W. Hasinoﬀ, Fr´edo Durand, and William T. Freeman. Noise-optimal
+capture for high dynamic range photography. IEEE Conference on Computer
+Vision and Pattern Recognition (CVPR 2010), pages 553–560, 2010.
+[23] Glenn E. Healey and Raghava Kondepudy. Radiometric CCD camera calibration
+and noise estimation.
+IEEE Transactions on Pattern Analysis and Machine
+Intelligence, 16(3):267–276, 1994.
+[24] Myung Hwangbo, Jun-Sik Kim, and Takeo Kanade. Gyro-aided feature tracking
+for a moving camera: Fusion, auto-calibration and GPU implementation. The
+International Journal of Robotics Research, 30(14):1755–1774, 2011.
+[25] InvenSense Inc.
+MPU-6000 and MPU-6050 product speciﬁcation.
+http://
+invensense.com/mems/gyro/documents/PS-MPU-6000A-00v3.4.pdf, 2013.
+[26] Chao Jia and Brian L. Evans. Probabilistic 3-d motion estimation for rolling
+shutter video rectiﬁcation from visual and inertial measurements. IEEE Inter-
+national Workshop on Multimedia Signal Processing, pages 203–208, 2012.
+[27] Chao Jia and Brian L. Evans. Online calibration and synchronization of cellphone
+camera and gyroscope. IEEE Global Conference on Signal and Information Pro-
+cessing, pages 731–734, 2013.
+
+===== PAGE 94 =====
+BIBLIOGRAPHY
+82
+[28] Hailin Jin, Paolo Favaro, and Roberto Cipolla. Visual tracking in the presence
+of motion blur. IEEE Conference on Computer Vision and Pattern Recognition
+(CVPR 2005), 2:18–25, 2005.
+[29] Neel Joshi and Michael F. Cohen. Seeing Mt. Rainier: Lucky imaging for multi-
+image denoising, sharpening, and haze removal. IEEE International Conference
+on Computational Photography (ICCP 2010), pages 1–8, 2010.
+[30] Neel Joshi, Sing Bing Kang, C. Lawrence Zitnick, and Richard Szeliski. Image
+deblurring using inertial measurement sensors. ACM Transactions on Graphics
+(SIGGRAPH 2010), pages 30:1–30:9, 2010.
+[31] Alexandre Karpenko, David Jacobs, Jongmin Baek, and Marc Levoy. Digital
+video stabilization and rolling shutter correction using gyroscopes.
+Stanford
+Computer Graphics Laboratory Technical Report 2011-03, 2011.
+[32] Jonathan Kelly and Gaurav S. Sukhatme. Visual-inertial sensor fusion: Local-
+ization, mapping and sensor-to-sensor self-calibration. The International Journal
+of Robotics Research, 30(1):56–79, 2011.
+[33] Rolf K¨ohler, Michael Hirsch, Betty Mohler, Bernhard Sch¨olkopf, and Stefan
+Harmeling. Recording and playback of camera shake: Benchmarking blind de-
+convolution with a real-world database. European Conference on Computer Vi-
+sion (ECCV 2012), pages 27–40, 2012.
+[34] Anthony Lawrence.
+Modern Inertial Technology: Navigation, Guidance, and
+Control. Springer, 1998.
+[35] Anat Levin, Rob Fergus, Fr´edo Durand, and William T. Freeman. Deconvolution
+using natural image priors. 2007.
+[36] Anat Levin, Yair Weiss, Fredo Durand, and William T. Freeman. Understanding
+and evaluating blind deconvolution algorithms. IEEE Conference on Computer
+Vision and Pattern Recognition (CVPR 2009), pages 1964–1971, 2009.
+
+===== PAGE 95 =====
+BIBLIOGRAPHY
+83
+[37] Mingyang Li, Byung Hyung Kim, and Anastasios I. Mourikis. Real-time motion
+tracking on a cellphone using inertial sensing and a rolling-shutter camera. IEEE
+International Conference on Robotics and Automation (ICRA 2013), pages 4712–
+4719, 2013.
+[38] Yunpeng Li, Sing Bing Kang, Neel Joshi, Steven M. Seitz, and Daniel P. Hutten-
+locher. Generating sharp panoramas from motion-blurred videos. IEEE Confer-
+ence on Computer Vision and Pattern Recognition (CVPR 2010), pages 2424–
+2431, 2010.
+[39] Ce Liu and William T. Freeman. A high-quality video denoising algorithm based
+on reliable motion estimation. European Conference on Computer Vision (ECCV
+2010), pages 706–719, 2010.
+[40] Ce Liu, Richard Szeliski, Sing Bing Kang, C. Lawrence Zitnick, and William T.
+Freeman. Automatic estimation and removal of noise from a single image. IEEE
+Transactions on Pattern Analysis and Machine Intelligence, 30(2):299–314, 2008.
+[41] Pei-Ying Lu, Tz-Huan Huang, Meng-Sung Wu, Yi-Ting Cheng, and Yung-Yu
+Chuang.
+High dynamic range image reconstruction from hand-held cameras.
+IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2009),
+pages 509–516, 2009.
+[42] Peter Meer. Robust techniques for computer vision. Emerging Topics in Com-
+puter Vision, pages 107–190, 2004.
+[43] Kaushik Mitra, Oliver Cossairt, and Ashok Veeraraghavan. To denoise or de-
+blur: Parameter optimization for imaging systems.
+SPIE Electronic Imaging
+Conference, 9023, 2014.
+[44] Steven Nasiri, Martin Lim, and Mike Housholder. A critical review of the market
+status and industry challenges of producing consumer grade MEMS gyroscopes.
+http://www.invensense.com/mems/whitepapers.html.
+
+===== PAGE 96 =====
+BIBLIOGRAPHY
+84
+[45] Sung Hee Park, Hyung Suk Kim, Steven Lansel, Manu Parmar, and Brian A.
+Wandell. A case for denoising before demosaicking color ﬁlter array data. Asilo-
+mar Conference on Signals, Systems and Computers, pages 860–864, 2009.
+[46] Sung Hee Park and Marc Levoy. Gyro-based multi-image deconvolution for re-
+moving handshake blur.
+IEEE Conference on Computer Vision and Pattern
+Recognition (CVPR 2014), 2014.
+[47] Sung Hee Park and Marc Levoy. Handling moving objects and over-exposed
+regions in non-blind multi-image deconvolution. Stanford Computer Graphics
+Laboratory Technical Report 2014-01, 2014.
+[48] Georg Petschnigg, Richard Szeliski, Maneesh Agrawala, Michael Cohen, Hugues
+Hoppe, and Kentaro Toyama. Digital photography with ﬂash and no-ﬂash image
+pairs. ACM Transactions on Graphics (SIGGRAPH 2004), 23(3):664–672, 2004.
+[49] Travis Portz, Li Zhang, and Hongrui Jiang. High-quality video denoising for
+motion-based exposure control. IEEE International Conference on Computer
+Vision Workshops, pages 9–16, 2011.
+[50] Alex Rav-Acha and Shmuel Peleg. Two motion-blurred images are better than
+one. Pattern Recognition Letters, 26(3):311–317, 2005.
+[51] Erik Ringaby and Per-Erik Forss´en. A virtual tripod for hand-held video stacking
+on smartphones. IEEE International Conference on Computational Photography
+(ICCP 2014), pages 1–9, May 2014.
+[52] David Sachs, Steven Nasiri, and Daniel Goehl. Image stabilization technology
+overview. http://www.invensense.com/mems/whitepapers.html, 2006.
+[53] Kalpana Seshadrinathan, Sung Hee Park, and Oscar Nestares. Noise and dy-
+namic range optimal computational imaging. IEEE International Conference on
+Image Processing (ICIP 2012), pages 2785–2788, 2012.
+
+===== PAGE 97 =====
+BIBLIOGRAPHY
+85
+[54] Qi Shan, Jiaya Jia, and Aseem Agarwala. High-quality motion deblurring from
+a single image. ACM Transactions on Graphics (SIGGRAPH 2008), 27(3):73,
+2008.
+[55] Ondˇrej ˇSindel´aˇr and Filip ˇSroubek. Image deblurring in smartphone devices using
+built-in inertial measurement sensors. Journal of Electronic Imaging, 22(1), 2013.
+[56] Jacob Telleen, Anne Sullivan, Jerry Yee, Oliver Wang, Prabath Gunawardane,
+Ian Collins, and James Davis. Synthetic shutter speed imaging. Computer Graph-
+ics Forum (Eurographics 2007), 26(3):591–598, 2007.
+[57] Marius Tico and Kari Pulli. Image enhancement method via blur and noisy
+image fusion. IEEE International Conference on Image Processing (ICIP 2009),
+pages 1521–1524, 2009.
+[58] Tronics. An overview of MEMS and non-MEMS high performance gyros. http:
+//www.tronicsgroup.com/high-performance-mems-gyro/, 2013.
+[59] Zhou Wang, Alan C. Bovik, Hamid R. Sheikh, and Eero P. Simoncelli. Image
+quality assessment: from error visibility to structural similarity. IEEE Transac-
+tions on Image Processing, 13(4):600–612, 2004.
+[60] Oliver Whyte, Josef Sivic, Andrew Zisserman, and Jean Ponce. Non-uniform
+deblurring for shaken images.
+International Journal of Computer Vision,
+98(2):168–186, 2012.
+[61] Norbert Wiener. Extrapolation, Interpolation, and Smoothing of Stationary Time
+Series, volume 8. MIT Press, 1964.
+[62] Navid Yazdi, Farrokh Ayazi, and Khalil Najaﬁ. Micromachined inertial sensors.
+Proceedings of the IEEE, 86(8):1640–1659, 1998.
+[63] Lu Yuan, Jian Sun, Long Quan, and Heung-Yeung Shum. Image deblurring with
+blurred/noisy image pairs. ACM Transactions on Graphics (SIGGRAPH 2007),
+26(3):1, 2007.
+
+===== PAGE 98 =====
+BIBLIOGRAPHY
+86
+[64] Li Zhang, Alok Deshpande, and Xin Chen. Denoising vs. deblurring: HDR imag-
+ing techniques using moving cameras. IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR 2010), pages 522–529, 2010.

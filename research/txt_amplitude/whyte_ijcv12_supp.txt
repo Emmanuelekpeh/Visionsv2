@@ -1,0 +1,1002 @@
+=== PAGE 1 ===
+Noname manuscript No.
+(will be inserted by the editor)
+Non-uniform Deblurring for Shaken Images:
+Derivation of parameter update equations for blind de-blurring
+Oliver Whyte
+the date of receipt and acceptance should be inserted later
+Abstract This note outlines the derivation of the parameter update formulas for the variational non-uniform blind deblurring
+algorithm described in the IJCV submission “Non-uniform Deblurring for Shaken Images”. First, using the calculus of variations,
+we ﬁnd the optimal forms of the factorized approximating distributions and arrive at the same formulas as in the uniform blind
+deblurring of Miskin and MacKay [3] and Fergus et al. [2]. Next, we derive the parameter update equations, which differ
+signiﬁcantly from [3, 2].
+1 Summary
+We derive here the optimal forms and parameters of the approximating distributions q(f), q(w) and q(βσ) used in the variational
+inference of the blind deblurring algorithms of Miskin and MacKay [3] and Fergus et al. [2]. Using the calculus of variations,
+we ﬁnd that the optimal distributions for the latent variables are (the same as Equations (42, 43, 17) of [3]):
+q(wk) ∝p(wk) exp
+
+−1
+2w(2)
+k
+
+wk −w(1)
+k
+2
+(1)
+q(fj) ∝p(fj) exp
+
+−1
+2f(2)
+j
+
+fj −f(1)
+j
+2
+(2)
+q(βσ) = Γ
+
+βσ; 1
+2
+
+i
+
+(gi −ˆgi(f, w))2	
+q(f,w) , Ng
+2
+
+,
+(3)
+where w(1)
+k , w(2)
+k , f(1)
+j
+, f(2)
+j
+are parameters of the distributions, ˆgi(f, w) is the “reconstruction” of the ith blurry pixel using the
+model in Equation (7) of the submission. Note that f and w are random variables, so in this context ˆgi(f, w) is also a random
+variable, which for simplicity we denote by ˆgi from now on. Ng is the number of observed blurry pixels, and ⟨·⟩q represents
+the expectation with respect to the the distribution q. For each latent variable, the parameters of its distribution depend on the
+distributions of all the other latent variables, e.g. w(1)
+k
+and w(2)
+k
+depend on q(βσ), q(fj) for all j and q(wk′) for all k′̸ = k. For
+our non-uniform blur model, we ﬁnd the following optimal values for the parameters (cf . Equations (46–49) of [3]):
+w(2)
+k
+= ⟨βσ⟩
+
+i
+
+j
+Cijkfj
+2	
+q(f)
+(4)
+w(1)
+k w(2)
+k
+= ⟨βσ⟩
+
+i
+
+gi
+
+j
+Cijk⟨fj⟩q(fj) −
+
+k′̸=k
+
+j
+Cijkfj
+
+j
+Cijk′fj
+	
+q(f)⟨wk′⟩q(wk′ )
+
+(5)
+f(2)
+j
+= ⟨βσ⟩
+
+i
+
+k
+Cijkwk
+2	
+q(w)
+(6)
+f(1)
+j
+f(2)
+j
+= ⟨βσ⟩
+
+i
+
+gi
+
+k
+Cijk⟨wk⟩q(wk) −
+
+j′̸=j
+⟨fj′⟩q(fj′ )
+
+k
+Cij′kwk
+
+k
+Cijkwk
+	
+q(w)
+
+.
+(7)
+The details of the derivation are given next.
+O. Whyte
+INRIA - Willow Project
+Laboratoire d’Informatique de l’Ecole Normale Sup´erieure
+(CNRS/ENS/INRIA UMR 8548), Paris, France
+E-mail: whyte@di.ens.fr
+
+=== PAGE 2 ===
+2
+2 Variational method
+For convenience, we will sometimes collect the latent variables f, w, and βσ into the “ensemble” Θ. The aim is to approximate
+the true posterior p(Θ|g) with a simpler factorized distribution q(Θ|g), denoted for simplicity as q(Θ) = q(βσ) 
+j q(fj) 
+k q(wk).
+Our model, from Equation (7) in the submission, provides the likelihood p(g|Θ):
+gi =
+
+j,k
+fjCijkwk + ε,
+(8)
+gi = f⊤Ciw + ε
+(9)
+p(g|Θ) =
+
+i
+G
+gi; ˆgi, β−1
+σ
+
+,
+see Equation (7) of [3]
+(10)
+where G( · ; μ, σ2) is a Gaussian with mean μ and variance σ2, and for each blurry pixel gi, Ci is a matrix of interpolation
+co-efﬁcients with elements Cijk. In order to get to the posterior, we also need a prior p(Θ) for our latent variables. The latent
+variables are assumed to be independent, so that the prior factorizes:
+p(Θ) = p(f)p(w)p(βσ),
+(11)
+and furthermore the elements of both f and w are assumed to be independent and identically-distributed, i.e.
+p(f) =
+
+j
+p(fj)
+(12)
+p(w) =
+
+k
+p(wk).
+(13)
+From Equation(10) of [3], we wish to minimize the following cost function, ﬁrst using the calculus of variations to ﬁnd the
+optimal form of the approximate distributions, then iteratively optimizing their parameters, which is equivalent to minimizing
+the Kullback-Leibler (KL) divergence between the posterior and the approximating distribution (see [1, Eqn. 10.3, page 463]):
+CKL =
+
+q(Θ)
+
+ln q(Θ)
+p(Θ) −ln p(g|Θ)
+
+dΘ.
+(14)
+3 Inside the Cost Function
+Since q(Θ) = q(f)q(w)q(βσ) and p(Θ) = p(f)p(w)p(βσ),
+CKL =
+
+q(Θ)
+
+ln q(f)
+p(f) + ln q(w)
+p(w) + ln q(βσ)
+p(βσ) −ln p(g|Θ)
+
+dΘ.
+(15)
+CKL =
+
+q(f) ln q(f)
+p(f)df +
+
+q(w) ln q(w)
+p(w)dw +
+
+q(βσ) ln q(βσ)
+p(βσ)dβσ −
+
+q(Θ) ln p(g|Θ) dΘ.
+(16)
+Similarly, since q(f) = 
+j q(fj), q(w) = 
+k p(wk), p(f) = 
+j p(fj), and p(w) = 
+k p(wk),
+CKL =
+
+j
+
+q(fj) ln q(fj)
+p(fj)dfj +
+
+k
+
+q(wk) ln q(wk)
+p(wk)dwk +
+
+q(βσ) ln q(βσ)
+p(βσ)dβσ
+−
+
+q(Θ) ln p(g|Θ) dΘ.
+(17)
+Finally, we expand the last term:
+p(g|Θ) =
+
+i
+G(gi; ˆgi, β−1
+σ ),
+(18)
+ln p(g|Θ) =
+
+i
+ln G(gi; ˆgi, β−1
+σ )
+(19)
+= 1
+2
+
+i
+
+ln βσ −βσ(gi −ˆgi)2 −ln 2π
+
+(20)
+
+q(Θ) ln p(g|Θ) dΘ = 1
+2
+
+q(Θ)
+
+i
+
+ln βσ −βσ(gi −ˆgi)2 −ln 2π
+
+dΘ
+(21)
+= 1
+2
+
+q(βσ)
+
+i
+
+ln βσ −βσ
+
+q(f)q(w)(gi −ˆgi)2 df dw
+
+dβσ −1
+2
+
+i
+ln 2π.
+(22)
+
+=== PAGE 3 ===
+3
+Putting (22) into (17) and ignoring terms independent of Θ,
+CKL =
+
+j
+
+q(fj) ln q(fj)
+p(fj)dfj +
+
+k
+
+q(wk) ln q(wk)
+p(wk)dwk +
+
+q(βσ) ln q(βσ)
+p(βσ)dβσ
+−1
+2
+
+q(βσ)
+
+i
+
+ln βσ −βσ
+
+q(f)q(w)(gi −ˆgi)2 df dw
+
+dβσ
+(23)
+4 Optimal Distributions
+4.1 Optimal q(βσ)
+To derive the optimal form of q(βσ), we ignore terms in CKL independent of βσ, add a Lagrange multiplier for the constraint
+that 
+q(βσ) dβσ = 1, and differentiate with respect to q(βσ) :
+CKL
+
+q(βσ)
+=
+
+q(βσ)
+
+ln q(βσ)
+p(βσ) −1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
+dβσ + λσ
+
+q(βσ) dβσ −1
+
+,
+(24)
+where ⟨·⟩denotes the expectation under the approximating distribution q(Θ).
+CKL
+
+q(βσ) + δq(βσ)
+=
+
+q(βσ)
+
+ln q(βσ) + δq(βσ)
+p(βσ)
+−1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
+dβσ
++
+
+δq(βσ)
+
+ln q(βσ) + δq(βσ)
+p(βσ)
+−1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
+dβσ
++ λσ
+
+q(βσ) dβσ +
+
+δq(βσ) dβσ −1
+
+(25)
+ln
+q(βσ) + δq(βσ)
+≃ln q(βσ) + δq(βσ)
+q(βσ)
+to ﬁrst order, so
+(26)
+CKL
+
+q(βσ) + δq(βσ)
+= CKL
+
+q(βσ)
++
+
+δq(βσ) dβσ
++
+
+δq(βσ)
+
+ln q(βσ)
+p(βσ) + δq(βσ)
+q(βσ) −1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
+dβσ
++ λσ
+
+δq(βσ) dβσ.
+(27)
+Discarding higher order terms in δq,
+δCKL =
+
+δq(βσ)
+
+1 + ln q(βσ)
+p(βσ) −1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
++ λσ
+
+dβσ
+(28)
+∂CKL
+∂q(βσ) = 1 + ln q(βσ)
+p(βσ) −1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
++ λσ.
+(29)
+Setting this derivative to zero, we obtain an relation similar to Equation (14) in [3]:
+ln q(βσ) = ln p(βσ) + 1
+2
+
+i
+
+ln βσ −βσ
+
+(gi −ˆgi)2
+−1 −λσ.
+(30)
+Thus the optimal distribution is
+q(βσ) ∝p(βσ)β
+Ng
+2
+σ
+exp
+
+−1
+2βσ
+
+i
+
+(gi −ˆgi)2
+
+,
+(31)
+which, given that p(ln βσ) = 1 ⇒p(βσ) = Γ(βσ; ϵ, ϵ) with ϵ →0 (Equation (8) of [3]), gives Equation (17) of [3]:
+q(βσ) = Γ
+
+βσ; 1
+2
+
+i
+
+(gi −ˆgi)2
+, Ng
+2
+
+,
+(32)
+where the Γ distribution is given by Equation (15) of [3]:
+Γ(x; a, b) =
+1
+Γ(b)abx(b−1) exp(−ax).
+(33)
+
+=== PAGE 4 ===
+4
+4.2 Optimal q(fj)
+Starting from Equation (23), and isolating the relevant terms,
+CKL
+
+q(fj)
+=
+
+q(fj) ln q(fj)
+p(fj) dfj + 1
+2⟨βσ⟩
+
+i
+
+q(f)q(w)(gi −ˆgi)2 df dw + λj
+
+q(fj) dfj −1
+
+. (34)
+For convenience, we partition f into fj, the pixel of interest, and fj∗, the remaining pixels:
+CKL
+
+q(fj)
+=
+
+q(fj)
+
+ln q(fj)
+p(fj) + 1
+2⟨βσ⟩
+
+i
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw
+
+dfj + λj
+
+q(fj) dfj −1
+
+(35)
+CKL
+
+q(fj) + δq(fj)
+=
+
+q(fj)
+
+ln q(fj)
+p(fj) + δq(fj)
+q(fj) + 1
+2⟨βσ⟩
+
+i
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw
+
+dfj
++
+
+δq(fj)
+
+ln q(fj)
+p(fj) + δq(fj)
+q(fj) + 1
+2⟨βσ⟩
+
+i
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw
+
+dfj
++ λj
+
+q(fj) dfj +
+
+δq(fj) dfj −1
+
+(36)
+= CKL
+
+q(fj)
++ (1 + λj)
+
+δq(fj) dfj
++
+
+δq(fj)
+
+ln q(fj)
+p(fj) + 1
+2⟨βσ⟩
+
+i
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw
+
+dfj
+(37)
+∂CKL
+∂q(fj) = ln q(fj)
+p(fj) + 1
+2⟨βσ⟩
+
+i
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw + 1 + λj.
+(38)
+Setting this equal to zero, we obtain the optimal form
+ln q(fj) = ln p(fj) −1
+2⟨βσ⟩
+
+i
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw −1 −λj.
+(39)
+Here we need to make some simpliﬁcations to obtain a function of fj.
+(gi −ˆgi)2 = g2
+i −2giˆgi + ˆg2
+i
+(40)
+ˆgi = f⊤Ciw,
+(41)
+= f⊤
+j∗Cij∗w + fjc⊤
+ijw
+(42)
+where c⊤
+ij is the jth row of Ci, and Cij∗is Ci with this row removed.
+(gi −ˆgi)2 = g2
+i −2gi(f⊤Ciw) + (f⊤Ciw)2
+(43)
+= g2
+i −2gi(f⊤
+j∗Cij∗w) −2gi(fjc⊤
+ijw) + (f⊤
+j∗Cij∗w)2 + 2(f⊤
+j∗Cij∗w)(fjc⊤
+ijw) + (fjc⊤
+ijw)2
+(44)
+= −2gi(fjc⊤
+ijw) + 2(f⊤
+j∗Cij∗w)(fjc⊤
+ijw) + (fjc⊤
+ijw)2 + const.
+(45)
+
+(gi −ˆgi)2
+q(fj∗,w) =
+
+q(fj∗)q(w)(gi −ˆgi)2 dfj∗dw
+(46)
+= 
+−2gi(fjc⊤
+ijw) + 2(f⊤
+j∗Cij∗w)(fjc⊤
+ijw) + (fjc⊤
+ijw)2 + const.
+q(fj∗,w)
+(47)
+= −2fj
+
+gic⊤
+ij
+
+w
+q(w) −
+fj∗⊤
+q(fj∗)
+
+(Cij∗w)(c⊤
+ijw)
+q(w)
+
++ f2
+j
+
+(c⊤
+ijw)2
+q(w) + const.
+(48)
+
+i
+
+(gi −ˆgi)2
+q(fj∗,w) = −2fj
+
+i
+
+gic⊤
+ij
+
+w
+q(w) −
+fj∗⊤
+q(fj∗)
+
+(Cij∗w)(c⊤
+ijw)
+q(w)
+
++ f2
+j
+
+i
+
+(c⊤
+ijw)2
+q(w) + const.
+(49)
+
+=== PAGE 5 ===
+5
+which is just a quadratic in fj. Replacing the coefﬁcients with aj and bj,
+
+i
+
+(gi −ˆgi)2
+q(fj∗,w) = ajf2
+j −bjfj + const.
+(50)
+= aj
+
+fj −bj
+2aj
+2
++ const.
+(51)
+ln q(fj) = ln p(fj) −1
+2⟨βσ⟩aj
+
+fj −bj
+2aj
+2
++ const.
+(52)
+q(fj) ∝p(fj) exp
+
+−1
+2⟨βσ⟩aj
+
+fj −bj
+2aj
+2
+(53)
+∝p(fj) exp
+
+−1
+2f(2)
+j
+
+fj −f(1)
+j
+2
+cf . Equation (43) of [3]
+(54)
+where
+f(2)
+j
+= ⟨βσ⟩aj
+(55)
+= ⟨βσ⟩
+
+i
+
+(c⊤
+ijw)2
+q(w)
+cf . Equation (48) of [3]
+(56)
+= ⟨βσ⟩
+
+i
+
+k
+Cijkwk
+2	
+q(w)
+(57)
+f(1)
+j
+f(2)
+j
+= 1
+2⟨βσ⟩bj
+(58)
+= ⟨βσ⟩
+
+i
+
+gic⊤
+ij
+
+w
+q(w) −
+fj∗⊤
+q(fj∗)
+
+(Cij∗w)(c⊤
+ijw)
+q(w)
+
+cf . Equation (49) of [3]
+(59)
+= ⟨βσ⟩
+
+i
+
+gi
+
+k
+Cijk⟨wk⟩q(wk) −
+
+j′̸=j
+⟨fj′⟩q(fj′ )
+
+k
+Cij′kwk
+
+k
+Cijkwk
+	
+q(w)
+
+.
+(60)
+4.3 Optimal q(wk)
+We proceed much the same as for q(fj), starting from Equation (23), and isolating the relevant terms,
+CKL
+
+q(wk)
+=
+
+q(wk) ln q(wk)
+p(wk) dwk + 1
+2⟨βσ⟩
+
+i
+
+q(f)q(w)(gi −ˆgi)2 df dw
++ λk
+
+q(wk) dwk −1
+
+.
+(61)
+similarly, we partition w into wk, the element of interest, and wk∗, the remaining elements:
+CKL
+
+q(wk)
+=
+
+q(wk)
+
+ln q(wk)
+p(wk) + 1
+2⟨βσ⟩
+
+i
+
+q(f)q(wk∗)(gi −ˆgi)2 df dwk∗
+
+dwk
++ λk
+
+q(wk) dwk −1
+
+(62)
+and obtain the optimal form
+ln q(wk) = ln p(wk) −1
+2⟨βσ⟩
+
+i
+
+q(f)q(wk∗)(gi −ˆgi)2 df dwk∗−1 −λk.
+(63)
+Here we need to make some simpliﬁcations to obtain a function of wk.
+ˆgi = f⊤Ciw,
+(64)
+= f⊤cikwk + f⊤Cik∗wk∗
+(65)
+
+=== PAGE 6 ===
+6
+where cik is the kth column of Ci, and Cik∗is Ci with this column removed.
+(gi −ˆgi)2 = g2
+i −2gi(f⊤Ciw) + (f⊤Ciw)2
+(66)
+= g2
+i −2gi(f⊤cikwk) −2gi(f⊤Cik∗wk∗) + (f⊤cikwk)2
++ 2(f⊤cikwk)(f⊤Cik∗wk∗) + (f⊤Cik∗wk∗)2
+(67)
+= −2gi(f⊤cikwk) + 2(f⊤cikwk)(f⊤Cik∗wk∗) + (f⊤cikwk)2 + const.
+(68)
+
+i
+
+(gi −ˆgi)2
+q(f,wk∗) = −2wk
+
+i
+
+gi
+
+f⊤
+q(f)cik −
+(f⊤cik)(f⊤Cik∗)
+q(f)
+
+wk∗
+q(wk∗)
+
++ w2
+k
+
+i
+
+(f⊤cik)2
+q(f) + const.
+(69)
+q(wk) ∝p(wk) exp
+
+−1
+2w(2)
+k
+
+wk −w(1)
+k
+2
+cf . Equation (42) of [3]
+(70)
+where
+w(2)
+k
+= ⟨βσ⟩
+
+i
+
+(f⊤cik)2
+q(f)
+cf . Equation (46) of [3]
+(71)
+= ⟨βσ⟩
+
+i
+
+j
+Cijkfj
+2	
+q(f)
+(72)
+w(1)
+k w(2)
+k
+= ⟨βσ⟩
+
+i
+
+gi
+
+f⊤
+q(f)cik −
+(f⊤cik)(f⊤Cik∗)
+q(f)
+
+wk∗
+q(wk∗)
+
+cf . Equation (47) of [3]. (73)
+= ⟨βσ⟩
+
+i
+
+gi
+
+j
+Cijk⟨fj⟩q(fj) −
+
+k′̸=k
+
+j
+Cijkfj
+
+j
+Cijk′fj
+	
+q(f)⟨wk′⟩q(wk′ )
+
+(74)
+References
+1. C. M. Bishop. Pattern Recognition and Machine Learning (Information Science and Statistics). Springer, 2006. ISBN
+0387310738.
+2. R. Fergus, B. Singh, A. Hertzmann, S. T. Roweis, and W. T. Freeman. Removing camera shake from a single photograph.
+ACM Trans. Graphics (Proc. SIGGRAPH 2006), 25(3):787–794, 2006.
+3. J. W. Miskin and D. J. C. MacKay. Ensemble learning for blind image separation and deconvolution. In M. Girolani, editor,
+Advances in Independent Component Analysis. Springer-Verlag, 2000.

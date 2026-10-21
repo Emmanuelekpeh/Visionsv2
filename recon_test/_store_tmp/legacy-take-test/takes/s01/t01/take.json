@@ -1,0 +1,18 @@
+{
+  "take": "t01",
+  "shot": "s01",
+  "at": "2026-10-14 11:55:18",
+  "generation": {
+    "prompt": "legacy",
+    "scale": "medium",
+    "camera": "none",
+    "subject": "",
+    "seed": 1204,
+    "model": "off"
+  },
+  "input_hash": "02f6086c62a5",
+  "rebuild_hash": "9f59dd3ee65b",
+  "seconds": 540.0,
+  "frames": 3,
+  "approved": false
+}

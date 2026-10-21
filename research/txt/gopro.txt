@@ -1,0 +1,1056 @@
+Motion Deblurring in the Wild
+Mehdi Noroozi
+Institute of Informatics
+University of Bern
+noroozi@inf.unibe.ch
+Paramanand Chandramouli
+Institute of Informatics
+University of Bern
+chandra@inf.unibe.ch
+Paolo Favaro
+Institute of Informatics
+University of Bern
+paolo.favaro@inf.unibe.ch
+(a)
+(b)
+(c)
+(d)
+Figure 1: Direct deblurring example. (a) Blurry video frame. (b) Result of [36] on the single frame in (a). (c) Output of video
+deblurring method by [17]. (d) Result of the proposed method using a single frame in (a) is comparable to video deblurring
+which uses multiple frames.
+Abstract
+The task of image deblurring is a very ill-posed prob-
+lem as both the image and the blur are unknown. Moreover,
+when pictures are taken in the wild, this task becomes even
+more challenging due to the blur varying spatially and the
+occlusions between the object. Due to the complexity of the
+general image model we propose a novel convolutional net-
+work architecture which directly generates the sharp image.
+This network is built in three stages, and exploits the ben-
+eﬁts of pyramid schemes often used in blind deconvolution.
+One of the main difﬁculties in training such a network is to
+design a suitable dataset. While useful data can be obtained
+by synthetically blurring a collection of images, more real-
+istic data must be collected in the wild. To obtain such data
+we use a high frame rate video camera and keep one frame
+as the sharp image and frame average as the correspond-
+ing blurred image. We show that this realistic dataset is key
+in achieving state-of-the-art performance and dealing with
+occlusions.
+1. Introduction
+Motion blur artifacts are a major concern while captur-
+ing pictures in real world scenarios. Because of camera and
+object motion and due to the ﬁnite exposure interval, the
+image of different scene points gets averaged on the sensor
+causing motion blur (see Fig. 1 left). Motion deblurring has
+been exhaustively studied for the case when blur is uniform
+across the image. In this scenario, blind deconvolution algo-
+rithms achieve very good performance [37, 28]. However,
+in practice, motion blur varies across an image due to ob-
+ject motion, camera shake and the 3D structure of the scene.
+Modeling the relationship between the blurred observation
+and the sharp latent image by considering all these factors,
+in addition to occlusion effects, is quite a complicated task.
+Consequently, algorithms that handle space-variant blur ei-
+ther address only speciﬁc scenarios [15, 30, 40] or simplify
+the blur model [21, 36].
+The common approach followed by deblurring algo-
+rithms is to initially determine the point spread function
+(PSF) that describes the blur and then solve for the sharp
+image [27, 26, 28]. Since the space-variant PSF is directly
+linked with the unknown factors such as scene depth, cam-
+era motion and segmentation boundaries of objects, deter-
+1
+arXiv:1701.01486v1  [cs.CV]  5 Jan 2017
+
+mining it in a general setting is quite challenging. In this
+paper, we follow a different approach. Rather than enforc-
+ing a model to relate the blurred observation and the sharp
+image, we attempt to directly recover the latent sharp image
+by discriminative learning through a deep network formula-
+tion. We learn the parameters of the mapping function from
+real data and avoid an explicit model in terms of the PSF.
+A large amount of data is required for training the network
+that represents the mapping function. One way to obtain
+this data is to create blurred-unblurred image pairs by syn-
+thetically blurring images. However, these images do not
+capture effects such as real object and camera motion and
+occlusions. A system to obtain such data would in princi-
+ple require a hybrid setup with 2 synchronized cameras, one
+with a long exposure and one with a short one. However, to
+avoid such setup altogether, we use a high frame rate video
+camera. The sharp image is taken as one of the frames and
+the blurry image as the average of all the frames. Fig. 1
+shows an example of the ability of our network to generate
+sharp images despite space-variant blur.
+Our contributions are: 1) A state-of-the-art blind decon-
+volution method for general space-varying motion blur (due
+to moving objects, depth variations and camera shake); 2) A
+novel convolutional network design motivated by the pyra-
+mid architecture; 3) The sharp image is directly obtained
+from our network very efﬁciently and without parameter
+tuning; 4) A novel database for sharp-motion blurred im-
+age pairs in the wild, which we will make available.
+1.1. Related work
+With the success of the variational Bayesian approach
+of Fergus et al. [9], a large number of blind deconvolu-
+tion algorithms have been developed for motion deblur-
+ring [2, 5, 26, 37, 31, 28, 45, 42]. Although blind decon-
+volution algorithms consider blur to be uniform across the
+image, some of the methods are able to handle small varia-
+tions due to camera shake [24]. Techniques based on blind
+deconvolution have been adapted to address blur variations
+due to camera rotations by deﬁning the blur kernel on a
+higher dimensional space [11, 13, 40]. Another approach to
+handle camera shake induced space-variant blur is through
+region-wise blur kernel estimation [12, 19]. In 3D scenes,
+motion blur at a pixel is also related to depth at a point. To
+address this problem, techniques have been proposed that
+initially estimate a depth map and then solve for the motion
+blur PSF and the sharp image [16, 43]. In [46], motion blur
+due to forward or backward camera motion has been explic-
+itly addressed. Note that all the above approaches consider
+blurring due to camera motion and are not suitable to handle
+sudden variations in blur due to moving objects.
+Comparatively fewer methods exist for deblurring dy-
+namic scenes.
+In an initial attempt to this problem by
+Levin [25], the blurred image is considered to be composed
+of different regions within which blur is assumed to be con-
+stant. Based on the effect of blur on image statistics, the
+segmentation map and blur estimates for different regions
+are initially derived.
+Subsequently, each region is sepa-
+rately deblurred through Richardson-Lucy deconvolution.
+Couzini et al. [6] perform deblurring for both space vari-
+ant defocus and horizontal motion blur. They propose to
+estimate the space-variant PSF by combining learned local
+blur evidence with global smoothness constraints and then
+recover the sharp image using a deconvolution algorithm
+based on sparse regularization with global image statistics.
+The main restriction in these methods is that the blur model
+does not accurately represent the camera or object motion.
+Techniques based on alpha matting have been applied to re-
+store scenes with two layers [7, 39]. Although these meth-
+ods can handle moving objects, they require user interaction
+and cannot be used in general scenarios where blur varies
+due to camera motion and scene depth.
+Kim et al. [20] proposed a segmentation-based technique
+to deblur dynamic scenes. The method incorporates alter-
+nate minimization to estimate blur kernels, latent image,
+and motion segments. Even with a general camera shake
+model for blurring, the algorithm fails in certain scenarios
+such as forward motion or depth variations [21]. In the tech-
+nique proposed in [21] by Kim and Lee, abrupt changes
+in motion are handled without segmentation by a robust
+model. To reduce the complexity, motion blur is modeled
+by linear ﬁlters (uniform velocity assumption). The authors
+propose to simultaneously estimate motion ﬂow and the la-
+tent image using a robust total variation (TV-L1) model.
+Schelten and Roth [32] propose a method to estimate and
+remove local non-parametric blur. Through a variational-
+Bayesian formulation, their framework recovers both defo-
+cus as well as object motion blur kernels. The sharp image
+is estimated by non-blind deblurring. Pan et al. [29] propose
+an efﬁcient algorithm to jointly estimate object segmenta-
+tion and camera motion by incorporating soft segmentation.
+In addition to the unknowns of sharp image and blur kernel
+of each layer, they introduce the terms of binary mask and
+a segmentation conﬁdence map in their framework that al-
+lows handling of large blurs. Although the method produces
+good results in very challenging scenarios, the downside is
+that it requires user input for initializing the segmentation
+map and the number of segments. Another related approach
+to the deblurring problem is to use multiple frames. Recent
+works following this approach are able handle space-variant
+blur quite well [17, 41]. The works in [4, 10, 35] address
+the problem of segmenting an image into different regions
+according to blur. Although one could potentially estimate
+constant blur regions from these segmentation methods and
+apply standard deblurring techniques, in practice, such ap-
+proaches would lead to artifacts at the boundaries unless
+handled suitably.
+
+Since deep learning-based approaches have been able to
+achieve remarkable performance in different problems in
+computer vision, researchers have attempted to use them
+for motion deblurring. The methods in [33, 44] address the
+non-blind deconvolution problem wherein the sharp image
+is predicted using the PSF estimated from other techniques.
+In [34], Schuler et al. develop an end-to-end system that
+learns to perform blind deconvolution. Their system con-
+sists of modules to extract features, estimate the PSF and
+to perform deblurring. Similar to conventional blind de-
+convolution algorithm, they incorporate multi-scale itera-
+tions by repeating the set of modules. The performance
+of this approach degrades for larger sizes of blur kernels.
+Chakrabarti [3] proposes to learn the prediction of com-
+plex Fourier coefﬁcients of a deconvolution ﬁlter for an in-
+put patch of the blurry image. From the restored patches, a
+global blur kernel and thence the sharp image are estimated
+through conventional optimization approaches. Hradiˇs et
+al. [14] predict clean and sharp images from text documents
+that are corrupted by motion blur, defocus and noise through
+a convolutional network without an explicit PSF estima-
+tion.
+This approach has been extended to license plates
+in [38]. While textual data contains repeated shapes and
+good data representation can be learnt for reconstruction,
+replicating this approach for natural images is signiﬁcantly
+challenging. The deep learning-based methods discussed
+above are applicable for uniform blur scenarios.
+Sun et
+al. [36] propose to addresses non-uniform motion blur rep-
+resented in terms of motion vectors with a speciﬁc length
+and orientation. They estimate probabilities of local blur
+kernels through a ConvNet and subsequently estimate dense
+motion kernels by enforcing motion smoothness. Finally
+space-variant deblurring is performed using patch-level im-
+age prior. Handling object motion could be difﬁcult with
+this scheme because of the motion smoothness constraint.
+2. Proposed formulation
+Consider a dynamic scene imaged by a camera.
+The
+blurred observation g at a pixel x can be expressed as
+g (x) = 1
+Te
+Z Te
+0
+ft (x) dt
+(1)
+where ft denotes the instantaneous image observed by the
+camera sensors at time t, and Te denotes the exposure du-
+ration. One of the instantaneous (sharp) images within the
+exposure duration can be considered as the reference latent
+image f. If there are no occlusion effects, then ft would
+be a transformed instance of the reference image f, i.e.,
+ft (x) = f (Mt (x)) for some mapping Mt. If the map-
+ping is restricted to translations that are uniform across the
+image domain, then Mt (x) = x −vt, with vt a 2D vector
+that depends on time t, and Eqn. (1) can be replaced by the
+well-known convolution model
+g (x) = 1
+Te
+Z Te
+0
+f (x −vt) dt = (f ∗k) (x)
+(2)
+where k denotes the shift-invariant PSF. However, in a gen-
+eral scenario, due to camera rotations, motion parallax, ob-
+ject motion and occlusion effects a simple and accurate
+model for Eqn. (1) seems elusive. Rather than enforcing a
+model on the data our approach is to discriminatively train
+a network using real data. We learn the parameters of a
+generative model that optimally estimates the sharp image
+given the blurred observation. To this purpose, we use a
+fully convolutional neural network that is trained in an end-
+to-end fashion: The network takes a blurry image as input
+and directly generates a sharp image estimate. Since deblur-
+ring is a demanding ﬁltering task, we design a network with
+very high capacity (see Table 1). As a consequence, train-
+ing such a bulky model becomes more demanding. We em-
+ploy efﬁcient techniques to get reasonable convergence of
+the network parameters, which we describe more in detail in
+the next section. Furthermore, this network requires a large
+set of blurry and sharp image pairs. To this end, we gener-
+ate a new dataset using high resolution videos of dynamic
+scenes. The use of such a dataset is critical for achieving
+good performance as later seen in the experimental section.
+We describe the dataset generation more in detail in Sec. 3.
+2.1. The Multiscale Convolutional Neural Network
+Our convolutional neural network (CNN) architecture,
+shown in Fig. 2, has two main differences with respect to
+conventional CNNs. These differences play a signiﬁcant
+role in generating high quality sharp images without arti-
+facts.
+Firstly, it is designed in a pyramid or multi-scale
+fashion. Inspired by the multi-scale processing of blind de-
+convolution algorithms [28, 34], we include three segments
+N1, N2, and N3 in our network, wherein each segment in-
+cludes several convolution/deconvolution (fractional convo-
+lution) layers. The task of each segment is to minimize the
+reconstruction error at a particular scale. Because the extent
+of blur decreases with downsampling [28], the multi-scale
+formulation allows the network to deal with small amounts
+of blur in each segment. In particular, the task for the ﬁrst
+segment N1 is to generate a deblurred image at 1/4 of the
+original scale. The task for the segment N2 is to start from
+this low resolution, but sharper, input and generate a sharp
+image at 1/2 of the original resolution. Finally, the task for
+the segment N3 is to generate the sharp output at the orig-
+inal resolution. Secondly, the network is designed with a
+skip connection at the end of each segment. The idea behind
+this technique is to reduce the difﬁculty of the reconstruc-
+tion task in the network by using the information already
+present in the blurry image. Thus, each segment needs to
+only generate a residual image which is then added to the
+
++
+#4
+#2
+#4
+#2
++
++
+g
+N1
+N2
+N3
+f
+L2
+L1
+L3
+Figure 2: The Multiscale CNN architecture: The multiscale
+scheme allows the network to handle large blurs and skip
+connections facilitate the generation of details.
+input blurry image (after downsampling, if needed). We
+observe experimentally that the skip connection technique
+helps the network in generating more texture details. We
+call this architecture the Multiscale CNN.
+The ﬁrst segment of our network generates sharp im-
+ages at a scale corresponding to a downsampling factor of
+4. This part consists of seven convolutional layers. In this
+segment, we perform downsampling by having stride of 2 in
+the ﬁrst and fourth layers. The second and third segments
+include four convolutional layers followed by a deconvolu-
+tional layer with the stride of 2. The last deconvolution layer
+can be seen as a parametrized upsampling layer. The details
+of the architecture are shown in Table 1. During the train-
+ing we minimize the reconstruction error of all the scales
+simultaneously. Our loss function L is deﬁned as the sum
+of 3 losses:
+L = L1 + L2 + L3
+L1 =
+X
+(g,f)∈D
+N1(g) + g
+1
+4 −f
+1
+4
+
+2
+(3)
+L2 =
+X
+(g,f)∈D
+N2(N1(g) + g
+1
+4 ) + g
+1
+2 −f
+1
+2
+
+2
+L3 =
+X
+(g,f)∈D
+N3(N2(N1(g) + g
+1
+4 )) + g
+1
+2 ) + g −f
+
+2
+where D is the training set, g denotes a blurry image, f
+denotes a sharp image, I
+1
+k denotes the downsampling op-
+eration of the image I by factor of k, and Ni indicates the
+i-th segment in the Multiscale CNN, which reconstructs one
+scale.
+2.2. Implementation Details
+We used Adam [23] for optimization with momentum
+parameters as β1 = 0.9, β2 = 0.999, and an initial learning
+rate of 0.001. We decrease the learning rate by .75 every
+10K iterations. We used two Titan X for training with a
+batch size of 10. The network needs 5 days to converge
+Figure 3: Filters of the ﬁrst layer.
+using batch normalization [18]. The ﬁlters of the ﬁrst layer
+are shown in Fig 3. We observe that these ﬁlters are quite
+strong for an unsupervised learning method.
+3. Blurry Images in the Wild
+We train our network with a realistic dataset consisting of
+sharp and blurry observations of a dynamic scene obtained
+through a high resolution video camera. We average a set
+of frames to obtain realistic blurred observations. Similar
+averaging of frames has been done in previous works to ob-
+tain data for evaluation [22, 1]. While in [22] a blurry video
+is simulated, in [1] blurry images, coded exposure images
+and motion invariant photographs are synthesized.
+From a handheld GoPro Hero5 camera which has a
+frame rate of 240 fps with a resolution of 1280×720, we
+collected a large set of videos of outdoor scenes. We down-
+sampled all the frames in the videos by a factor of three
+in order to reduce the magnitude of relative motion across
+frames. The number of frames Ne to be averaged is selected
+at random from a set of odd numbers ranging between 7 and
+23. Out of the Ne frames, the central frame is considered to
+be the sharp image. The averaging of frames corresponds
+to a discrete version of the integration in Eqn. (1). How-
+ever, if the velocity of the relative motion is high, a scene
+point could jump more than 1 pixel across frames. Such
+jumps would not be occurring in a real motion blurred im-
+age. To avoid frames with higher displacement, we evaluate
+optical ﬂow using the recent FlowNet algorithm [8]. We do
+not include those sets of frames in our dataset if the opti-
+cal ﬂow between adjacent frames is more than a pixel at
+any location. Fig. 4 shows an example of the sharp and
+blurred image pair in our training dataset. In this scene, we
+ﬁnd both the camera and objects to be moving. By simply
+averaging the frames, we can embed the information corre-
+sponding to motion parallax, occlusions camera shake and
+
+N1
+N2
+N3
+Type
+conv
+conv
+conv
+conv
+conv
+conv
+conv
+conv
+conv
+conv
+conv
+deconv
+conv
+conv
+conv
+conv
+deconv
+OutCh
+96
+256
+384
+384
+256
+256
+3
+256
+256
+256
+256
+3
+256
+256
+256
+256
+3
+Kernel
+11
+7
+7
+7
+3
+3
+3
+5
+5
+5
+5
+5
+5
+5
+5
+5
+5
+Stride
+↓2
+1
+1
+↓2
+1
+1
+1
+1
+1
+1
+1
+↑2
+1
+1
+1
+1
+↑2
+Table 1: Details of the Multiscale CNN architecture. There is a Batch Normalization and Relu layer after every convolutional
+layer (except for the last layer of N1) that are not shown for the sake of simplicity. Using a stride greater than one in
+convolutional layers downsamples the input and is indicated by the ↓symbol. In contrast, a stride greater than one in
+deconvolutional layers performs upsampling and is indicated by the ↑symbol.
+object motion in our data.
+For completeness, we also compute approximate PSFs
+in a sparse grid on the input image. The ideal PSF h at
+a location x can be related to the shifts undergone by the
+point during the exposure time as
+hx (s) = 1
+Te
+Z Te
+0
+δ (s −(x −Mt (x))) dt
+(4)
+If we use the convolution relationship between f and g
+through the PSF h, we would arrive at the imaging model
+in Eqn. 1. In the case of our dataset, we arrive at an ap-
+proximate estimate of the PSF using the optical ﬂow values
+returned by the algorithm in [8]. We show the approximate
+estimates of the PSF in Fig. 4 (c).
+4. Experiments
+We tested the performance of our method on three dif-
+ferent types of data: a) a test set in the wild created from a
+high frame rate video camera, b) real images captured from
+a Canon EOS 5D, and c) data from previous works. Addi-
+tional results and comparisons are presented in the supple-
+mentary material.
+To verify the impact of using a realistic dataset for space-
+variant blurring, we trained another network with the same
+architecture as the one in Fig. 2. However, we used synthet-
+ically blurred images according to the convolution model.
+As in [3], we prepared a set of 100K different PSFs. Dur-
+ing training, we randomly pick a motion PSF and convolve
+it with a sharp texture to generate blurred data. We refer
+to this network as the MSCNN(SI), multiscale CNN space-
+invariant (data), and include comparisons of this network
+with our method. A second network is instead trained only
+on the blurry-sharp image pairs from our dataset in the wild.
+This network is called MSCNN(WILD), multiscale CNN
+from data in the wild.
+4.1. Test-set evaluation
+The videos in the test set were captured at locations dif-
+ferent from those where training data was captured. Also
+incidentally, the weather conditions were signiﬁcantly dif-
+ferent when the test set was captured. We randomly chose
+[36]
+[42]
+[45]
+MSCNN(SI) MSCNN(WILD)
+25.48 23.61 22.50
+25.8
+28.1
+Table 2: Average PSNR on our test set in the wild.
+15 images from the test-set and compared the performance
+of our method against the methods in [42], [36], the space
+variant implementation of the method in [45], and our
+MSCNN(SI) and MSCNN(WILD) methods. Representa-
+tive examples corresponding to two different scenes are
+shown in Fig. 5. Although we observe deblurring from
+the methods in [45] and [42] at a few locations, these
+methods fail when there is blur variation either due to ob-
+ject motion or depth changes.
+Our results are closer to
+the true image.
+Using the reference images, we quanti-
+ﬁed the performance of the methods in terms of PSNR as
+shown in Table 2. The PSNR values indicate that both our
+methods perform better than previous work. However, the
+MSCNN(WILD) method’s performance is signiﬁcantly bet-
+ter than MSCNN(SI). Since the test data set is quite chal-
+lenging due to factors such as reﬂections/specularities and
+space variant blur, the PSNR values are not comparable to
+the values seen in conventional deconvolution algorithms.
+We show all the 15 images from the test set and compar-
+isons with other methods in the supplementary material.
+4.2. Qualitative evaluation
+We also evaluate our network qualitatively on datasets
+of prior works and images obtained from a Canon cam-
+era. While Figs. 6 and 7, consist of data from [36] and
+[21], respectively, Fig. 8 shows images from our camera.
+In Fig. 8, we compare the methods of [42], [36] and [45]
+to our MSCNN(SI) and MSCNN(WILD). In all the images,
+we can see that our method is able to return sharper im-
+ages with more details. Further, we observe that in Fig. 8,
+MSCNN(WILD) produces signiﬁcantly better results than
+MSCNN(SI).
+
+(a)
+(b)
+(c)
+Figure 4: Example of training data: (a) Averaged image. (b) Reference frame. (c) PSF estimated from optical ﬂow.
+Blurry image
+True image
+Xu and Jia[42]
+Xu et al. [45]
+Sun et al. [36]
+MSCNN(WILD)
+Blurry image
+True image
+Xu and Jia[42]
+Xu et al. [45]
+Sun et al. [36]
+MSCNN(WILD)
+Figure 5: Evaluation on our test dataset in the wild.
+5. Conclusions
+We proposed a novel convolutional neural network ar-
+chitecture for predicting a sharp image given a blurred one.
+
+Blurry image
+Sun et al. [36]
+MSCNN(WILD)
+Figure 6: Evaluation on the test dataset from [36].
+Blurry image
+Kim and Lee[21]
+Sun et al. [36]
+MSCNN(WILD)
+Blurry image
+Kim and Lee[21]
+Sun et al. [36]
+MSCNN(WILD)
+Figure 7: Evaluation on the test dataset [21].
+Our network is able to infer estimates of a sharp image un-
+der challenging scenarios due to occlusions, saturation, mo-
+tion parallax and camera rotations. The network is designed
+in 3 segments and it exploits a multiscale strategy to break
+down the complexity of the deblurring task. Moreover, each
+segment outputs only a residual image that yields the sharp
+image when added to the input image. This allows the seg-
+ment to focus on small details as conﬁrmed experimentally.
+
+Blurry image
+Xu et al. [45]
+Sun et al. [36]
+Xu and Jia[42]
+MSCNN(SI)
+Output of MSCNN(WILD)
+Blurry image
+Xu et al. [45]
+Sun et al. [36]
+Xu and Jia[42]
+MSCNN(SI)
+MSCNN(WILD)
+Figure 8: Evaluation on images from the Canon camera.
+
+An important part of our solution is the design of a real-
+istic dataset. We ﬁnd that simple frame averaging com-
+bined with a very high frame rate video camera produces
+reasonable blurred-sharp image pairs for the training of our
+network. Indeed, both quantitative and qualitative results
+show a good performance when compared to prior work.
+Moreover, we observe that our network does not generate
+artifacts, but may leave extreme blurs untouched. In future
+work we plan to use the same strategy to address more chal-
+lenging scenarios due to saturations and reﬂections.
+References
+[1] A. Agrawal and R. Raskar. Optimal single image capture for
+motion deblurring. In Computer Vision and Pattern Recog-
+nition, 2009. CVPR 2009. IEEE Conference on, pages 2560–
+2567. IEEE, 2009.
+[2] S. D. Babacan, R. Molina, M. N. Do, and A. K. Katsagge-
+los. Bayesian blind deconvolution with general sparse image
+priors. In ECCV, Firenze, Italy, October 2012. Springer.
+[3] A. Chakrabarti. A neural approach to blind motion deblur-
+ring. In ECCV, 2016.
+[4] A. Chakrabarti, T. Zickler, and W. T. Freeman.
+Analyz-
+ing spatially-varying blur.
+In Computer Vision and Pat-
+tern Recognition (CVPR), 2010 IEEE Conference on, pages
+2512–2519. IEEE, 2010.
+[5] S. Cho and S. Lee. Fast motion deblurring. ACM Trans.
+Graph., 28(5):1–8, 2009.
+[6] F. Couzinie-Devy, J. Sun, K. Alahari, and J. Ponce. Learning
+to estimate and remove non-uniform image blur. In Proceed-
+ings of the IEEE Conference on Computer Vision and Pattern
+Recognition, pages 1075–1082, 2013.
+[7] S. Dai and Y. Wu. Removing partial blur in a single image.
+In Computer Vision and Pattern Recognition, 2009. CVPR
+2009. IEEE Conference on, pages 2544–2551. IEEE, 2009.
+[8] A. Dosovitskiy, P. Fischer, E. Ilg, P. Hausser, C. Hazirbas,
+V. Golkov, P. van der Smagt, D. Cremers, and T. Brox.
+Flownet: Learning optical ﬂow with convolutional networks.
+In Proceedings of the IEEE International Conference on
+Computer Vision, pages 2758–2766, 2015.
+[9] R. Fergus, B. Singh, A. Hertzmann, S. T. Roweis, and W. T.
+Freeman. Removing camera shake from a single photograph.
+ACM Trans. Graph., 25(3):787–794, 2006.
+[10] J. Gast, A. Sellent, and S. Roth. Parametric object motion
+from blur. arXiv preprint arXiv:1604.05933, 2016.
+[11] A. Gupta, N. Joshi, L. Zitnick, M. Cohen, and B. Curless.
+Single image deblurring using motion density functions. In
+ECCV, 2010.
+[12] M. Hirsch, C. J. Schuler, S. Harmeling, and B. Sch¨olkopf.
+Fast removal of non-uniform camera shake. In 2011 Inter-
+national Conference on Computer Vision, pages 463–470.
+IEEE, 2011.
+[13] M. Hirsch, S. Sra, B. Sch¨olkopf, and S. Harmeling. Efﬁcient
+ﬁlter ﬂow for space-variant multiframe blind deconvolution.
+In CVPR, 2010.
+[14] M. Hradiˇs, J. Kotera, P. Zemc´ık, and F. ˇSroubek. Convolu-
+tional neural networks for direct text deblurring. In BMVC,
+2015.
+[15] Z. Hu, L. Xu, and M.-H. Yang. Joint depth estimation and
+camera shake removal from single blurry image. In CVPR,
+pages 2893–2900. IEEE, 2014.
+[16] Z. Hu, L. Xu, and M.-H. Yang. Joint depth estimation and
+camera shake removal from single blurry image. In CVPR,
+2014.
+[17] T. Hyun Kim and K. Mu Lee. Generalized video deblurring
+for dynamic scenes. In Proceedings of the IEEE Conference
+on Computer Vision and Pattern Recognition, pages 5426–
+5434, 2015.
+[18] S. Ioffe and C. Szegedy. Batch normalization: Accelerating
+deep network training by reducing internal covariate shift.
+arXiv preprint arXiv:1502.03167, 2015.
+[19] H. Ji and K. Wang. A two-stage approach to blind spatially-
+varying motion deblurring. In Computer Vision and Pattern
+Recognition (CVPR), 2012 IEEE Conference on, pages 73–
+80. IEEE, 2012.
+[20] T. H. Kim, B. Ahn, and K. M. Lee. Dynamic scene deblur-
+ring. In The IEEE International Conference on Computer
+Vision (ICCV), December 2013.
+[21] T. H. Kim and K. M. Lee. Segmentation-free dynamic scene
+deblurring. In 2014 IEEE Conference on Computer Vision
+and Pattern Recognition, pages 2766–2773. IEEE, 2014.
+[22] T. H. Kim, S. Nah, and K. M. Lee. Dynamic scene deblurring
+using a locally adaptive linear blur model. arXiv preprint
+arXiv:1603.04265, 2016.
+[23] D. Kingma and J. Ba. Adam: A method for stochastic opti-
+mization. arXiv preprint arXiv:1412.6980, 2014.
+[24] R. K¨ohler,
+M. Hirsch,
+B. J. Mohler,
+B. Sch¨olkopf,
+and S. Harmeling.
+Recording and playback of camera
+shake: Benchmarking blind deconvolution with a real-world
+database. In ECCV (7), pages 27–40, 2012.
+[25] A. Levin. Blind motion deblurring using image statistics. In
+NIPS, 2006.
+[26] A. Levin, Y. Weiss, F. Durand, and W. Freeman. Efﬁcient
+marginal likelihood optimization in blind deconvolution. In
+CVPR, pages 2657–2664, 2011.
+[27] A. Levin, Y. Weiss, F. Durand, and W. T. Freeman. Under-
+standing and evaluating blind deconvolution algorithms. In
+CVPR, pages 1964–1971. IEEE, June 2009.
+[28] T. Michaeli and M. Irani. Blind deblurring using internal
+patch recurrence. In ECCV, pages 783–798. Springer, 2014.
+[29] J. Pan, Z. Hu, Z. Su, H.-Y. Lee, and M.-H. Yang.
+Soft-
+segmentation guided object motion deblurring. In Proceed-
+ings of the IEEE International Conference on Computer Vi-
+sion, 2016.
+[30] C. Paramanand and A. N. Rajagopalan. Non-uniform motion
+deblurring for bilayer scenes. In CVPR, 2013.
+[31] D. Perrone and P. Favaro. Total variation blind deconvolu-
+tion: The devil is in the details. In CVPR, 2014.
+[32] K. Schelten and S. Roth.
+Localized image blur removal
+through non-parametric kernel estimation. In International
+Conference on Pattern Recognition, 2014.
+
+[33] C. J. Schuler, H. Christopher Burger, S. Harmeling, and
+B. Scholkopf. A machine learning approach for non-blind
+image deconvolution. In The IEEE Conference on Computer
+Vision and Pattern Recognition (CVPR), June 2013.
+[34] C. J. Schuler, M. Hirsch, S. Harmeling, and B. Sch¨olkopf.
+Learning to deblur. IEEE Transactions on Pattern Analysis
+and Machine Intelligence, 38(7):1439–1451, 2016.
+[35] J. Shi, L. Xu, and J. Jia. Discriminative blur detection fea-
+tures. In Proceedings of the IEEE Conference on Computer
+Vision and Pattern Recognition, pages 2965–2972, 2014.
+[36] J. Sun, W. Cao, Z. Xu, and J. Ponce. Learning a convolu-
+tional neural network for non-uniform motion blur removal.
+In 2015 IEEE Conference on Computer Vision and Pattern
+Recognition (CVPR), pages 769–777, 2015.
+[37] L. Sun, S. Cho, J. Wang, and J. Hays. Edge-based blur kernel
+estimation using patch priors. In ICCP, pages 1–8. IEEE,
+2013.
+[38] P. Svoboda, M. Hradiˇs, L. Marˇs´ık, and P. Zemc´ık. Cnn for
+license plate motion deblurring. In ICIP, 2016.
+[39] Y.-W. Tai, N. Kong, S. Lin, and S. Y. Shin. Coded expo-
+sure imaging for projective motion deblurring. In Computer
+Vision and Pattern Recognition (CVPR), 2010 IEEE Confer-
+ence on, pages 2408–2415. IEEE, 2010.
+[40] O. Whyte, J. Sivic, A. Zisserman, and J. Ponce. Non-uniform
+deblurring for shaken images. In CVPR, 2010.
+[41] P. Wieschollek, B. Sch¨olkopf, H. P. A. Lensch, and
+M. Hirsch. End-to-end learning for image burst deblurring.
+In ACCV, 2016.
+[42] L. Xu and J. Jia.
+Two-phase kernel estimation for robust
+motion deblurring. In ECCV, 2010.
+[43] L. Xu and J. Jia. Depth-aware motion deblurring. In ICCP,
+pages 1 –8, april 2012.
+[44] L. Xu, J. S. Ren, C. Liu, and J. Jia.
+Deep convolutional
+neural network for image deconvolution. In Z. Ghahramani,
+M. Welling, C. Cortes, N. D. Lawrence, and K. Q. Wein-
+berger, editors, Advances in Neural Information Process-
+ing Systems 27, pages 1790–1798. Curran Associates, Inc.,
+2014.
+[45] L. Xu, S. Zheng, and J. Jia. Unnatural l0 sparse represen-
+tation for natural image deblurring. In Proceedings of the
+IEEE Conference on Computer Vision and Pattern Recogni-
+tion, pages 1107–1114, 2013.
+[46] S. Zheng, L. Xu, and J. Jia. Forward motion deblurring. In
+Proceedings of the IEEE International Conference on Com-
+puter Vision, pages 1465–1472, 2013.
+
+Supplementary Material
+This supplementary material includes two sec-
+tions. In the ﬁrst section we provide more results
+and comparisons. In the second section we pro-
+vide some analysis on our network.
+6. Additional results
+In the main paper we showed the average
+PSNRs of the methods by Xu and Jia [42], Xu
+et al. [45], and Sun et al.[36] on the 15 images
+of our test set. In Figs. 10-14 we show the visual
+outputs of all methods including ours and report
+the corresponding PSNR in the caption. Further-
+more, the images with the highest (lowest) PSNR
+for each method are depicted by a green (red) box.
+Since the code of [21] is not publicly available, we
+could not show their results.
+In Figs. 15, 16 we also show a visual compari-
+son of all the methods above when run on images
+from other data sets. In this case we also show
+the results of Kim and Lee [21]. In Fig.17 we
+could also show results of [21] on two Canon im-
+ages, which were kindly provided by the authors
+shortly after the paper submission deadline.
+Notice that our method behaves conservatively:
+It removes blur without introducing artifacts or it
+leaves the original content (e.g., when blur is too
+large). Other methods may instead oversharpen
+or introduce oscillations that spoil the image con-
+tent.
+The ﬁrst image in Fig. 15 is captured with a
+Canon EOS 5D Mark II camera. This blurry im-
+age is obtained directly from the camera without
+averaging or any other post-processing. Notice
+that this is a very challenging scenario since there
+is both camera shake and objects are moving in-
+dependently.
+We also show details of the out-
+puts in insets below each image. Our method can
+produce sharper results on diverse regions such
+as faces, heads, necks, clothing, than other com-
+peting algorithms. The method of Kim and Lee
+[21] can deblur successfully some regions (e.g.,
+neck) but also introduces artifacts to the back of
+the head. In contrast, our method can deal with
+substantial blurs, such as that on the hand, and
+Figure 9: Analysis. Normalized average PSF size versus
+normalized residual magnitude plot. Notice the high level
+of correlation between the blur size and the residual magni-
+tude.
+reduce them without corrupting the image. The
+second image (canal) is taken from [46]. Similar
+considerations can be drawn also in this case.
+In Fig. 16 we show results on a data set from
+[21]. As shown in the insets below each image,
+our method clearly outperforms the others. While
+all methods perform some deblurring, our method
+can debur more textures and regions. In the car
+image, [42] obtains image sharpness at the cost of
+adding artifacts. [21] yields an overly-cartooned
+image and thus loses details (e.g., see the back of
+the van).
+7. Analysis
+Because our network is very deep we analyze
+only the very last layer and leave the analysis of
+the other layers to future work. Our network gen-
+erates a residual image that when added to the
+blurry input yields the sharp image. The blurrier
+the image, the larger residual, as more changes
+will be required. Thus, in the ideal case, blur is
+related to the magnitude of the residual, which
+we also call activation.
+We therefore expect a
+good correlation between our generated residual
+and the blur magnitude of the input blurry image.
+Our experiments validate this hypothesis quan-
+titatively and qualitatively. We take 700 images
+of the test set of our dataset, feed them to the net-
+
+work, and calculate their activations, i.e., the l1
+norm of the network outputs (the residuals). In
+Fig. 18 we show 6 most activating images, i.e.,
+images with the highest l1 norm in the output, and
+in Fig. 19 we show 6 least activating images, i.e.,
+images with lowest l1 norm in the output. In these
+images each of the three columns contains two ex-
+amples. The image in the ﬁrst row is the input, the
+second row shows the estimated residual (the net-
+work output), the third row is the deblurred image
+(ﬁrst row + second row), and ﬁnally the forth row
+is the ground truth. As expected, the most acti-
+vating images are highly blurred, while the least
+activating ones are sharp samples.
+We also show quantitatively that there is a nice
+correlation between blurriness and the residual
+magnitude. As we have mentioned in the main pa-
+per, our dataset stores an estimate of point spread
+functions (PSFs) obtained from optical ﬂow for
+each blurry image. We calculate the average PSF
+size across the blurry image, and this gives us a
+reasonable approximation of blurriness (the ap-
+proximation is due to the error in the optical ﬂow
+estimates).
+In Fig. 9 we show the plot of the
+l1 norm of the residual versus average estimated
+PSF size from optical ﬂow for all 700 images.
+The residual magnitudes and blur sizes are nor-
+malized so that mean and std of both are 0 and 1
+respectively. Notice the high level of correlation
+between the blur size and the activation.
+
+Blurry image(28.5)
+Ground truth
+Xu and Jia [42] (25.3)
+Xu et al. [45] (22.3)
+Sun et al. [36] (29.1)
+Ours (31.1)
+Blurry image(27.9)
+Ground truth
+Xu and Jia [42] (23.3)
+Xu et al. [45] (24.2)
+Sun et al. [36] (27.3)
+Ours (30.5)
+Blurry image(28.0)
+Ground truth
+Xu and Jia [42] (23.3)
+Xu et al. [45] (22.7)
+Sun et al. [36] (27.2)
+Ours (30.8)
+Figure 10: Quantitative evaluation. Results of all 15 images of our test dataset in the wild. The PSNR of all methods and
+for each image is shown next to the authors name in parentheses. Images with highest/ lowest PSNR are highlighted with a
+green/ red box.
+
+Blurry image(25.8)
+Ground truth
+Xu and Jia [42] (26.8)
+Xu et al. [45] (26.7)
+Sun et al. [36] (21.5)
+Ours (29.0)
+Blurry image(24.7)
+Ground truth
+Xu and Jia [42] (23.4)
+Xu et al. [45] (23.5)
+Sun et al. [36] (26.2)
+Ours (27.4)
+Blurry image(25.5)
+Ground truth
+Xu and Jia [42] (23.1)
+Xu et al. [45] (20.0)
+Sun et al. [36] (24.9)
+Ours (27.3)
+Figure 11: Quantitative evaluation. Results of all 15 images of our test dataset in the wild. The PSNR of all methods and
+for each image is shown next to the authors name in parentheses. Images with highest/ lowest PSNR are highlighted with a
+green/ red box.
+
+Blurry image(23.2)
+Ground truth
+Xu and Jia [42] (20.2)
+Xu et al. [45] (22.0)
+Sun et al. [36] (23.3)
+Ours (25.6)
+Blurry image(23.3)
+Ground truth
+Xu and Jia [42] (22.4)
+Xu et al. [45] (19.7)
+Sun et al. [36] (24.2)
+Ours (26.3)
+Blurry image(20.8)
+Ground truth
+Xu and Jia [42] (18.7)
+Xu et al. [45] (18.6)
+Sun et al. [36] (21.1)
+Ours (24.0)
+Figure 12: Quantitative evaluation. Results of all 15 images of our test dataset in the wild. The PSNR of all methods and
+for each image is shown next to the authors name in parentheses. Images with highest/ lowest PSNR are highlighted with a
+green/ red box.
+
+Blurry image(23.9)
+Ground truth
+Xu and Jia [42] (20.8)
+Xu et al. [45] (20.3)
+Sun et al. [36] (24.1)
+Ours (26.7)
+Blurry image(23.0)
+Ground truth
+Xu and Jia [42] (21.7)
+Xu et al. [45] (21.4)
+Sun et al. [36] (23.6)
+Ours (25.8)
+Blurry image(24.5)
+Ground truth
+Xu and Jia [42] (24.2)
+Xu et al. [45] (22.7)
+Sun et al. [36] (25.9)
+Ours (27.4)
+Figure 13: Quantitative evaluation. Results of all 15 images of our test dataset in the wild. The PSNR of all methods and
+for each image is shown next to the authors name in parentheses. Images with highest/ lowest PSNR are highlighted with a
+green/ red box.
+
+Blurry image(25.2)
+Ground truth
+Xu and Jia [42] (26.8)
+Xu et al. [45] (23.5)
+Sun et al. [36] (26.9)
+Ours (29.0)
+Blurry image(29.0)
+Ground truth
+Xu and Jia [42] (25.2)
+Xu et al. [45] (26.5)
+Sun et al. [36] (29.5)
+Ours (31.4)
+Blurry image(25.8)
+Ground truth
+Xu and Jia [42] (28.4)
+Xu et al. [45] (23.2)
+Sun et al. [36] (26.8)
+Ours (28.7)
+Figure 14: Quantitative evaluation. Results of all 15 images of our test dataset in the wild. The PSNR of all methods and
+for each image is shown next to the authors name in parentheses. Images with highest/ lowest PSNR are highlighted with a
+green/ red box.
+
+Blurry image
+Xu et al. [45]
+Sun et al. [36]
+Xu and Jia [42]
+Kim and Lee[21]
+Ours
+Blurry image
+Xu et al. [45]
+Sun et al. [36]
+Xu and Jia [42]
+Ours
+Figure 15: Qualitative evaluation. Additional results from external datasets where ground truth is not available. The image
+on the top is from our Canon EOS 5D Mark II dataset. The bottom image is taken from [46].
+
+Blurry image
+Xu et al. [45]
+Sun et al. [36]
+Xu and Jia [42]
+Kim and Lee[21]
+Ours
+Blurry image
+Xu et al. [45]
+Sun et al. [36]
+Xu and Jia [42]
+Kim and Lee[21]
+Ours
+Figure 16: Qualitative evaluation. Additional results from external datasets where ground truth is not available. Both images
+are taken from Kim and Lee [21].
+
+Blurry image
+Kim and Lee [21]
+Ours
+Blurry image
+Kim and Lee [21]
+Ours
+Figure 17: Qualitative comparison with Kim and Lee [21] on two Canon EOS 5D Mark II images. We compare the results
+of more methods on the same images in the main paper. We repeat these images here since the results of Kim and Lee [21]
+were kindly provided by the authors shortly after the paper submission deadline.
+
+Figure 18: Analysis. The images with highest activations in the output layer. In these images each of the three columns
+contains two examples. The image in the ﬁrst row is the input, the second row shows the estimated residual (the network
+output), the third row is the deblurred image (ﬁrst row + second row), and ﬁnally the forth row is the ground truth.
+
+Figure 19: Analysis. The images with lowest activations in the output layer. In these images each of the three columns
+contains two examples. The image in the ﬁrst row is the input, the second row shows the estimated residual (the network
+output), the third row is the deblurred image (ﬁrst row + second row), and ﬁnally the forth row is the ground truth.

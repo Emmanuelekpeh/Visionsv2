@@ -1,0 +1,15 @@
+user_pref("remote.enabled", true);
+user_pref("remote.active-protocols", 3);
+user_pref("remote.log.level", "Info");
+user_pref("marionette.enabled", false);
+user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("browser.startup.page", 0);
+user_pref("datareporting.policy.dataSubmissionEnabled", false);
+user_pref("toolkit.telemetry.enabled", false);
+user_pref("browser.sessionstore.resume_from_crash", false);
+user_pref("browser.aboutwelcome.enabled", false);
+user_pref("browser.startup.homepage_override.mstone", "ignore");
+user_pref("layout.css.devPixelsPerPx", "1.0");
+user_pref("app.update.enabled", false);
+user_pref("browser.tabs.warnOnClose", false);
+user_pref("devtools.debugger.remote-enabled", true);

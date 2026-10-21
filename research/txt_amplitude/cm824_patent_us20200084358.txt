@@ -1,0 +1,1902 @@
+=== PAGE 1 ===
+INI 
+US 20200084358A1 
+( 19 ) United States 
+( 12 ) Patent Application Publication ( 10 ) Pub . No .: US 2020/0084358 A1 
+Nadamoto 
+( 43 ) Pub . Date : 
+Mar. 12 , 2020 
+( 54 ) CAMERA AND LENS APPARATUS 
+( 71 ) Applicant : CANON KABUSHIKI KAISHA , 
+Tokyo ( JP ) 
+( 52 ) U.S. CI 
+. 
+CPC 
+H04N 5/2327 ( 2013.01 ) ; H04N 5/2254 
+( 2013.01 ) ; H04N 5/23287 ( 2013.01 ) ; H04N 
+5/23254 ( 2013.01 ) ; H04N 5/2253 ( 2013.01 ) 
+( 72 ) Inventor : Ken Nadamoto , Saitama - shi ( JP ) 
+( 57 ) 
+ABSTRACT 
+( 21 ) Appl . No .: 16 / 555,177 
+( 22 ) 
+Filed : 
+Aug. 29 , 2019 
+( 30 ) 
+Foreign Application Priority Data 
+Sep. 7 , 2018 
+( JP ) 
+2018-167529 
+The camera is used in a camera system including the camera 
+that includes an image sensor movable for image blur 
+correction , and a lens apparatus that is detachably attachable 
+to the camera and includes an optical element movable for 
+the image blur correction . The camera includes a setting unit 
+configured to set a ratio of image blur correction amounts 
+provided respectively by movements of the optical element 
+and the image sensor in each of their moving directions , 
+using information on an image circle formed by the lens 
+apparatus , information on a mechanical movable amount of 
+the image sensor , and information on a size of a signal 
+readout area of the image sensor . 
+Publication Classification 
+( 51 ) 
+Int . Ci 
+. 
+H04N 5/232 
+( 2006.01 ) 
+H04N 5/225 
+( 2006.01 ) 
+106 
+103 
+OPERATION 
+UNIT 
+114 
+CAMERA 
+GYRO SENSOR 
+109 
+108 
+102 
+LENS POSITION 
+SENSOR 
+IMAGE SENSOR 
+POSITION 
+SENSOR 
+104 
+113 
+120 
+LENS MPU 
+CAMERA 
+MPU 
+140 
+107 
+112 
+MEMORY 
+LENS 
+ACTUATOR 
+IMAGE SENSOR 
+ACTUATOR 
+LENS GYRO SENSOR 
+LENS 
+CONNECTION 
+TERMINALS 
+CAMERA 
+CONNECTION 
+TERMINALS 
+MEMORY 
+110 
+105 
+130 
+
+=== PAGE 2 ===
+106 
+103 
+100 
+101 
+OPERATION 
+UNIT 
+CAMERA GYRO 
+SENSOR 
+Patent Application Publication 
+114 
+109 
+108 
+102 
+LENS 
+POSITION SENSOR 
+IMAGE 
+SENSOR POSITION SENSOR 
+104 
+113 
+120 
+LENS 
+MPU 
+CAMERA MPU 
+140 
+107 
+Mar. 12 , 2020 Sheet 1 of 11 
+112 
+MEMORY 
+LENS 
+ACTUATOR 
+IMAGE 
+SENSOR ACTUATOR 
+LENS 
+GYRO 
+SENSOR 
+LENS 
+CONECTION TERMINALS 
+CAMERA 
+CONECTION TERMINALS 
+MEMORY 
+110 
+105 
+130 
+US 2020/0084358 A1 
+FIG 
+. 
+1 
+
+=== PAGE 3 ===
+Patent Application Publication Mar. 12 , 2020 Sheet 2 of 11 
+US 2020/0084358 A1 
++ Y 
+3 
+2 
+4 . 
+5 
+1.1 
+6 
++ X 
+FIG . 2 
++ Y 
+??? 
+2 
+4 
+5 ' 
+6 
++ X 
+FIG . 3 
+
+=== PAGE 4 ===
+Patent Application Publication 
+Mar. 12 , 2020 Sheet 3 of 11 
+US 2020/0084358 A1 
+CAMERA PROCESS 
+LENS PROCESS 
+IMAGE BLUR CORRECTION 
+PROCESS 1 
+S101 
+SEND SENSOR EFFECTIVE SIZE , 
+IIS MECHANICAL STROKE 
+AMOUNT AND IIS ROLL SHAKE 
+CORRECTABLE ANGLE TO LENS 
+S102 
+SENDS IMAGE CIRCLE 
+INFORMATION AND FOCAL LENGTH 
+INFORMATION TO CAMERA . 
+S103 
+CALCULATE IIS CORRECTABLE 
+AMOUNT IN EACH MOVING 
+DIRECTION 
+S104 
+CONVERT OIS AND IIS MOVABLE 
+AMOUNTS INTO OIS AND IIS 
+CORRECTABLE ANGLES 
+S105 
+CALCULATE OIS AND IIS 
+CORRECTION RATIOS IN EACH 
+MOVING DIRECTION 
+S106 
+SEND IS CORRECTION RATIO IN 
+EACH MOVING DIRECTION TO 
+CAMERA 
+S107 
+S108 
+CONTROL IIS USING IIS 
+CORRECTION RATIO 
+CONTROL OIS USING OIS 
+CORRECTION RATIO 
+END 
+FIG . 4 
+
+=== PAGE 5 ===
+Patent Application Publication Mar. 12 , 2020 Sheet 4 of 11 
+US 2020/0084358 A1 
+IIS CORRECTABLE AMOUNT 
+CALCULATION PROCESS 
+S201 
+CALCULATE IIS MOVABLE 
+AMOUNT WITHIN IMAGE CIRCLE 
+S202 
+IIS 
+MOVABLE AMOUNT 
+WITHIN IMAGE CIRCLE IS SMALLER 
+THAN IIS MECHANICAL 
+STROKE AMOUNT 
+? 
+NO 
+YES 
+S203 
+S204 
+SET CALCULATED IIS MOVABLE 
+AMOUNT TO IIS MOVABLE AMOUNT 
+FOR SETTING IS CORRECTION 
+RATIO 
+SET IIS MECHANICAL STROKE 
+AMOUNT TO IIS MOVABLE 
+AMOUNT FOR SETTING IIS 
+CORRECTION RATIO 
+END 
+FIG . 5 
+3 
+2 
+7 
+FIG . 6 
+
+=== PAGE 6 ===
+Patent Application Publication Mar. 12 , 2020 Sheet 5 of 11 
+US 2020/0084358 A1 
++ 
+1 
+MXN MY 
+W 
+? 
+?? 
+?? 
+? 
+? 
+?? 
+??? 
+? 
+?? 
+??? 
+? 
+?? 
+? 
+?? 
+?? 
+???? 
+OIS + IIS 
+CORRECTION 
+0 
+AMOUNT 
+. 
+tx 
+??? 
+????? 
+??? 
+??? 
+???? 
+???? 
+??? 
+????? 
+???? 
+????????? 
+??????? 
+??????? 
+?????? 
+?????? 
+?? 
+???? 
+???????? 
+???? 
+???? 
+IS + AREA 
+IIS CORRECTION 
+AMOUNT 
+0 
+IIS- AREA 
+PARA 
+??????? 
+?? 
+???? 
+?????? 
+??? 
+??? 
+??????? 
+???? 
+????? 
+???? 
+OIS + AREA 
+OIS CORRECTION 
+0 
+AMOUNT 
+OIS- AREA 
+FIG . 7 
+
+=== PAGE 7 ===
+Patent Application Publication 
+Mar. 12 , 2020 Sheet 6 of 11 
+US 2020/0084358 A1 
+CAMERA PROCESS 
+LENS PROCESS 
+IMAGE BLUR CORRECTION 
+PROCESS 2 
+S301 
+~ 
+SEND OIS CORRECTABLE 
+ANGLE TO CAMERA 
+SEND IMAGE CIRCLE 
+INFORMATION AND FOCAL 
+LENGTH INFORMATION TO 
+CAMERA 
+S302 
+S303 
+CALCULATE IIS MOVABLE 
+AMOUNT IN EACH 
+MOVING DIRECTION 
+S304 , 
+CONVERT IIS MOVABLE 
+AMOUNT INTO IIS 
+CORRECTABLE ANGLE 
+S305 
+CALCULATE OIS AND IIS 
+CORRECTION RATIOS IN 
+EACH MOVING DIRECTION 
+S306 
+SEND OIS CORRECTION 
+RATIO IN EACH MOVING 
+DIRECTION TO LENS 
+S308 
+2 
+S307 
+CONTROL IIS USING IIS 
+CORRECTION RATIO 
+CONTROL OIS USING OIS 
+CORRECTION RATIO 
+END 
+FIG . 8 
+
+=== PAGE 8 ===
+Patent Application Publication 
+Mar. 12 , 2020 Sheet 7 of 11 
+US 2020/0084358 A1 
+CAMERA PROCESS 
+LENS PROCESS 
+IMAGE BLUR CORRECTION 
+PROCESS 3 
+S401 . 
+CALCULATE SENSOR EFFECTIVE SIZE 
+SEND SENSOR EFFECTIVE SIZE AND IIS 
+MECHANICAL STROKE AMOUNT TO LENS 
+S403 
+S402 
+1 
+1 
+meren 
+SEND IMAGE CIRCLE 
+INFORMATION AND FOCAL 
+LENGTH INFORMATION TO 
+CAMERA 
+??? 
+1 
+S404 
+CALCULATE I / EIS 
+MOVABLE AMOUNT IN 
+EACH MOVING DIRECTION 
+S405 
+CONVERT OIS AND I / EIS 
+MOVABLE AMOUNTS INTO 
+CORRECTABLE ANGLES 
+S406 
+CALCULATE OIS AND I / EIS 
+CORRECTION RATIOS IN 
+EACH MOVING DIRECTION 
+SEND I / EIS CORRECTION 
+RATIO IN EACH MOVING 
+DIRECTION TO CAMERA 
+S408 
+S407 
+SET IIS AND EIS 
+CORRECTION RATIOS IN 
+EACH MOVING DIRECTION 
+S411 
+S409 
+CONTROL EIS USING 
+EIS CORRECTION 
+RATIO 
+S410 
+CONTROL IIS USING 
+IIS CORRECTION 
+RATIO 
+CONTROL OIS USING 
+OIS CORRECTION 
+RATIO 
+END 
+FIG . 9 
+
+=== PAGE 9 ===
+Patent Application Publication 
+Mar. 12 , 2020 Sheet 8 of 11 
+US 2020/0084358 A1 
+SENSOR EFFECTIVE SIZE 
+CALCULATION PROCESS 
+S501 
+PERFORM EIS ? 
+NO 
+YES 
+S502 
+SET SENSOR EFFECTIVE SIZE 
+TO EIS CLIPPING SIZE 
+S503 
+PERFORM 
+ROLL SHAKE CORRECTION 
+NO 
+BY IIS ? 
+YES 
+SETS SENSOR EFFECTIVE 
+SIZE TO BE LARGER BY ROLLI S504 
+SHAKE CORRECTION IN IIS 
+END 
+FIG . 10 
+4 
+8 
+FIG . 11 
+
+=== PAGE 10 ===
+Patent Application Publication Mar. 12 , 2020 Sheet 9 of 11 
+US 2020/0084358 A1 
+9 
+4 OR 8 
+7 
+FIG . 12 
++ Y 
+2 
+??? 
++ Y 
+?? 
+2 
+12 ' 
+12 " 
+5 ' 
+6 
+premomme 
+6 " 
+m 
++ X 
+~ 
++ X 
+1 
+11 " 
+A 
+FIG . 13 
+
+=== PAGE 11 ===
+Patent Application Publication 
+Mar. 12 , 2020 Sheet 10 of 11 
+US 2020/0084358 A1 
+CAMERA PROCESS 
+LENS PROCESS 
+IMAGE BLUR CORRECTION 
+PROCESS 4 
+S601 
+SEND IMAGE CIRCLE 
+INFORMATION TO CAMERA 
+S602 
+CALCULATE IIS MOVABLE 
+AMOUNT IN EACH MOVING 
+DIRECTION 
+S603 
+MOVE IIS INITIAL POSITION 
+AND RECALCULATES IIS 
+MOVABLE AMOUNT 
+S604 
+SEND IIS MOVABLE AMOUNT 
+TO LENS 
+SEND FOCAL LENGTH 
+INFORMATION TO CAMERA $ 605 
+S606 
+CONVERT OIS AND IIS 
+MOVABLE AMOUNTS INTO 
+OIS AND IIS CORRECTABLE 
+ANGLES 
+S607 
+CALCULATE OIS AND HIS 
+CORRECTION RATIOS 
+S608 
+SEND IIS CORRECTION 
+RATIO TO CAMERA 
+S609 
+S610 
+CONTROL IIS USING IIS 
+CORRECTION RATIO 
+CONTROL OIS USING OIS 
+CORRECTION RATIO 
+END 
+FIG . 14 
+
+=== PAGE 12 ===
+Patent Application Publication 
+Mar. 12 , 2020 Sheet 11 of 11 
+US 2020/0084358 A1 
+START T 
+S701 
+STILL IMAGE 
+OR MOVING IMAGE 
+MOVING IMAGE 
+STILL IMAGE 
+S702 
+S703 
+IMAGE BLUR 
+CORRECTION PROCESS 1 
+IMAGE BLUR 
+CORRECTION PROCESS 2 
+END 
+FIG . 15 
+
+=== PAGE 13 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+CAMERA AND LENS APPARATUS 
+BACKGROUND OF THE INVENTION 
+Field of the Invention 
+[ 0001 ] The present invention relates to optical appara 
+tuses , that is , lens apparatuses and cameras used in camera 
+systems having an image blur correction function . 
+Description of the Related Art 
+[ 0002 ] Lens - interchangeable camera system having an 
+image blur correction function for optically reducing ( cor 
+recting ) an image blur include one that moves a correction 
+lens provided in an interchangeable lens with respect to its 
+optical axis and moves an image sensor provided in a camera 
+respect to the optical axis . 
+[ 0003 ] However , a movable amount of the correction lens 
+is mechanically limited , and a movable amount of the image 
+sensor is limited by , in addition to its mechanical limitation , 
+an image circle formed by the interchangeable lens . Japa 
+nese Patent Laid - Open No. 2009-265182 discloses a camera 
+system that changes , depending on movable amounts of a 
+correction lens and an image sensor , a ratio ( correction ratio ) 
+between image blur correction amounts respectively pro 
+vided by movements of the correction lens and the image 
+sensor 
+. 
+[ 0004 ] Further , in the lens interchangeable camera system , 
+the center of the image circle may be shifted from the center 
+of the image sensor due to manufacturing errors of the 
+interchangeable lens . Japanese Patent Laid - Open No. 2009 
+139877 discloses a camera in which an image sensor cap 
+tures a chart image formed by an interchangeable lens , and 
+moves , using the captured chart image , an initial movement 
+position of the image sensor from its original center position . 
+[ 0005 ] However , the shift amount and the shift direction of 
+the center of the image circle are different in each individual 
+interchangeable lens . As a result , the movable amount of the 
+image sensor when moving within an area of the image 
+circle also differs depending on its moving direction ( + and 
+directions ) . For this reason , if the correction ratio is set 
+simply depending on the movable amounts of the correction 
+lens and the image sensor as disclosed in Japanese Patent 
+Laid - Open No. 2009-265182 , insufficient image blur cor 
+rection may be performed . Further , even if the initial move 
+ment position of the image sensor is moved from the original 
+center position , the movable amounts of the image sensor in 
+its moving direction are mutually different . 
+using information on an image circle formed by the lens 
+apparatus , information on a mechanical movable amount of 
+the image sensor , and information on a size of a signal 
+readout area of the image sensor . 
+[ 0008 ] The present invention provides as another aspect 
+thereof a lens apparatus used in a camera system including 
+a camera that includes an image sensor movable for image 
+blur correction , and the lens apparatus that is detachably 
+attachable to the camera and includes an optical element 
+movable for the image blur correction . The lens apparatus 
+includes a setting unit configured to set a ratio of image blur 
+correction amounts provided respectively by movements of 
+the optical element and the image sensor in each of their 
+moving directions , using information on an image circle 
+formed by the lens apparatus , information on a mechanical 
+movable amount of the image sensor , and information on a 
+size of a signal readout area of the image sensor . 
+[ 0009 ] The present invention provides as yet another 
+aspect thereof a camera used in a camera system including 
+the camera that includes an image sensor movable for image 
+blur correction , and a lens apparatus that is detachably 
+attachable to the camera and includes an optical element 
+movable for the image blur correction . The camera includes 
+a control unit configured to move an initial position of 
+movement of the image sensor to a position at which 
+movable amounts of the image sensor in its moving direc 
+tions become mutually equal , using information on an image 
+circle formed by the lens apparatus . 
+[ 0010 ] The present invention provides as still another 
+aspect thereof a method of controlling a camera used in a 
+camera system including the camera that includes an image 
+sensor movable for image blur correction , and a lens appa 
+ratus that is detachably attachable to the camera and includes 
+an optical element movable for the image blur correction . 
+The method includes the step of acquiring information on an 
+image circle formed by the lens apparatus , information on a 
+mechanical movable amount of the image sensor , and infor 
+mation on a size of a signal readout area of the image sensor , 
+and the step of setting a ratio of image blur correction 
+amounts provided respectively by movements of the optical 
+element and the image sensor in each of their moving 
+directions , using the information on the image circle , the 
+information on the mechanical movable amount , and the 
+information on the size of the signal readout area . 
+[ 0011 ] The present invention provides as yet still another 
+aspect thereof a method of controlling a lens apparatus used 
+in a camera system including a camera that includes an 
+image sensor movable for image blur correction , and the 
+lens apparatus that is detachably attachable to the camera 
+and includes an optical element movable for the image blur 
+correction . The method includes the step of acquiring infor 
+mation on an image circle formed by the lens apparatus , 
+information on a mechanical movable amount of the image 
+sensor , and information on a size of a signal readout area of 
+the image sensor , and the step of setting a ratio of image blur 
+correction amounts provided respectively by movements of 
+the optical element and the image sensor in each of their 
+moving directions , using the information on the image 
+circle , the information on the mechanical movable amount , 
+and the information on the size of a signal readout area . 
+[ 0012 ] The present invention provides as further another 
+aspect thereof a method of controlling a camera used in a 
+camera system including the camera that includes an image 
+sensor movable for image blur correction , and a lens appa 
+SUMMARY OF THE INVENTION 
+[ 0006 ] The present invention provides a camera and a lens 
+apparatus ( an optical apparatus ) each capable of effectively 
+utilizing a movable amount of an image sensor even when 
+the center of the image circle is shifted from the center of the 
+image sensor . 
+[ 0007 ] The present invention provides as an aspect thereof 
+a camera used in a camera system including the camera that 
+includes an image sensor movable for image blur correction , 
+and a lens apparatus that is detachably attachable to the 
+camera and includes an optical element movable for the 
+image blur correction . The camera includes a setting unit 
+configured to set a ratio of image blur correction amounts 
+provided respectively by movements of the optical element 
+and the image sensor in each of their moving directions , 
+
+=== PAGE 14 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+2 
+Embodiment 1 
+ratus that is detachably attachable to the camera and includes 
+an optical element movable for the image blur correction . 
+The method includes the step of acquiring information on an 
+image circle formed by the lens apparatus , and the step of 
+moving the image sensor to a position at which movable 
+amounts of the image sensor in its moving directions 
+become mutually equal , using the information on the image 
+circle . 
+[ 0013 ] The present invention provides as yet further 
+another aspect thereof a computer - readable non - transitory 
+storage medium storing a program for causing a camera or 
+a lens apparatus to execute a process according to any one 
+of the above methods . 
+[ 0014 ] Further features of the present invention will 
+become apparent from the following description of exem 
+plary embodiments with reference to the attached drawings . 
+a 
+BRIEF DESCRIPTION OF THE DRAWINGS 
+[ 0015 ] FIG . 1 is a block diagram illustrating a configura 
+tion of a camera system that is Embodiment 1 of the present 
+invention . 
+[ 0016 ] FIG . 2 illustrates an IIS movable amount when the 
+center of an image circle of an interchangeable lens is not 
+shifted with respect to the center of an IIS mechanical stroke 
+range . 
+[ 0017 ] 
+FIG . 3 illustrates an IIS movable amount when the 
+center of the image circle of the interchangeable lens is 
+shifted with respect to the center of the IIS mechanical 
+stroke range . 
+[ 0018 ] FIG . 4 is a flowchart of an image blur correction 
+process performed in Embodiment 1 . 
+[ 0019 ] FIG . 5 is a flowchart of an IIS movable amount 
+calculation process performed in Embodiment 1 . 
+[ 0020 ] FIG . 6 illustrates a sensor readout area when roll 
+shake correction is performed by IIS in Embodiment 1 . 
+[ 0021 ] 
+FIG . 7 illustrates an example of image blur cor 
+rection performed by movements of a correction lens and an 
+image sensor in Embodiment 1 . 
+[ 0022 ] FIG . 8 is a flowchart of an image blur correction 
+process performed in Embodiment 2 of the present inven 
+tion . 
+[ 0023 ] FIG . 9 is a flowchart of an image blur correction 
+process performed in Embodiment 3 of the present inven 
+tion . 
+[ 0024 ] FIG . 10 is a flowchart of a sensor effective size 
+setting process performed in Embodiment 3 . 
+[ 0025 ] FIG . 11 illustrates a sensor readout area and an EIS 
+clipping area in Embodiment 3 . 
+[ 0026 ] 
+FIG . 12 illustrates a sensor effective size in 
+Embodiment 3 . 
+[ 0027 ] FIG . 13 illustrates a case where a center position of 
+an image circle is shifted with respect to a center position 1 
+of an IIS mechanical stroke range in Embodiment 3 . 
+[ 0028 ] FIG . 14 is a flowchart of an image blur correction 
+process performed in Embodiment 4 of the present inven 
+tion . 
+[ 0029 ] FIG . 15 is a flowchart of a process performed in 
+another embodiment of the present invention . 
+[ 0031 ] FIG . 1 illustrates a configuration of a camera 
+system 10 that is a first embodiment ( Embodiment 1 ) of the 
+present invention . The camera system 10 includes an inter 
+changeable lens 101 as a lens apparatus and a first optical 
+apparatus ( one optical apparatus ) , and a camera body 100 as 
+a camera and a second optical apparatus ( another optical 
+device ) to which the interchangeable lens 101 is detachably 
+and communicably attached ( connected ) . The camera body 
+100 includes a camera MPU 102 , an operation unit 103 , an 
+image sensor 104 , camera connection terminals 105 , 
+camera gyro sensor 106 , and a back display 120 . 
+[ 0032 ] 
+A camera MPU ( camera control unit ) 102 is a 
+computer that governs overall control of the camera body 
+100 and the interchangeable lens 101 , and controls various 
+operations such as AE , AF , and image capturing in response 
+to inputs from the operation unit 103. The camera MPU 102 
+communicates various commands and information with a 
+lens MPU ( lens control unit ) 109 as a computer through the 
+camera connection terminals 105 and lens connection ter 
+minals 111 provided in the interchangeable lens 101. The 
+camera connection terminals 105 and the lens connection 
+terminals 111 include a power supply terminal for supplying 
+power from the camera body 100 to the interchangeable lens 
+101 . 
+[ 0033 ] 
+The operation unit 103 includes a mode dial for 
+setting various image - capturing modes , a release button for 
+instructing start of an image - capturing preparation operation 
+and an image - capturing operation , and other operation mem 
+bers . When the release button is half - pressed , a first switch 
+( SW1 
+) is turned on . When the release button is full - pressed , 
+a second switch ( SW2 
+) is turned on . In response to turning 
+on of SW1 
+, the image capturing preparation operation ( AE 
+and AF ) is performed . In response to turning - on of SW2 
+, the 
+start of the image - capturing ( exposure ) operation is 
+instructed , and after a predetermined time from the instruc 
+tion the image capturing operation is started . The on / off of 
+SW1 and SW2 is notified from the camera MPU 102 to the 
+lens MPU 109 by communication therebetween . 
+[ 0034 ] 
+The image sensor 104 is constituted by a photo 
+electric conversion element such as a CCD sensor or a 
+CMOS sensor , and photoelectrically converts an object 
+image formed by an image - capturing optical system 
+described later to generate an image - capturing signal . The 
+camera MPU 102 generates a still image or a moving image 
+( video signal ) using the image - capturing signal from the 
+image sensor 104 . 
+[ 0035 ] The camera gyro sensor 106 is a shake sensor that 
+detects angular shake of the camera body 100 ( hereinafter 
+referred to as “ camera shake ” ) due to user's hand jiggling or 
+the like to output a camera shake detection signal as an 
+angular velocity signal . The camera MPU 102 drives an 
+image sensor actuator 107 depending on the camera shake 
+detection signal and on an IIS correction ratio ( described 
+later ) received from the interchangeable lens 101 to move 
+the image sensor 104 in a direction orthogonal to an optical 
+axis of the image - capturing optical system ( or a direction 
+including a directional component orthogonal to the optical 
+axis ) . The movement of the image sensor 104 reduces 
+( corrects ) image blur caused by the camera shake . 
+[ 0036 ] When moving the image sensor 104 , the camera 
+MPU 102 performs feedback control of the image sensor 
+actuator 107 such that a position of the image sensor 104 ( a 
+movement amount thereof from a position on the optical 
+DESCRIPTION OF THE EMBODIMENTS 
+[ 0030 ] Exemplary embodiments of the present invention 
+will hereinafter be described with reference to the accom 
+panying drawings . 
+
+=== PAGE 15 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+3 
+axis that is a movement center ) detected by an image sensor 
+position sensor 108 approaches a target position . Thereby , 
+image blur correction ( hereinafter referred to as “ IIS ” ) by the 
+movement of the image sensor 104 is performed . The IIS is 
+performed in response to camera shake in a vertical ( pitch ) 
+direction and a horizontal ( yaw ) direction . 
+[ 0037 ] The rear display 120 constituted by a display 
+device displays a moving image corresponding to the video 
+signal generated by the camera MPU 102 using the image 
+capturing signal from the image sensor 104. Before image 
+capturing , the rear display 120 displays a viewfinder image 
+( live - view image ) that user can observe . In addition , after 
+image capturing , the rear display 120 can display a still 
+image or a moving image for recording generated by the 
+image capturing . The word “ image capturing ” in this 
+embodiment means image capturing for recording . 
+[ 0038 ] The interchangeable lens 101 includes the image 
+capturing optical system ( not illustrated , the lens MPU 109 
+and the lens connection terminal 111s described above , and 
+a lens gyro sensor 110. The lens gyro sensor 110 is a shake 
+sensor that detects angular shake of the interchangeable lens 
+101 ( hereinafter referred to as “ a lens shake ” ) to output a 
+lens shake detection signal as an angular velocity signal . 
+[ 0039 ] The lens MPU 109 drives a lens actuator 112 
+depending on the lens shake detection signal and an OIS 
+correction ratio ( described later ) to move a correction lens 
+113 as an optical element that is a part of the image 
+capturing optical system 
+in a direction orthogonal to an 
+optical axis of the image - capturing optical system . The 
+movement of the correction lens 113 reduces ( corrects ) 
+image blur caused by the lens shake . When moving the 
+correction lens 113 , the lens MPU 109 performs feedback 
+control of the lens actuator 112 such that a position of the 
+correction lens 113 ( a movement amount thereof from a 
+position on the optical axis that is a movement center ) 
+detected by a lens position sensor 114 approaches a target 
+position . Thereby , image blur correction by the movement of 
+the correction lens 113 ( hereinafter referred to as “ OIS ” ) is 
+performed . 
+[ 0040 ] The OIS is performed , as with the IIS , in response 
+to lens shake in the pitch direction and the yaw direction . 
+The correction lens 113 may be moved in the direction 
+orthogonal to the optical axis by being moved in parallel in 
+a plane orthogonal to the optical axis or by being rotated 
+about a point on the optical axis . 
+[ 0041 ] Next , description will be made of a controlled 
+movable amount of the image sensor 104 ( hereinafter 
+referred to as “ an IIS movable amount ” ) set depending on a 
+relation between a center position of an image circle formed 
+by the interchangeable lens 101 and a center position of a 
+mechanical movable range of the image sensor 104 in the IIS 
+( hereinafter referred to as “ an IIS mechanical stroke range ” ) . 
+In the following description , an image blur correctable 
+amount provided by the IIS , which is obtained from the IIS 
+movable amount , is referred to as “ an IIS correctable 
+amount ” . Further , an image blur correctable amount pro 
+vided by the OIS , which is obtained from a mechanical or 
+controlled movable range of the correction lens 113 , is 
+hereinafter referred to as " an OIS correctable amount " . 
+[ 0042 ] 
+In this embodiment , the IIS correctable amount and 
+the OIS correctable amount are expressed as angle ( in deg ) . 
+Further , the above - mentioned IIS correction ratio is a ratio 
+of the IIS correctable amount to a total image blur correct 
+able amount by both the IIS and the OIS , and the OIS 
+correction ratio is a ratio of the OIS correctable amount to 
+the total image blur correctable amount . 
+[ 0043 ] FIG . 2 illustrates the IIS moveable amount in an 
+ideal case where the center position 1 ' of the image circle 3 
+coincides with the center position 1 of the IIS mechanical 
+stroke range 2. In FIG . 2 and FIG . 3 described later , the right 
+direction is a + X direction , the left direction is a -X 
+direction , the upper direction is a + Y direction , and the lower 
+direction is a -Y direction . 
+[ 0044 ] 
+In the IIS , a signal readout area in an image 
+capturing surface of the image sensor 104 from which the 
+image - capturing signal for generating display images or 
+recording images ( the area is hereinafter referred to as “ a 
+sensor readout area ” ) 4 can be moved within the image circle 
+3 and within the IIS mechanical stroke range 2. In FIG . 2 , 
+the IIS movable amount 5 in the + X direction and the IIS 
+movable amount 6 in the -X direction are equal to each 
+other . Thus , the IIS correction ratio in the + X direction and 
+the IIS correction ratio in the -X direction are also equal to 
+each other . The same applies to the + Y direction and the -Y 
+direction . 
+[ 0045 ] On the other hand , FIG . 3 illustrates a case where 
+the center position 1 ' of the image circle 3 is shifted with 
+respect to the center position 1 of the IIS mechanical stroke 
+range 2 to the lower left due to manufacturing errors or the 
+like of the interchangeable lens 101. In this case , the IIS 
+movable amount 6 ' in the + X direction and the IIS movable 
+amount 5 ' in the -X direction are different from each other 
+( specifically , the IIS movable amount 6 ' is smaller than the 
+IIS movable amount 5 ' ) . Therefore , the IIS correction ratio 
+in the + X direction and the IIS correction ratio in the -X 
+direction are also different from each other . In such a case , 
+even if the IIS correction ratio is set without considering the 
+shift of the image circle , in other words , moving directions 
+of the image sensor 104 , the IIS correction ratio cannot be 
+realized in one of the + X and the -X directions . 
+[ 0046 ] Specifically , in one of the + X and the -X direc 
+tions , an IIS correction ratio larger than an actually obtain 
+able IIS correction ratio is set , and thus the sensor movable 
+amount cannot be sufficiently used . Further , due to the above 
+large IIS correction ratio , when the OIS correction ratio 
+smaller than an actually obtainable OIS correction ratio is 
+set , the OIS correctable amount cannot be sufficiently used . 
+As a result , sufficient image blur correction cannot be 
+performed . The same applies to the + Y and -Y directions . In 
+order to solve such a problem , this embodiment performs the 
+following process . 
+[ 0047 ] FIG . 4 illustrates a flowchart of an image blur 
+correction process 1 performed by the camera body 100 
+( camera MPU 102 ) and the interchangeable lens 101 ( lens 
+MPU 109 ) . The process performed by the camera MPU 102 
+is illustrated on the left side of FIG . 4 , and the process 
+performed by the lens MPU 109 is illustrated on the right 
+side thereof The camera MPU 102 and the lens MPU 109 
+execute the respective processes according to computer 
+programs stored in the memories 130 and 140 respectively 
+provided in the camera body 100 and the interchangeable 
+lens 101 . 
+[ 0048 ] When the camera body 100 is powered on to 
+supply power to the interchangeable lens 101 and commu 
+nication between the camera MPU 102 and the lens MPU 
+109 is started , the camera MPU 102 starts this process at step 
+S101 . Although the image blur correction process in the X 
+direction will be described below , the same image blur 
+
+=== PAGE 16 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+4 
+correction process is performed in the Y direction . The same 
+applies to other processes ( flow charts ) that will be described 
+later . 
+[ 0049 ] At step S101 , the camera MPU 102 sends , to the 
+lens MPU 109 , a sensor effective size , a mechanical movable 
+stroke amount of the image sensor 104 in the IIS ( hereinafter 
+referred to as “ an IIS mechanical stroke amount ” ) , and a roll 
+shake correctable angle in the IIS ( hereinafter referred to as 
+“ an IIS roll shake correctable angle ” ) . The sensor effective 
+size is a size ( a horizontal width and a vertical width ) of the 
+above - described sensor readout area 4 in the image sensor 
+104. The roll shake correctable angle is a maximum cor 
+rectable angle in roll shake correction ( roll correction ) by the 
+IIS for correcting image blur due to the roll shake that is 
+rotational shake around a center of the image sensor 104 
+( sensor readout area ) . In this way , the lens MPU 109 
+acquires ( receives ) the sensor effective size , the IIS 
+mechanical stroke amount , and the IIS roll shake correctable 
+angle . 
+[ 0050 ] Next at step S102 , the lens MPU 109 sends , to the 
+camera MPU 102 , information on the image circle of the 
+interchangeable lens 101 ( image - capturing optical system ) , 
+and information on a focal length of the interchangeable lens 
+101. The information on the image circle is hereinafter 
+referred to as “ image circle information ” , and the informa 
+tion on the focal length is hereinafter referred to as “ focal 
+length information ” . 
+[ 0051 ] The image circle information includes at least 
+information on an actual center position of the image circle 
+that is shifted from a center position of a designed image 
+circle , that is , the center position of the sensor readout area 
+of the image sensor 104 due to manufacturing errors or the 
+like . In this embodiment , the image circle information 
+further includes information on a radius of the image circle . 
+The image circle information may include information on a 
+diameter of the image circle because the radius can be 
+calculated from the diameter . The image circle information 
+is required when the camera MPU 102 later calculates the 
+IIS movable range . Further , the image circle information 
+may change depending on image - capturing conditions such 
+as a focal length , a focus position and an aperture diameter 
+of the image - capturing optical system , and a posture of the 
+camera system . Therefore , it is desirable that the image 
+circle information sent from the lens MPU 109 to the camera 
+MPU 102 be associated with a value of at least one of 
+parameters of the image - capturing conditions . 
+[ 0052 ] The focal length information is information indi 
+cating the focal length of the image - capturing optical sys 
+tem , and is required to convert an image blur correction 
+amount ( angle ) provided by the movement of the image 
+sensor 104 into a movement amount of the image sensor 104 
+in control of the IIS . 
+[ 0053 ] At step S103 , the lens MPU 109 calculates the IIS 
+correctable amount ( angle ) of the image sensor 104 in each 
+of its moving directions ( + X and -X directions ) . Description 
+will be made of a method of calculating the IIS correctable 
+amount with reference to a flowchart of FIG . 5 
+[ 0054 ] At step S201 , the lens MPU 109 calculates the IIS 
+movable amount such that the sensor readout area 4 does not 
+protrude from the image circle 3 in each of the moving 
+directions . When the IIS roll shake correctable angle sent 
+from the camera MPU 102 at step S101 is set to 0 , and 
+thereby the roll shake correction is not performed by the IIS , 
+the lens MPU 109 calculates the IIS movable amount 6 in 
+the + direction and the IIS movable amount 5 in the 
+direction in FIG . 3 . 
+[ 0055 ] When the IIS performs the roll shake correction , 
+the camera MPU 102 sends , to the lens MPU 109 , a roll 
+shake correction angle in the IIS , and the lens MPU 109 
+calculates the IIS movable amounts 5'and 6 ' in consideration 
+of the roll shake correction angle . FIG . 6 illustrates a range 
+7 in which the sensor readout area 4 can be moved ( rotated ) 
+when the IIS performs the roll shake correction . Reference 
+numerals 1 , 1 ' to 4 are the same as those in FIG . 3 . 
+[ 0056 ] The range 7 in which the sensor readout area 4 can 
+be rotated is calculated from the sensor effective size and the 
+IIS roll shake correctable angle . Specifically , the IIS mov 
+able amount is calculated such that the range 7 in which the 
+sensor readout area 4 can be rotated does not protrude from 
+the image circle 3 in each of the moving directions ( + X and 
+-X directions ) . 
+[ 0057 ] Next , at step S202 , the lens MPU 109 determines 
+whether or not the IIS movable amount in each of the 
+moving directions calculated from the sensor effective size 
+and the image circle information is smaller than the IIS 
+mechanical stroke amount . If the IIS movable amount is 
+smaller than the IIS mechanical stroke amount , the lens 
+MPU 109 proceeds to step S203 . 
+[ 0058 ] At step S203 , the lens MPU 109 sets the IIS 
+movable amount calculated from the sensor effective size 
+and the image circle information to the IIS movable amount 
+used for setting the IIS correction ratio . When the IIS 
+movable amount is lamer than the IIS mechanical stroke 
+amount , the lens MPU 109 proceeds to step S204 to set a 
+mechanical movable amount , which corresponds to the 
+mechanical stroke amount , to the IIS movable amount to be 
+used for setting the IIS correction ratio . 
+[ 0059 ] Next at step S104 in FIG . 4 , the lens MPU 109 
+converts , using the focal length information of the image 
+capturing optical system , the OIS movable amount into the 
+OIS correctable angle o 
+In the following description , the 
+OIS correctable angle Bois when the correction lens 113 is 
+moved with respect to the optical axis in the + X direction is 
+referred to as “ an OIS + correctable angle 
++ ” , and the OIS 
+correctable angle 
+when the correction lens 113 is moved 
+in the -X direction is referred to as “ an OIS , correctable 
+angle @ais ” . 
+[ 0060 ] In addition , at this step , the lens MPU 109 converts , 
+using the focal length information of the image - capturing 
+optical system , the IIS movable amount into the IIS correct 
+able angle , In the following description , the IIS correct 
+able angle 
+is when the image sensor 104 is moved in the 
++ X direction from the initial position ( center position of the 
+sensor readout area 4 ) is referred to as “ an IIS + correctable 
+angle Onis * and the IIS correctable angle ons when the 
+image sensor 104 is moved in the -X direction is referred to 
+as “ an IIS- correctable angle ous " . Since the IIS movable 
+amount differs depending on the moving direction of the 
+image sensor 104 , the IIS correctable angle also differs 
+depending on the moving direction . 
+[ 0061 ] Next at step S105 , the lens MPU 109 as a setting 
+unit calculates ( sets ) the OIS correction ratio and the IIS 
+correction ratio in each of the moving directions of the 
+correction lens 113 and the image sensor 104. The OIS 
+correction ratio indicates a ratio of an image blur correction 
+amount ( angle [ deg ] ) provided by the OIS ( hereinafter 
+referred to as “ an OIS correction amount " ) to a total image 
+OIS 
+OIS 
+2 
+OIS 
+IIS : 
+
+=== PAGE 17 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+5 
+depending on the IIS + correctable angle Oust and the IIS 
+correctable angle € 115 . Since the IIS + correction ratio and 
+the IIS- correction ratio are different from each other , the 
+OIS + correction ratio when the correction lens 113 is moved 
+in the OIS + area and the OIS- correction ratio when the 
+correction lens 113 is moved in the OIS , area are also 
+different from each other . 
+[ 0073 ] As described above , in this embodiment , the IIS + 
+correction ratio and the IIS- correction ratio are set to 
+appropriate values different from each other depending on 
+the difference between the IIS + correctable angle and the 
+IIS- correctable angle caused by the shift of the image 
+circle . As a result , the image blur correction can be per 
+formed by effectively utilizing the movable amounts of the 
+correction lens 113 and the image sensor 104 . 
+[ 0074 ] In this embodiment , when an optical state such as 
+focus or zoom of the image - capturing optical system 
+changes , the IIS and OIS correctable angles are recalculated . 
+When the camera MPU 102 calculates the IIS and OIS 
+correctable angles , the current optical state of the image 
+capturing optical system is periodically sent to the camera 
+MPU 102 , and the camera MPU 102 calculates the IIS and 
+OIS correctable angles on the basis of the received optical 
+state and the acquired image circle information . The same 
+applies to the following embodiments . 
+Embodiment 2 
+blur correction amount provided by both the OIS and the IIS . 
+Further , the IIS correction ratio indicates a ratio of an image 
+blur correction amount provided by the IIS ( hereinafter 
+referred to as “ an IIS correction amount ” ) to the total image 
+blur correction amount . 
+[ 0062 ] The OIS + correction ratio , the OIS , correction 
+ratio , the IIS + correction ratio , and the IIS- correction ratio 
+are calculated as follows : 
+[ 0063 ] OIS + correction ratio : 0 ors " ( ust +0 01st ) 
+[ 0064 ] OIS , correction ratio : Dois ( 0,15 + 001s ) 
+[ 0065 ] IIS + correction ratio : @ us * ( Ons * +0015 ) 
+[ 0066 ] IIS- correction ratio : sus +015 ) 
+[ 0067 ] Next at step S106 , the lens MPU 109 sends the IIS + 
+correction ratio and the IIS- correction ratio calculated at 
+step S105 to the camera MPU 102. Then , at step S107 , the 
+camera MPU 102 controls the IIS using the IIS + correction 
+ratio and the IIS- correction ratio acquired ( received ) from 
+the lens MPU 109 at step S106 . Specifically , the camera 
+MPU 102 calculates the IIS correction amount depending on 
+the camera shake detected by the camera gyro sensor 106 
+and the IIS + correction ratios . Thereafter the camera MPU 
+102 controls the image sensor actuator 107 to move the 
+image sensor 104 to a target position corresponding to the 
+IIS correction amount . 
+[ 0068 ] At the same time as step S107 , at step S108 , the 
+lens MPU 109 controls the OIS using the OIS + correction 
+ratio and the OIS , correction ratio calculated at step S105 . 
+Specifically , the lens MPU 109 calculates the OIS correction 
+amount depending on the lens shake detected by the lens 
+gyro sensor 110 and the OIS + correction ratios . Thereafter , 
+the lens MPU 109 controls the lens actuator 112 to move the 
+correction lens 113 to a target position corresponding to the 
+OIS correction amount . 
+[ 0069 ] Thus , cooperative image blur correction by the OIS 
+and the IIS , that is , by the correction lens 113 and the image 
+sensor 104 is performed . 
+[ 0070 ] Next , with reference to FIG . 7 , description will be 
+made of the cooperative coordinated image blur correction 
+by the OIS and the IIS . The middle part of FIG . 7 illustrates 
+changes in the IIS correction amount by a solid line . Further , 
+the lower part of FIG . 7 illustrates changes in the OIS 
+correction amount by a solid line . Further , the upper part of 
+FIG . 7 illustrates the total image blur correction amount that 
+is the sum of the IIS correction amount illustrated in the 
+middle part of FIG . 7 and the OIS correction amount 
+illustrated in the lower part thereof , and the total image blur 
+correction amount is illustrated by a dotted line in the middle 
+and lower parts . In these drawings , “ O ” indicates the center 
+position of a mechanical stroke range of the correction lens 
+113 ( hereinafter referred to as “ an OIS mechanical stroke 
+range ” ) and the IIS mechanical stroke range . 
+[ 0071 ] In the OIS , the correction lens 113 is moved 
+depending on the lens shake in an OIS + area and an OIS 
+area divided at the center position of the OIS mechanical 
+stroke range . On the other hand , in the IIS , the image sensor 
+104 is moved depending on the camera shake in an IIS + area 
+and an IIS- area divided at the center position of the IIS 
+mechanical stroke range ( initial position ) . 
+[ 0072 ] As illustrated in the middle of FIG . 7 , the IIS + 
+correction ratio when the image sensor 104 is moved in the 
+IIS + area and the IIS- correction ratio when the image 
+sensor 104 is moved in the IIS , area are different from each 
+other . That is , the lens MPU 109 sets , as the IIS + correction 
+ratio and the IIS- correction ratio , mutually different values 
+[ 0075 ] 
+In a camera system that is a second embodiment 
+( Embodiment 2 ) of the present invention , the interchange 
+able lens 101 corresponds to a second optical apparatus and 
+one optical apparatus , and the camera body 100 corresponds 
+to a first optical apparatus and another optical apparatus . In 
+Embodiment 2 , the camera body 100 sets , using the OIS 
+correctable angle , the image circle information and the focal 
+distance information received from the interchangeable lens 
+101 , the OIS correction ratio and the IIS correction ratio in 
+each of the moving directions of the correction lens 113 and 
+the image sensor 104. The interchangeable lens 101 controls 
+the OIS depending on the OIS correction ratio received from 
+the camera body 100. The camera system of this embodi 
+ment has the same configuration as that of the camera system 
+of Embodiment 1 , and the same constituent elements as 
+those in Embodiment 1 are denoted by the same reference 
+numerals as those in Embodiment 1 . 
+[ 0076 ] FIG . 8 illustrates a flowchart of an image blur 
+correction process 2 performed by the camera body 100 
+( camera MPU 102 ) and the interchangeable lens 101 ( lens 
+MPU 109 ) . The process performed by the camera MPU 102 
+is illustrated on the left side of FIG . 8 , and the process 
+performed by the lens MPU 109 is illustrated on the right 
+side thereof . The camera MPU 102 and the lens MPU 109 
+execute the respective processes according to computer 
+programs . 
+[ 0077 ] When the camera body 100 is powered on to 
+supply power to the interchangeable lens 101 and commu 
+nication between the camera MPU 102 and the lens MPU 
+109 is started , the lens MPU 109 starts this process at step 
+S301 . 
+[ 0078 ] At step S301 , the lens MPU 109 calculates the OIS 
+correctable angle 
+from the OIS movable amount and the 
+focal length information , and sends the calculated OIS 
+correctable angle bois to the camera MPU 102 . 
+[ 0079 ] Next at step S302 , the lens MPU 109 sends the 
+image circle information and the focal length information to 
+OIS 
+
+=== PAGE 18 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+6 
+the camera MPU 102. The reason therefor is as described at 
+step S102 in Embodiment 1. Thus , the camera MPU 102 
+acquires ( receives ) the image circle information and the 
+focal length information . 
+[ 0080 ] Next at step S303 , the camera MPU 102 calculates 
+the IIS movable amount in each of the moving directions 
+( + X and -X directions ) of the image sensor 104. The 
+calculation method of the IIS movable amount is the same 
+as that described at step S103 in Embodiment 1 . 
+[ 0081 ] Next at step S304 , the camera MPU 102 converts , 
+using the focal length information received from the lens 
+MPU 109 at step S302 , the IIS movable amount calculated 
+at step S303 into the IIS correctable angle ous . 
+[ 0082 ] Next at step S305 , the camera MPU 102 as a setting 
+unit calculates ( sets ) the OIS correction ratio ( OIS + and 
+OIS- correction ratios ) and the IIS correction ratio ( IIS + and 
+IIS - correction ratios ) in each of the moving directions . The 
+calculation method thereof is the same as that described at 
+step S105 in Embodiment 1 . 
+[ 0083 ] Next at step S306 , the camera MPU 102 sends the 
+OIS + and OIS , correction ratios calculated at step S305 , to 
+the lens MPU 109 . 
+[ 0084 ] Then , at step S307 , the camera MPU 102 controls 
+the IIS using the IIS + and IIS- correction ratios calculated 
+at step S306 , as at step S107 of the first embodiment . 
+[ 0085 ] At step S308 simultaneously with step S307 , the 
+lens MPU 109 controls the OIS using the OIS + and OIS 
+correction ratios received from the camera MPU 102 at step 
+S306 as at step S108 in Embodiment 1 . 
+[ 0086 ] Thus , cooperative image blur correction by the OIS 
+and the IIS , that is , by the correction lens 113 and the image 
+sensor 104 is performed . 
+[ 0087 ] In this embodiment , the lens MPU 109 sends , to the 
+camera MPU 102 , an angle equivalent value as the OIS 
+correctable angle . However , as another embodiment of the 
+present invention , the lens MPU 109 may send , to the 
+camera MPU 102 , a movable amount [ mm ] of the correction 
+lens 113 instead of the angle equivalent value . When sending 
+the movable amount [ mm ] , the lens MPU 109 separately 
+sends , to the camera MPU 102 , information on image blur 
+correction sensitivity ( sensitivity for converting the move 
+ment amount [ mm ] of the correction lens 113 into an angle 
+[ deg ] ) . However , it is more desirable that the lens MPU 109 
+send the OIS correctable angle to the camera MPU 102 
+because it is possible to reduce a communication amount for 
+the image blur correction sensitivity . 
+[ 0089 ] This embodiment is different from 
+the other 
+embodiments in that it is necessary that the lens MPU 109 
+sets each correction ration in consideration of not only the 
+OIS correctable angle and the IIS correctable angle but also 
+a correctable angle by the EIS ( hereinafter referred to as “ an 
+EIS correctable angle ” ) . Further , in Embodiment 1 , it is 
+necessary that the camera MPU 102 sends the IIS roll shake 
+correctable angle to the lens MPU 109 , and that the lens 
+MPU 109 calculates the IIS movable amount in consider 
+ation of the IIS roll shake correctable angle . 
+[ 0090 ] On the other hand , in Embodiment 3 , the lens MPU 
+109 calculates each correction ratio without receiving the 
+EIS correctable angle and the IIS roll shake correctable 
+angle from the camera MPU 102. This makes it possible to 
+reduce a communication amount between the camera body 
+100 and the interchangeable lens 101 and to simplify a 
+process of calculating the correction ratio . 
+[ 0091 ] FIG . 9 illustrates a flowchart of an image blur 
+correction process 3 performed by the camera body 100 
+( camera MPU 102 ) and the interchangeable lens 101 ( lens 
+MPU 109 ) . The process performed by the camera MPU 102 
+is illustrated on the left side of FIG . 9 , and the process 
+performed by the lens MPU 109 is illustrated on the right 
+side thereof The camera MPU 102 and the lens MPU 109 
+execute the respective processes according to computer 
+programs 
+. 
+[ 0092 ] When the camera body 100 is powered on to 
+supply power to the interchangeable lens 101 and commu 
+nication between the camera MPU 102 and the lens MPU 
+109 is started , the camera MPU 102 starts this process at step 
+S401 . 
+[ 0093 ] At step S401 , the camera MPU 102 calculates the 
+sensor effective size in consideration of the EIS correctable 
+angle and the IIS roll shake correctable angle . In this 
+calculation , the camera MPU 102 makes the calculated 
+sensor effective size different from the actual size of the 
+sensor readout area 4. Description will be made of the 
+process of calculating the sensor effective size with refer 
+ence to a flowchart of FIG . 10 . 
+[ 0094 ] 
+At step S501 , the camera MPU 102 determines 
+whether or not to perform the EIS in the camera body 100 . 
+When performing the EIS , the camera MPU 102 proceeds to 
+step S502 to set the sensor effective size to an EIS clipping 
+size that is smaller than the actual size of the sensor readout 
+area 4. FIG . 11 illustrates the sensor readout area 4 and an 
+EIS clipping area 8 that is an image clipping area in the EIS . 
+The EIS correctable angle is set depending on a maximum 
+amount by which the EIS cropping area 8 can be moved 
+within the sensor readout area 4. Further , a movable amount 
+of the EIS clipping area 8 within the image circle 3 and 
+within the IIS mechanical stroke range 2 is the sum of a 
+movable amount of the EIS clipping area 8 within the sensor 
+readout area 4 and the IIS movable amount . 
+[ 0095 ] Next at step S503 , the camera MPU 102 deter 
+mines whether or not to perform the roll shake correction by 
+the IIS . When the roll shake correction is to be performed , 
+the camera MPU 102 proceeds to step S504 . 
+[ 0096 ] At step S504 , the camera MPU 102 sets the sensor 
+effective size that is larger than the actual size of the sensor 
+readout area 4 or than the size of the EIS clipping area 8 
+when the process at step 502 has been performed . 
+[ 0097 ] FIG . 12 illustrates the sensor effective size 9 in 
+consideration of the roll shake correction amount of the IIS . 
+The sensor effective size 9 is set as a rectangle including 
+Embodiment 3 
+[ 0088 ] 
+In a camera system that is a third embodiment 
+( Embodiment 3 ) of the present invention , the interchange 
+able lens 101 corresponds to a first optical apparatus and one 
+optical apparatus , and the camera body 100 corresponds to 
+a second optical apparatus and another optical apparatus . In 
+Embodiment 3 , the camera body 100 performs electronic 
+image blur correction ( hereinafter referred to as “ EIS ” ) in 
+addition to the IIS . The interchangeable lens 101 sets , using 
+the sensor effective size and the IIS mechanical stroke 
+amount received from the camera body 100 , an OIS correc 
+tion ratio and an IIS + EIS correction ratio as a total correc 
+tion ratio of the IIS and EIS performed by the camera body 
+100. The camera body 100 controls the IIS and the EIS 
+depending on the IIS + EIS correction ratio received from the 
+interchangeable lens 101 . 
+
+=== PAGE 19 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+7 
+whole of a range 7 in which the sensor readout area 4 is 
+rotated by the roll shake correction . This sensor effective 
+size 9 is expressed by following expression ( 1 ) . In expres 
+sion ( 1 ) , " * " represents multiplication . 
+Lx ' = Ly * cos Roll + Ly * sin O Roll 
+Ly ' = Ly * sin Roll + Ly * cos O Roll 
+( 1 ) 
+[ 0098 ] 
+In expression ( 1 ) , Lx ' and Ly ' respectively repre 
+sents a horizontal width and a vertical width of the sensor 
+effective size in consideration of the roll shake correction 
+amount of the IIS , and Lx and Ly respectively represents a 
+horizontal width and a vertical width of the sensor effective 
+size that is the same as the sensor readout area 4. Further . 
+Ro11 represents the IIS roll shake correctable angle . 
+[ 0099 ] At step S103 in the first embodiment , since the area 
+7 within which the sensor readout area 4 can be rotated has 
+a complicate shape , calculation of the IIS movable amount 
+in the image circle 3 and in the IIS mechanical stroke range 
+2 becomes complicated . On the other hand , using the 
+rectangular sensor effective size 9 in consideration of the roll 
+shake correction as in this embodiment makes it possible to 
+simply calculate the IIS movable amount . 
+[ 0100 ] Next at step S402 in FIG . 9 , the camera MPU 102 
+sends the sensor effective size calculated at step S401 and 
+the IIS mechanical stroke amount to the lens MPU 109 . 
+Since the sensor effective size sent at this time has been set 
+in consideration of the EIS correctable angle and the IIS roll 
+shake correctable angle , it is not necessary to send the EIS 
+correctable angle and the IIS roll shake correctable angle to 
+the lens MPU 109 . 
+[ 0101 ] Next at step S403 , the lens MPU 109 sends the 
+image circle information and the focal length information to 
+the camera MPU 102. The reason therefor is as described at 
+step S102 in Embodiment 1. Thus , the camera MPU 102 
+acquires ( receives ) the image circle information and the 
+focal length information . 
+[ 0102 ] Next at step S404 , the lens MPU 109 calculates , 
+using the sensor effective size , the image circle information 
+and the IIS mechanical stroke amount , an I / EIS movable 
+amount in each of the moving directions of the image sensor 
+104. The I / EIS means IIS + EIS . The method of calculating 
+the I / EIS movable amount is the same as that described at 
+step S103 in Embodiment 1. The sensor effective size has 
+been set at step S401 in consideration of the EIS and the roll 
+shake correction by the IIS , so that the I / EIS movable 
+amount calculated at this step is the sum of the IIS movable 
+amount in consideration of the roll shake correction and the 
+EIS correctable angle ( EIS movable amount ) . 
+[ 0103 ] Next at step S405 , the lens MPU 109 converts the 
+OIS movable amount and the I / EIS movable amount into 
+correctable angles , respectively , by the same conversion 
+method as described at step S104 in Embodiment 1 . 
+[ 0104 ] At step S406 , the lens MPU 109 as a setting unit 
+calculates ( sets ) an OIS correction ratio ( OIS + and OIS 
+correction ratios ) and an I / EIS correction ratio ( I / EIS + and 
+I / EIS - correction ratios ) in each of the moving directions . In 
+this embodiment , the OIS correction ratio is a ratio of the 
+OIS correction amount to a total image blur correction 
+amount ( angle [ deg ] ) provided by the IIS , the EIS and the 
+OIS , and the I / EIS correction ratio is a ratio of a correction 
+amount ( hereinafter referred to as “ an I / EIS correction 
+amount " ) provided by the IIS and the EIS to the above total 
+image blur correction amount . 
+[ 0105 ] Next at step S407 , the lens MPU 109 sends the 
+I / EIS correction ratio calculated at step S406 to the camera 
+MPU 102 . 
+[ 0106 ] 
+Then , at step S408 , the camera MPU 102 calculates 
+the EIS correctable angle and the IIS correctable angle , 
+using the image circle information and the focal length 
+information received from the lens MPU 109 at step S403 . 
+Further , at step S407 , the camera MPU 102 divides the I / EIS 
+correction ratio received from the lens MPU 109 depending 
+on a ratio between the EIS correctable angle and the IIS 
+correctable angle . Thus , the camera MPU 102 calculates an 
+IIS correction ratio ( IIS + and IIS- correction ratios ) and an 
+EIS correction ratio ( EIS + and EIS , correction ratios ) in 
+each of the moving directions of the image sensor 104. The 
+IIS correction ratio is a ratio of the IIS correction amount to 
+the total image blur correction amount provided by the IIS , 
+the EIS and the OIS . The EIS correction ratio is a ratio of a 
+correction amount ( hereinafter referred to as “ an EIS cor 
+rection amount ) provided by the EIS to the above total image 
+blur correction amount . 
+[ 0107 ] Next at step S409 , the camera MPU 102 controls 
+the EIS using the EIS correction ratio ( EIS + and EIS 
+correction ratios ) calculated at step S408 . Specifically , the 
+camera MPU 102 calculates , depending on the camera shake 
+detected by the camera gyro sensor 106 and the EIS cor 
+rection ratio , the EIS correction amount that is a movement 
+amount of the EIS clipping area . Then , the camera MPU 102 
+changes the position of the EIS clipping area depending on 
+the calculated EIS correction amount to output a moving 
+image . 
+[ 0108 ] At step S410 simultaneously with step S409 , the 
+camera MPU 102 controls the IIS , using the IIS correction 
+ratio ( IIS + and IIS- correction ratios ) calculated at step 
+S408 , as at step S107 in Embodiment 1 . 
+[ 0109 ] Further , at step S411 simultaneously with step 
+S409 , the lens MPU 109 controls the OIS , using the OIS 
+correction ratio ( OIS + and OIS- correction ratios ) calcu 
+lated at step S407 , as at step S108 in Embodiment . 
+[ 0110 ] 
+Thus , cooperative image blur correction by the 
+OIS , IIS and EIS is performed . 
+[ 0111 ] In this embodiment , the camera MPU 102 changes 
+the sensor effective size depending on the EIS correction 
+amount and the roll shake correction amount of the IIS to 
+send the changed sensor effective size to the lens MPU 109 . 
+Thus , the lens MPU 109 can calculate ( set ) the OIS correc 
+tion ratio and the I / EIS correction ratio without considering 
+the EIS correctable angle and the IIS roll shake correctable 
+angle in the camera body 100. Therefore , this embodiment 
+can reduce a communication amount between the camera 
+body 100 and the interchangeable lens 101 , and reduce a 
+processing load on the lens MPU 109 when calculating each 
+correction ratio . 
+Embodiment 4 
+[ 0112 ] 
+In a camera system that is a fourth embodiment 
+( Embodiment 4 ) of the present invention , the interchange 
+able lens 101 corresponds to a first optical apparatus and one 
+optical apparatus , and the camera body 100 corresponds to 
+a second optical apparatus and another optical apparatus . In 
+Embodiment 4 , the camera body 100 changes the initial 
+position ( hereinafter referred to as “ an IIS initial position ” ) 
+of the movement of the image sensor 10 , which is different 
+from the other embodiments , in order to eliminate the 
+necessity of calculating the IIS correction ratio in each of the 
+
+=== PAGE 20 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+8 
+moving directions of the image sensor 104. The interchange 
+able lens 101 calculates the OIS correction ratio and the IIS 
+correction ratio , using the IIS movable amount received 
+from the camera body 100. Then , the camera body 100 
+controls the IIS depending on the IIS correction ratio 
+received from the interchangeable lens 101 . 
+[ 0113 ] With reference to FIG . 13 , description will be made 
+of the change of the IIS initial position . In the left and right 
+parts of FIG . 13 , as in FIG . 3 , the case is illustrated where 
+the center position 1 ' of the image circle 3 is shifted to the 
+lower left with respect to the center position 1 of the IIS 
+mechanical stroke range 2. In the left part of FIG . 13 , a case 
+is illustrated where the IIS movable amount 6 ' in the + X 
+direction and the IIS movable amount 5 ' in the -X direction 
+when the IIS initial position is located at the center position 
+1 of the IIS mechanical stroke range 2. The IIS movable 
+amounts 5 ' and 6 ' are mutually different . Similarly , the IIS 
+movable amount 12 ' in the + Y direction and the IIS movable 
+amount 11 ' in the -Y direction are mutually different . 
+Therefore , it is necessary to calculate and set the IIS 
+correction ratio in each of the moving directions ( + X , -X , 
++ Y and -Y directions ) of the image sensor 104 as in the 
+other embodiments . 
+[ 0114 ] On the other hand , in the right part of FIG . 13 , a 
+case is illustrated where the IIS initial position is set to a 
+position at which the same movable amount can be obtained 
+in the + and - directions in each of the X and Y directions . 
+In this case , the IIS movable amount 6 " in the + X direction 
+and the IIS movable amount 5 " in the -X direction are equal 
+to each other , and the IIS movable amount 12 " in the + Y 
+direction and the IIS movable amount 11 " in the -Y direc 
+tion are equal to each other . Therefore , it is not necessary to 
+calculate the IIS correction ratio in each of the moving 
+directions of the image sensor 104. That is , the same IIS 
+correction ratio can be used in the + X direction and the -X 
+direction , and the same IIS correction ratio can be used in the 
++ Y direction and the -Y direction . 
+[ 0115 ] FIG . 14 illustrates a flowchart of an image blur 
+correction process 4 performed by the camera body 100 
+( camera MPU 102 ) and the interchangeable lens 101 ( lens 
+MPU 109 ) . The process performed by the camera MPU 102 
+is illustrated on the left side of FIG . 14 , and the process 
+performed by the lens MPU 109 is illustrated on the right 
+side thereof . The camera MPU 102 and the lens MPU 109 
+execute respective processes according to computer pro 
+grams 
+. 
+[ 0116 ] When the camera body 100 is powered on to supply 
+power to the interchangeable lens 101 and communication 
+between the camera MPU 102 and the lens MPU 109 is 
+started , the lens MPU 109 starts this process at step S601 . 
+[ 0117 ] At step S601 , the lens MPU 109 sends the image 
+circle information to the camera MPU 102. Thus , the camera 
+MPU 102 acquires ( receives ) the image circle information . 
+[ 0118 ] Next at step S602 , the camera MPU 102 calculates , 
+using the sensor effective size , the image circle information 
+and the IIS mechanical stroke amount , the IIS movable 
+amount in each of the moving directions of the image sensor 
+104. The method of calculating the IIS movable amount is 
+the same as that described at step S103 in Embodiment 1 . 
+[ 0119 ] Next at step S603 , the camera MPU 102 as a 
+control unit moves the IIS initial position ( that is , moves the 
+image sensor 104 ) to a position at which the IIS movable 
+amounts in the respective moving directions ( + X and -X 
+directions ) calculated at step S602 become equal to each 
+other . Then , the camera MPU 102 recalculates the IIS 
+movable amount . In this calculation , since the IIS movable 
+amounts in the respective moving directions are equal to 
+each other , it is only necessary to calculate the IIS movable 
+amount in one moving direction . The IIS movable amount 
+after the movement of the IIS initial position is expressed by 
+following expression ( 2 ) . 
+dx = ( dx ++ d ) / 2 
+( 2 ) 
+[ 0120 ] 
+In expression ( 2 ) , d ' represents the IIS movable 
+amount 
+the + X 
+dir 
+tion and -X direction after the 
+movement of the IIS initial position , dx * represents the IIS 
+movable amount in the + X direction , and d , 
+is the IIS 
+movable amount in the -X direction . 
+[ 0121 ] Next at step S604 , the camera MPU 102 sends the 
+IIS movable amount calculated at step S603 to the lens MPU 
+109. As described above , since the IIS movable amounts in 
+the respective moving directions are equal to each other , it 
+is only necessary to send the IIS movable amount in one 
+moving direction to the lens MPU 109 . 
+[ 0122 ] Next at step S605 , the lens MPU 109 sends the 
+focal length information of the image capturing optical 
+system to the camera MPU 102 . 
+[ 0123 ] Next at step S606 , the lens MPU 109 converts , as 
+at step S104 in Embodiment 1 , the OIS movable amount and 
+the IIS movable amount respectively into the OIS correct 
+able angle and the IIS correctable angle . 
+[ 0124 ] Next at step S607 , the lens MPU 109 as a setting 
+unit calculates ( sets ) , from a ratio of the OIS correctable 
+angle and the IIS correctable angle calculated at step S606 , 
+the OIS correction ratio and the IIS correction ratio . In this 
+calculation , since the IIS correctable angle is common to the 
++ X and -X directions , it is not necessary to calculate the IIS 
+correction ratios in these directions . 
+[ 0125 ] Next at step S608 , the lens MPU 109 sends the 
+common IIS correction ratio in the + X and -X directions to 
+the camera MPU 102. Then , at step S609 , the camera MPU 
+102 controls the IIS , using the IIS correction ratio received 
+from the lens MPU 109 at step S606 , as at step S107 in 
+Embodiment 1 . 
+[ 0126 ] At step S610 simultaneously with step S609 , the 
+lens MPU 109 controls the OIS control , using the OIS 
+correction ratio calculated at step S607 , as at step S108 in 
+Embodiment 1 . 
+[ 0127 ] Thus , cooperative image blur correction by both 
+the OIS and the IIS , that is , by the correction lens 113 and 
+the image sensor 104 is performed . 
+[ 0128 ] In this embodiment , the IIS initial position is 
+moved to the position at which the IIS movable amounts in 
+the respective moving directions ( + X and -X directions ) of 
+the image sensor 104 are equal to each other , so that the IIS 
+correction ratios in the respective moving directions become 
+equal to each other . This makes it possible to eliminate the 
+necessity of calculating the IIS correction ratios in the 
+respective moving directions . Therefore , it is not necessary 
+to communicate the IIS correction ratios in the respective 
+moving directions between the camera body 100 and the 
+interchangeable lens 101 , thereby reducing the communica 
+tion amount therebetween . Further , it is not necessary to 
+calculate the IIS correction ratios in the respective moving 
+directions , so that the process load of the lens MPU 109 can 
+be reduced . 
+[ 0129 ] Embodiment 1 described the case where the cam 
+era MPU 102 sends the sensor effective size , the IIS 
+
+=== PAGE 21 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+9 
+mechanical stroke amount and the IIS roll shake correctable 
+angle to the lens MPU 109 , and the lens MPU 109 calculates 
+the IIS movable amount in each of the moving directions of 
+the image sensor 104. However , the camera MPU 102 may 
+calculate the IIS movable amount in each of the moving 
+directions in advance using the image circle information and 
+the focal length information to send them to the lens MPU 
+109 , and the lens MPU 109 may calculate the IIS correction 
+ratio depending thereon . 
+[ 0130 ] 
+Further , Embodiment 3 described the case where 
+the lens MPU 109 calculates the I / EIS movable amount and 
+the I / EIS correction ratio . However , the camera MPU 102 
+may calculate the I / EIS movable amount and the I / EIS 
+correction ratio . In this case , the camera MPU 102 may 
+convert the sensor effective size into the sensor effective size 
+in consideration of the roll shake correction amount to 
+reduce the process load of the camera MPU 102 when 
+calculating the I / EIS movable amount and the I / EIS correc 
+tion ratio . 
+[ 0131 ] Furthermore , a process may be performed in which 
+the image blur correction process 1 described in Embodi 
+ment 1 is performed when the camera body 100 performs 
+still image capturing , and the image blur correction process 
+ing 2 described in Embodiment 2 is performed when the 
+camera body 100 performs moving image capturing . FIG . 15 
+illustrates this process performed by the camera MPU 102 . 
+[ 0132 ] At step S701 , the camera MPU 102 determines 
+whether the camera body 100 performs still image capturing 
+or moving image capturing . When performing the still image 
+capturing , the camera MPU 102 proceeds to step S702 to 
+perform the image blur correction process 1 with the lens 
+MPU 109. On the other hand , when performing the moving 
+image capturing , the camera MPU 102 proceeds to step 
+S703 to perform the image blur correction process 2 with the 
+lens MPU 109 . 
+[ 0133 ] In this case , an appropriate image blur correction 
+process can be selectively performed in the still image 
+capturing and in the moving image capturing . 
+disk , a random - access memory ( RAM ) , a read only memory 
+( ROM ) , a storage of distributed computing systems , an 
+optical disk ( such as a compact disc ( CD ) , digital versatile 
+disc ( DVD ) , or Blu - ray Disc ( BD ) TM ) , a flash memory 
+device , a memory card , and the like . 
+[ 0135 ] While the present invention has been described 
+with reference to exemplary embodiments , it is to be under 
+stood that the invention is not limited to the disclosed 
+exemplary embodiments . The scope of the following claims 
+is to be accorded the broadest interpretation so as to encom 
+pass all such modifications and equivalent structures and 
+functions . 
+[ 0136 ] 
+This application claims the benefit of Japanese 
+Patent Application No. 2018-167529 , filed on Sep. 7 , 2018 
+which is hereby incorporated by reference herein in its 
+entirety . 
+What is claimed is : 
+1. A camera used in a camera system including the camera 
+that includes an image sensor movable for image blur 
+correction , and a lens apparatus that is detachably attachable 
+to the camera and includes an optical element movable for 
+the image blur correction , the camera comprising : 
+a setting unit configured to set a ratio of image blur 
+correction amounts provided respectively by move 
+ments of the optical element and the image sensor in 
+each of their moving directions , using information on 
+an image circle formed by the lens apparatus , informa 
+tion on a mechanical movable amount of the image 
+sensor , and information on a size of a signal readout 
+area of the image sensor . 
+2. The camera according to claim 1 , wherein the setting 
+unit is configured to set the ratio depending on an optical 
+image blur correctable amount provided by the movement of 
+the optical element in each of the moving directions of the 
+optical element , and on an image blur correctable amount 
+provided by the movement of the image sensor in each of the 
+moving directions of the image sensor . 
+3. The camera according to claim 1 wherein the informa 
+tion on the image circle is information on a center position 
+of the image circle and one of a radius and a diameter of the 
+image circle . 
+4. The camera according to claim 3 , wherein the setting 
+unit is configured to set the ratio in each of the moving 
+directions when the center position of the image circle is 
+shifted from a center position of the signal readout area . 
+5. The camera according to claim 2 , wherein the setting 
+unit is configured to set the ratio , using smaller one of the 
+image blur correctable amount of the image sensor and the 
+mechanical movable amount of the image sensor in each of 
+the moving directions of the image sensor as the image blur 
+correctable amount of the image sensor to be used for setting 
+the ratio . 
+6. The camera according to claim 1 , wherein the setting 
+unit is configured to send the ratio to the lens apparatus . 
+7. The camera according to claim 1 , wherein the setting 
+unit is configured to set the ratio , when the image sensor is 
+rotated for image blur correction against roll shake , using a 
+larger size of the signal readout area of the image sensor than 
+an actual size of the signal readout area as the size of a signal 
+readout area of the image sensor to be used for setting the 
+ratio . 
+8. The camera according to claim 1 , wherein the setting 
+unit is configured to set the ratio , when electronic image blur 
+correction is performed on the image sensor , using a smaller 
+Other Embodiments 
+[ 0134 ] Embodiments of the present invention can also be 
+realized by a computer of a system or apparatus that reads 
+out and executes computer executable instructions ( e.g. , one 
+or more programs ) recorded on a storage medium ( which 
+may also be referred to more fully as a “ non - transitory 
+computer - readable storage medium ' ) to perform the func 
+tions of one or more of the above - described embodiments 
+and / or that includes one or more circuits ( e.g. , application 
+specific integrated circuit ( ASIC ) ) for performing the func 
+tions of one or more of the above - described embodiments , 
+and by a method performed by the computer of the system 
+or apparatus by , for example , reading out and executing the 
+computer executable instructions from the storage medium 
+to perform the functions of one or more of the above 
+described embodiments and / or controlling the one or more 
+circuits to perform the functions of one or more of the 
+above - described embodiments . The computer may comprise 
+one or more processors ( e.g. , central processing unit ( CPU ) , 
+micro processing unit ( MPU ) ) and may include a network of 
+separate computers or separate processors to read out and 
+execute the computer executable instructions . The computer 
+executable instructions may be provided to the computer , for 
+example , from a network or the storage medium . The storage 
+medium may include , for example , one or more of a hard 
+
+=== PAGE 22 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+10 
+size of the signal readout area of the image sensor than an 
+actual size of the signal readout area as the size of a signal 
+readout area of the image sensor to be used for setting the 
+ratio . 
+9. A lens apparatus used in a camera system including a 
+camera that includes an image sensor movable for image 
+blur correction , and the lens apparatus that is detachably 
+attachable to the camera and includes an optical element 
+movable for the image blur correction , the lens apparatus 
+comprising : 
+a setting unit configured to set a ratio of image blur 
+correction amounts provided respectively by move 
+ments of the optical element and the image sensor in 
+each of their moving directions , using information on 
+an image circle formed by the lens apparatus , informa 
+tion on a mechanical movable amount of the image 
+sensor , and information on a size of a signal readout 
+area of the image sensor . 
+10. The lens apparatus according to claim 9 , wherein the 
+setting unit is configured to set the ratio depending on an 
+optical image blur correctable amount provided by the 
+movement of the optical element in each of the moving 
+directions of the optical element , and on a sensor image blur 
+correctable amount provided by the movement of the image 
+sensor in each of the moving directions of the image sensor . 
+11. The lens apparatus according to claim 9 , wherein the 
+information on the image circle is information on a center 
+position of the image circle and one of a radius and a 
+diameter of the image circle . 
+12. The lens apparatus according to claim 11 , wherein the 
+setting unit is configured to set the ratio in each of the 
+moving directions when the center position of the image 
+circle is shifted from a center position of the signal readout 
+a control unit configured to move an initial position of 
+movement of the image sensor to a position at which 
+movable amounts of the image sensor in the moving 
+directions of the image sensor become mutually equal , 
+using information on an image circle formed by the 
+lens apparatus . 
+18. The camera according to claim 17 , further comprising 
+a setting unit configured to set a ratio of image blur correc 
+tion amounts provided respectively by movements of the 
+optical element and the image sensor , the ratio being com 
+mon to moving directions of each of the optical element and 
+the image sensor . 
+19. A method of controlling a camera used in a camera 
+system including the camera that includes an image sensor 
+movable for image blur correction , and a lens apparatus that 
+is detachably attachable to the camera and includes an 
+optical element movable for the image blur correction , the 
+method comprising the steps of : 
+acquiring information on an image circle formed by the 
+lens apparatus , information on a mechanical movable 
+amount of the image sensor , and information on a size 
+of a signal readout area of the image sensor ; and 
+setting a ratio of image blur correction amounts provided 
+respectively by movements of the optical element and 
+the image sensor in each of their moving directions , 
+using the information on the image circle , the infor 
+mation on the mechanical movable amount , and the 
+information on the size of the signal readout area . 
+20. A method of controlling a lens apparatus used in a 
+camera system including a camera that includes an image 
+sensor movable for image blur correction , and the lens 
+apparatus that is detachably attachable to the camera and 
+includes an optical element movable for the image blur 
+correction , the method comprising the steps of : 
+acquiring information on an image circle formed by the 
+lens apparatus , information on a mechanical movable 
+amount of the image sensor , and information on a size 
+of a signal readout area of the image sensor ; and 
+setting a ratio of image blur correction amounts provided 
+respectively by movements of the optical element and 
+the image sensor in each of their moving directions , 
+using the information on the image circle , the infor 
+mation on the mechanical movable amount 
+, and the 
+information on the size of a signal readout area . 
+21. A method of controlling a camera used in a camera 
+system including the camera that includes an image sensor 
+movable for image blur correction , and a lens apparatus that 
+is detachably attachable to the camera and includes an 
+optical element movable for the image blur correction , the 
+method comprising the steps of : 
+acquiring information on an image circle formed by the 
+lens apparatus ; and 
+moving the image sensor to a position at which movable 
+amounts of the image sensor in the moving directions 
+of the image sensor become mutually equal , using the 
+information on the image circle . 
+22. A computer - readable non - transitory storage medium 
+storing a program for causing a camera , which is used in a 
+camera system including the camera that includes an image 
+sensor movable for image blur correction , and a lens appa 
+ratus that is detachably attachable to the camera and includes 
+an optical element movable for the image blur correction , to 
+execute a process according to the method of claim 19 . 
+area . 
+13. The lens apparatus according to claim 10 , wherein the 
+setting unit is configured to set the ratio , using smaller one 
+of the sensor image blur correctable amount and the 
+mechanical movable amount of the image sensor in each of 
+the moving directions of the image sensor as the sensor 
+image blur correctable amount to be used for setting the 
+ratio . 
+14. The lens apparatus according to claim 9 , wherein the 
+setting unit is configured to send the ratio to the camera . 
+15. The lens apparatus according to claim 9 , wherein the 
+setting unit is configured to set the ratio , when the image 
+sensor is rotated for image blur correction against roll shake , 
+using a larger size of the signal readout area of the image 
+sensor than an actual size of the signal readout area as the 
+size of a signal readout area of the image sensor to be used 
+for setting the ratio . 
+16. The lens apparatus according to claim 9 , wherein the 
+setting unit is configured to set the ratio , when electrical 
+image blur correction is performed on the image sensor , 
+using a smaller size of the signal readout area of the image 
+sensor than an actual size of the signal readout area as the 
+size of a signal readout area of the image sensor to be used 
+for setting the ratio . 
+17. A camera used in a camera system including the 
+camera that includes an image sensor movable for image 
+blur correction , and a lens apparatus that is detachably 
+attachable to the camera and includes an optical element 
+movable for the image blur correction , the camera compris 
+ing : 
+
+=== PAGE 23 ===
+US 2020/0084358 A1 
+Mar. 12 , 2020 
+11 
+23. A computer - readable non - transitory storage medium 
+storing a program for causing a lens apparatus , which is used 
+in a camera system including a camera that includes an 
+image sensor movable for image blur correction , and the 
+lens apparatus that is detachably attachable to the camera 
+and includes an optical element movable for the image blur 
+correction , to execute a process according to the method of 
+claim 20 . 
+24. A computer - readable non - transitory storage medium 
+storing a program for causing a camera , which is used in a 
+camera system including the camera that includes an image 
+sensor movable for image blur correction , and a lens appa 
+ratus that is detachably attachable to the camera and includes 
+an optical element movable for the image blur correction , to 
+execute a process according to the method of claim 21 . 

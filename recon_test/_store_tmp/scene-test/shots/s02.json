@@ -1,0 +1,18 @@
+{
+  "id": "s02",
+  "prompt": "b",
+  "purpose": "",
+  "scale": "medium",
+  "camera": "none",
+  "camera_suggestion": null,
+  "seconds": 2.5,
+  "scene": "sc2",
+  "subject": "",
+  "energy": 0.2,
+  "beat": "develop",
+  "take": null,
+  "created": "2026-10-14 11:55:18",
+  "render_inputs": null,
+  "updated": "2026-10-14 11:55:18",
+  "seed": 1305
+}

@@ -1,0 +1,837 @@
+ 
+1 
+Image Stabilization Technology Overview 
+ 
+David Sachs, Steven Nasiri, Daniel Goehl 
+InvenSense, Inc. 
+3150A Coronado Drive, Santa Clara, CA 95054 
+(408) 988-7339 
+www.InvenSense.com 
+ 
+ 
+Abstract 
+ 
+As Digital Still Cameras (DSC) become smaller, cheaper and higher in resolution, 
+photographs are increasingly prone to blurring from shaky hands. Optical image 
+stabilization (OIS) is an effective solution that addresses the quality of images, and is an 
+idea that has been around for at least 30 years. It has only recently made its way into the 
+low-cost consumer camera market, and will soon be migrating to the higher end camera 
+phones. This paper provides an overview of common design practices and considerations 
+for optical image stabilization and how silicon-based MEMS dual-axis gyroscopes with 
+their size, cost and performance advantages are enabling this vital function for image 
+capturing devices. 
+ 
+Introduction 
+ 
+Image stabilization first hit the consumer market in 1995, with the introduction of a 
+stabilized zoom lens by Canon. Canon had published this idea in the United States as 
+early as 1976 in a patent entitled “Image stabilizing optical system having a variable 
+prism”. Since this introduction, image stabilization has appeared in an increasing number 
+of products including digital single lens reflex cameras (DSLR), video cameras and 
+binoculars. However, optical image stabilization in the mass market “point-and-shoot” 
+camera is only a recent phenomenon, with Panasonic releasing the first of these cameras 
+in 2004. Since this introduction, integration of image stabilization has been brisk, with 
+several cameras launched in 2005 and marketing promotions ranging from prime-time 
+television commercials to exclusive sections in big-box electronics stores devoted to 
+displaying cameras with this feature. Now every DSC maker either has several models 
+with IS already in the market, or is planning to have fairly soon.  
+ 
+Market 
+ 
+Optical image stabilization (OIS) is quickly on its way to becoming a standard feature. 
+The Gartner Group estimates that 96 million digital cameras will be sold worldwide in 
+2006. InvenSense predicts that 30 percent of these will have OIS. By 2009, the expected 
+penetration will be close to 90 percent of the 100 million unit plus digital camera market. 
+In the high resolution camera phone market (3 megapixels and greater), there is an even 
+greater need for optical image stabilization. Adoption is already underway, and the 
+number of cameraphones will quickly surpass the total number of digital cameras over 
+the next several years. InfoTrends anticipates that nearly 45 million handsets with 3 
+
+ 
+2 
+megapixel cameras and higher will be shipped in 2006 and over 330 million handsets by 
+2009. Initially, less than 5 percent will have image stabilization, but as the size and cost 
+for key components of the optical image stabilization system decreases, experts believe 
+that the penetration will rapidly rise to over 50% of the market. 
+ 
+Needed Solution 
+ 
+As DSC’s shrink in size and weight, migrate to higher megapixel sensors, and 
+incorporate 3x- and -4x optical zooms, engineers struggle to provide better quality 
+images in lower lighting conditions without a color-distorting flash. Virtually all trends in 
+photography have pushed cameras toward longer exposure times and higher resolutions 
+which have largely resulted in image quality problems from shaky hands. 
+ 
+The human body is always in motion. No photographer is capable of holding a camera 
+with outstretched hands without moving it to some degree; this movement is a biological 
+phenomenon that cannot be easily defeated by training. Human hands shake with a 
+frequency of 10 to 20 Hz and, when outstretched, will also drift at lower frequencies. In 
+photography, this jittering produces an effect often referred to as “camera shake”, and can 
+cause blurring in photographs. Modern consumer cameras tend to amplify this effect by 
+being small and lightweight, and by replacing the traditional viewfinder with an LCD 
+screen, encourages users to hold their 
+cameras with extended arms. In digital 
+photography, in which image sensors are 
+arrays of pixels, this effect can be ignored 
+if it produces a blur over one pixel or less. 
+The amount of blur that will be produced 
+by hand jitter for a certain picture depends 
+on the exposure time and the angular 
+field-of-view corresponding to one pixel. 
+If an image sensor is exposed to light only 
+for a short amount of time, the camera 
+may not move enough to blur the image; 
+however, zoom, higher pixel densities and 
+smaller 
+movements 
+will 
+produce 
+significant blur. 
+Figure 1. Anti-Shake demonstration by Konica Minolta 
+Figure 2. Micron's CMOS pixel array
+
+ 
+3 
+ 
+The exposure time required for enough light to be absorbed in an image sensor depends 
+on the amount of light present during the exposure, the aperture through which the light 
+must travel, and the design of the sensor itself. A camera system designed for an action 
+shot will have film that exposes very quickly, and a wide aperture for letting in as much 
+light as possible, allowing the shutter to be open for as little as 1ms. In contrast, a 3 
+megapixel camera module designed for a cell phone will have a small aperture, as the 
+phone itself must be small. Sensors with higher pixel densities must have smaller pixels, 
+which will absorb light more slowly for a given aperture. In addition, most of these 
+sensors are based on CMOS technology, in which transistors are integrated in the sensor 
+along side the pixel; the part of the pixel that absorbs light is even smaller, to make room 
+for this additional circuitry. This is usually expressed with a “fill factor”, the ratio of the 
+actual light-absorbing area to the area occupied by the entire pixel. In Figure 2, only the 
+photodiodes actually absorb light. Ultimately, when such a system is used in an indoor 
+location with a typical lighting condition, the exposure time can easily be over 100ms.  
+ 
+Figure 3 shows two seconds of hand jitter as recorded by an IDG-1000, InvenSense’s 
+dual-axis gyroscope. It also shows 100ms of this data that has been isolated and 
+integrated, giving a typical angular path of a camera during an exposure.  
+ 
+ 
+Figure 3. Left: Yaw Hand Jitter data, 1s. Right: Pitch and Yaw integrated data, 100ms. 
+ 
+Typical low-cost camera systems have a field of view of 35º to 45º along the horizontal. 
+For a 640x480 VGA camera with a field of view of 45º, each pixel corresponds to a 
+horizontal angle of 0.07º. The derived camera path shown in Figure 3 has a total 
+horizontal drift of 0.08º, producing a negligible blur of 1.1 pixels in such a VGA image.  
+ 
+However, as an example, if the pixel density is increased to 2 megapixels (1600x1200), 
+the horizontal blur becomes 2.9 pixels. Such a blur will begin to be noticeable, though the 
+impact it has on a viewer can, to some degree, be reduced by artificial image sharpening 
+algorithms. Pixel densities of 3 and 6 megapixels simply allow greater resolution of this 
+blur, revealing it to 3.6 and 5 pixels respectively. In fact, it is clear that, for such slow 
+
+ 
+4 
+shutter speeds, increasing resolution beyond 2 megapixels accomplishes nothing more 
+than enlarging the blur caused by hand jitter. Note that these numbers were derived 
+without any optical zoom, which would amplify the movement of the camera, and 
+produce even more blurring. Photography in conditions with low lighting would extend 
+the necessary exposure time, introducing additional blur. 
+ 
+Optical image stabilization reduces any hand jitter that is within a given range, usually 
+±1º, certainly enough to defeat the hand movement shown in Figure 3. Figure 4 shows an 
+experiment involving several images that were acquired with and without image 
+stabilization. The improvement in image quality is impressive. 
+ 
+Figure 4. Minolta A1, 51mm lens, 1/15th second shutter speed. Top: OIS off. Bottom:  OIS On. 
+ 
+As consumers demand higher resolution cameras with optical zoom, packed into smaller 
+and lighter DSC’s and cell phones, the blurring due to hand jitter will become even more 
+noticeable and stabilization systems will become standard features.  
+ 
+Photography Terminology 
+ 
+Aperture sizes are measured in “f-numbers”, 
+which refer to the ratio of the lens focal 
+length to the diameter of the hole, as both 
+influence the amount of light per area that 
+will be incident on the film or image sensor. 
+The film speed is measured using a scale 
+known as “ISO”, defined by the International 
+Organization for Standardization, though the 
+application of this metric to digital sensors is 
+sometimes vague. Since the blur generated 
+depends on a multitude of factors, a metric 
+called a “stop” is often cited in photography 
+to refer to changes in aperture, shutter speed, or film speed. For example, increasing the 
+Aperture Shutter 
+Speed  
+Film Speed 
+f-32 
+1/8 
+ISO-25 
+f-22 
+1/15  
+ISO-50 
+f-16 
+1/30 
+ISO-100 
+f-11 
+1/60  
+ISO-200 
+f-8 
+1/125 
+ISO-400 
+f-5.6 
+1/250 
+ISO-800 
+f-4 
+1/500 
+ISO-1600 
+f-2.8 
+1/1000 
+ISO-3200 
+Table 1. Stops in photography. 
+
+ 
+5 
+shutter speed from 1/30th of a second to 1/60th of a second is referred to as increasing it 
+“one stop”, and will reduce the final exposure of the image; but decreasing the aperture 
+size from f-11 to f-16 will allow half as much light in, having a similar effect, and is 
+described as reducing the aperture one stop. If the film used has a speed of ISO-200, the 
+film speed can be reduced by one stop by replacing it with a slower film with a speed of 
+ISO-100. Some commonly used stops are shown in Table 1.  
+ 
+Evaluating Blur 
+ 
+With this metric, a simple evaluation of an OIS system can be done that takes into 
+account alterations of any of these parameters, and differences between cameras. A good 
+OIS system is usually said to enable 2 to 3 stops of exposure. This means that if the 
+exposure time is increased until blur starts to appear, and then an OIS system is activated, 
+the blur will disappear; and the exposure time can now be increased an additional 2 to 3 
+times before blur stars to reappear. This is a relative measurement, as the actual allowed 
+exposure time will depend on the other parameters. 
+ 
+Optical Image Stabilization 
+ 
+Blur due to hand jitter is reduced by mechanically stabilizing the camera. A two axis 
+gyroscope is used to measure the movement of the camera, and a microcontroller directs 
+that signal to small linear motors that move the image sensor, compensating for the 
+camera motion. Other designs move a lens somewhere in the optical chain within the 
+camera. A typical high-level block diagram is shown in Figure 5. 
+ 
+ 
+Figure 5. OIS High level block diagram. 
+ 
+ 
+With either method, the result is that the body of the camera may shake, but light strikes 
+the pixels of the image sensor as though the camera were not shaking.  
+
+ 
+6 
+Sensor Requirements 
+ 
+For an OIS system to function 
+properly, the sensors, actuators, and 
+electronics must be carefully chosen. 
+A newcomer to this field may 
+immediately wonder why gyroscopes 
+are used in image stabilization, rather 
+than 
+other 
+sensors, 
+such 
+as 
+accelerometers. 
+A 
+gyroscope 
+measures the rotation about an axis, where rotations about X, Y,  and Z axes for a given 
+object are referred to as roll, pitch, and yaw, depicted in Figure 6. Gyroscopes are perfect 
+for the job because they measure rotation, which dominates linear movement in its effect 
+on picture taking, at relatively fast rates, ~100 to 150 Hz,  
+ 
+A camera creates an angular representation of the world, mapping everything within its 
+angular field of view onto an image sensor. In such optical systems, the linear motion 
+becomes negligible for far away objects, but rotation must always be taken into account. 
+The diminishing effect of translation on the angular field of view of a scene can be 
+visualized with the diagram in Figure 7. 
+ 
+Figure 7. Left: Impact of Translation on FOV. Right: Impact of Rotation on FOV. 
+ 
+ 
+Note that when the camera’s frame of reference moves linearly, as in the diagram on the 
+left, objects at A1, A2, and A3 find themselves at different angles within the camera’s 
+field of view. This effect is known as parallax. Objects that are further away will appear 
+to move less within the angular field of view of the camera. In the diagram on the right, 
+in which the camera has rotated, all three objects have the same angular displacement 
+regardless of their distance from the camera. The impact of linear movement decreases, 
+but the impact of rotation does not. As an example, a 0.08º rotation of the camera will 
+cause objects in its field of view to be displaced by 0.08º. To achieve this same 
+displacement of an object 10 meters away with a translation of the camera, the camera 
+A1 
+A2 
+A3 
+y 
+y` 
+x 
+x`
+θ1 
+θ2 
+θ3 
+y
+y`
+x 
+x` 
+A1
+A2
+A3
+θ1, θ2, θ3 
+Figure 6. Roll, Pitch, and Yaw, from NASA. 
+
+ 
+7 
+would have to move 10m•tan(0.08º), or about 1.4cm. This would require an unnaturally 
+excessive hand jitter. 
+ 
+Linear jitter is only damaging in the field of macrophotography, which involves close-up 
+photographs, typically of insects and plants; here, the objects may not be far away 
+relative to the magnitude of the linear jitter. Effects due to translation can be reduced 
+when using lenses designed for macrophotography, which have large magnification 
+factors that allow the photographer to be further from the object being captured. Note that 
+in practice, there are no consumer cameras that compensate for any motion other than 
+pitch and yaw. Blurring due to roll and linear movements is small enough that it can be 
+ignored. 
+ 
+While accelerometers can sometimes be used to measure rotation by detecting the 
+acceleration due to gravity, the resulting output is noisy and coupled with linear 
+movement in ways that are impossible to separate without gyroscopes. In addition, 
+accelerometers would not be able to sense yaw. For these reason, the gyroscope has 
+always been fundamental to image stabilization systems. 
+ 
+Gyroscopes 
+ 
+Gyroscopes are employed in IS systems to sense 
+pitch and yaw with low noise and high sensitivity in 
+order to resolve the small movements associated 
+with hand jitter. Typically, these systems require a 
+full-scale range of +/-30 degrees per second, with at 
+least 10-bit resolution. 
+ 
+Almost all reported micromachined gyroscopes use 
+vibrating mechanical elements (proof-mass) to 
+sense rotation. They have no rotating parts that 
+require bearings, and hence they can be easily 
+miniaturized and batch fabricated using micromachining techniques. All vibratory 
+gyroscopes are based on the transfer of energy between two vibration modes of a 
+structure caused by Coriolis acceleration. Coriolis acceleration, named after the French 
+scientist and engineer G. G. de Coriolis (1792–1843), is an apparent acceleration that 
+arises in a rotating reference frame and is proportional to the rate of rotation, Fig. 8.  
+ 
+Vibratory gyroscopes were demonstrated in the early 
+1980’s. An example of this type of devices is the 
+quartz tuning fork like the Quartz Rate Sensor by 
+Systron 
+Donner. 
+Although 
+quartz 
+vibratory 
+gyroscopes can yield very high quality factors at 
+atmospheric pressure with improved level of 
+performance, due to use of quartz as the primary 
+material, their batch processing is not compatible 
+with IC fabrication technology. In the late 1980’s, after successful demonstration of 
+Figure 8. Coriolis Acceleration 
+Figure 9. Older gyroscope technology 
+
+ 
+8 
+batch-fabricated silicon accelerometers, some efforts were initiated to replace quartz with 
+silicon in micromachined vibratory gyroscopes. Charles Stark Draper Laboratory 
+demonstrated one of the first batch fabricated silicon micromachined rate gyroscopes in 
+1991. 
+ 
+In older image stabilization systems, two single axis piezoelectric or quartz gyroscopes 
+were used with many external components to amplify and filter the signals to achieve the 
+desired full-scale range. In order for image stabilization to become a standard feature in 
+digital cameras and camera phones, it will be necessary for gyroscopes to be smaller and 
+less costly, measure pitch and yaw simultaneously, meet more stringent shock and 
+vibration standards as well as achieve a lower overall system cost with more integrated 
+features.  
+ 
+Although many companies have attempted to 
+commercialize MEMS gyroscopes, only a 
+few, namely Bosch and ADI, have succeeded 
+in bringing single axis solutions to market. 
+These gyroscopes serve high-end automotive 
+applications, such as vehicle stability control 
+and roll-over protection.
+ 
+ 
+ 
+InvenSense is the first and only 
+company to bring to market an integrated 
+dual-axis gyroscope using advanced MEMS 
+technology. InvenSense’s gyroscope is also 
+the first solution that provides integrated 
+amplifiers with programmable gain settings 
+and integrated reset switches that are convenient for IS applications. 
+ 
+One of the key advantages of InvenSense’s 
+solution 
+is 
+its 
+patented 
+out-of-plane, 
+resonating structures that enable in-plane 
+sensing and the integration two axes as 
+shown in Figure 9. Another key advantage 
+is its ability to achieve low cost. Patented 
+wafer-level packaging technology allows 
+for fully functional device testing at the 
+wafer level. This is done by combining 
+MEMS 
+and 
+ASIC 
+wafers 
+using 
+a 
+proprietary and patented wafer bonding 
+technology. The wafer bonding process 
+provides electrical connections between the 
+CMOS and MEMS wafers, which also 
+creates a hermetic seal between the two wafers. Integrating the finished MEMS structures 
+Figure 11. InvenSense resonating structure 
+Figure 10. InvenSense gyroscope circuitry 
+
+ 
+9 
+with a standard off-the-shelf CMOS ASIC avoids many of the pitfalls associated with 
+trying to integrate the MEMS and CMOS processes, as with a surface micromachining 
+approach. 
+ 
+InvenSense’s IDG-1000 is the first and only integrated MEMS 
+dual-axis gyroscope currently in high volume production. Most 
+other gyro manufacturers addressing IS use Piezoelectric quartz 
+or ceramic technologies that are discrete solutions with package-
+level integration of the sensor and electronics. These solutions 
+tend to be bigger in size, more costly to assemble and require 
+vacuum-sealed ceramic packaging. MEMS technology is a very 
+mature technology used in numerous sensors and other high 
+volume consumer applications, such as accelerometers and inkjet 
+printers.   
+ 
+Actuator Requirements 
+ 
+Actuators for OIS systems must be small, 
+low-power, 
+and 
+accurate 
+for 
+tiny 
+movements. The range of movement 
+required by an OIS actuator depends on 
+the optics of the system, but the desired 
+outcome is an ability to compensate for 
+±1º of rotation. The most common 
+actuator 
+is 
+the 
+voice 
+coil, 
+an 
+electromagnetic linear motor, used to drive 
+the lens in Figure 13. In combination with 
+strong permanent magnets, two coils are 
+used to drive a platform both vertically 
+and horizontally. As this system inherently 
+creates a strong magnetic field, Hall effect 
+sensors can be used to track the position 
+of the platform by measuring this field. 
+Motors and position sensors can be tightly integrated in a small package, and work 
+together to precisely control the position of the platform.  
+ 
+Another implementation is shown in Figure 14, 
+using piezoelectric actuators to shift the image 
+sensor. These actuators are relatively new to this 
+field, but can be used with lower power, and at 
+lower frequencies than voice coils. Newer 
+systems are including other types of composite 
+shape-changing materials. 
+ 
+ 
+In either case, the actuators should 
+Figure 13. Nikon, shifting a lens. 
+Figure 14. Konica Minolta, shifting the image sensor. 
+InvenSense’s gyroscope 
+Figure 12 
+
+ 
+10 
+be designed to be as linear as possible, with as little cross-axis correlation as possible. 
+This means that the displacement resulting from a signal delivered to the X-axis actuator 
+should be proportional to that signal, and should not depend on the state of the Y-axis 
+actuator. This design often requires two stacked platforms, an X-axis platform, and a Y-
+axis platform riding on the X-axis platform. This ensures that the axes can truly be 
+controlled separately. 
+ 
+Hall Sensors 
+ 
+When using feedback with Hall sensors, it is important to place them carefully to prevent 
+cross-axis errors, so that the X-axis Hall sensor only measures movement along that axis. 
+Ideally, the entire system should also be designed so that the magnetic field changes in a 
+linear fashion in the vicinity of these sensors, as this will simplify the design of the 
+feedback control system. However, a small cross-axis error may be calibrated out and 
+accounted for in software. As Hall sensors tend to vary greatly over temperature, the 
+required signal conditioning and circuitry must be flexible. Figure 15 shows an example 
+taken from an OIS patent (U.S. 6,631,042): 
+ 
+Figure 15. Canon, Hall sensor conditioning. 
+ 
+These sensors require two contacts for generating a known current, and two more 
+contacts for measuring the deflection of that current due to a magnetic field. Note that a 
+current source is used to minimize the temperature dependency, and the sensor is sampled 
+using circuitry with a controllable amplification and offset, allowing calibration to be 
+done on the fly. For example, by periodically driving the actuators to their mechanical 
+limits and measuring the respective Hall sensor outputs, the four corners of the OIS 
+system can be found, and these can be used as calibration factors. An alternative method 
+is to use two complementary Halls sensors per axis, one on each side of the system, such 
+that one always has a decreasing value when the other has an increasing value. The sum, 
+which should be constant for a given temperature, can be used for temperature 
+compensation, while the difference is used to compute the position of the actuator. 
+Finally, using integrated Hall sensors with internal amplification greatly simplifies this 
+
+ 
+11 
+design. In practice, however, most OIS systems use raw Hall sensors with more complex 
+external circuitry. 
+ 
+Control Algorithm Requirements 
+ 
+Gyroscopes output angular velocity, which must be integrated in order to provide the 
+absolute angle through which a camera rotates during an exposure. It must also be scaled 
+in order to convert the measured angular camera movement into a directed linear 
+movement of an image sensor or lens that will cancel (stabilize) the effect of the hand 
+jitter effect on the image. This scale factor will depend on the fixed optical properties of 
+the individual camera, but it must also be updated to account for different zoom factors. 
+A zoom of 2X amplifies any movement of the camera, and the final instructions sent to 
+the motors must similarly be amplified. 
+ 
+However, it is first necessary to filter out intentional hand movements from this 
+integration, which is typically accomplished with a high-pass filter. For example, if a 
+photographer begins framing a shot, and the gyroscope begin integrating from zero, and 
+then the photographer proceeds to rotate the camera 90º in order to frame a different shot, 
+the integrated data will track this 90º rotation, and a system without a high-pass filter 
+would attempt to drive the optics of the camera to compensate, pointing at the original 
+shot. This would be mechanically impossible, as well as undesirable. Pre-filtering the 
+gyroscope data allows the OIS system to focus on removing the unintentional high-
+frequency hand jitter, without interfering with the photographer’s ability to pan and frame 
+shots. 
+ 
+A simple implementation of this system is shown in Figure 16. 
+ 
+ 
+Figure 16. Gyroscope signal processing. 
+ 
+Note that each block has a coefficient that may be updated in real-time by a 
+microcontroller. The scale factor may only need to be updated while the photographer is 
+altering the zoom, but the other factors might be changed continuously, depending on the 
+calculated exposure time and the movements of the camera. 
+ 
+The time constants used in the filter depend on the context of the shot. During a long 
+exposure time, lower frequency arm movements become more prominent, and a short 
+time constant intended to isolate a 10-20Hz vibration may not be sufficient. A time 
+constant around 10s will allow the OIS system to compensate for any movements made 
+
+ 
+12 
+during a period of a few seconds, without the data being distorted by artifacts produced 
+by the filter. However, a long time constant interferes with the photographer’s intentional 
+movements. For example, when attempting to take a picture of a moving car, in which the 
+car is to be sharply displayed against a blurry background, a photographer must rotate the 
+camera to follow the car. An OIS system with a long time constant will inappropriately 
+attempt to compensate for this movement. For such pictures taken with panning, a short 
+time constant on the order of 0.1s to 1s is preferable. A panning shot may be set as a 
+mode within the camera menu system, but should ideally be detected from the gyro data 
+itself, giving a user greater freedom to move the camera and shoot at will. 
+ 
+Long time constants can become particularly annoying if the OIS system is designed to 
+be active before the shot is taken. While low-power implementations will avoid using the 
+OIS system until the moment the shutter opens, it may be desirable to use the OIS during 
+the framing of a shot, to prevent the jitter from distracting the photographer. In addition, 
+while some autofocus systems use ultrasonic ranging to measure distances to objects, 
+others depend on the images acquired by the image sensor, incrementally adjusting the 
+focus until the image acquired is sharp enough, as measured by an image processing 
+algorithm. Such systems will not function with the OIS deactivated, as none of the 
+images will be sharp, especially under 3X zoom or higher conditions.  
+ 
+The Feedback Control Loop 
+ 
+When using Hall sensors as feedback to position the actuator, a feedback loop must be 
+designed. This is usually done in firmware in camera systems, but has been implemented 
+as an analog circuit in some binocular systems. The classic PID control algorithm can be 
+used, in which the actuator is driven by the Hall sensor signal by summing proportional, 
+derivative, and integral components. 
+ 
+ 
+Figure 17. PID Block Diagram 
+ 
+In Figure 17, a set-point is derived from the gyroscope data as in Figure 16, and 
+compared to a measured process variable obtained from the Hall sensors. The difference 
+between them is passed through three blocks independently, a proportional block, an 
+integral block, and a derivative block. The values are summed, and used to drive the 
+motor. 
+ 
+Proportional 
+Derivative 
+Integral 
+Process 
+Variable 
+Motor 
+Set Point 
++
+-
++
+
+ 
+13 
+The proportional term is the meat of the system, driving the actuator until the set-point 
+and the process variable are equal. The derivative term is important for stability with 
+systems that don’t have high levels of internal friction, such as the voice coils. In 
+contrast, the piezo-electric actuators have a certain amount of friction built in for aiding 
+with low frequency compensation; control algorithms for the piezo systems will be quite 
+different. The integral term is usually important for systems in which the accuracy of the 
+final position is important. OIS designers may decide to omit it, as stabilization systems 
+only require accuracy in relative positioning. That is, if there is a small, constant offset in 
+desired position of the motor and the true position of the motor, this will not influence the 
+blur in the final image. However, due to lens aberrations, there may be image quality 
+compromises in some OIS systems that can be reduced if the motors stay as close as 
+possible to the centers of their ranges. In such systems, it may be desirable to remove 
+such small offsets, and an integral term should be used. These offsets from the center will 
+also decrease the range of movement in some direction, and may reduce the cameras 
+ability to stabilize when movement is required in that direction. 
+ 
+As the hand jitter being detected is around 10-20Hz, OIS systems must iterate at least ten 
+times faster in order to resolve this. However, it may be necessary to run the actuator 
+control loop even faster in order to make up for non-linearities in the actuators or Hall 
+sensors, as non-linear systems can be treated as linear if they are driven at a high enough 
+rate. In practice, the control loop will usually be run from 500Hz to 4kHz, though the 
+gyroscope need not be sampled as often. 
+ 
+Note that not all designers use a PID system. In some systems a lead-compensation 
+control algorithm is used, and in others a PDD system is used, using differences in 
+position, velocity, and acceleration.  
+  
+Microcontroller Requirements 
+ 
+In some systems, the OIS system is implemented as part of an interrupt service routine on 
+the main processor; in others, the system is given its own microcontroller. This controller 
+need not be excessively fancy, but must be able to run a feedback control algorithm 
+somewhere in the 500Hz to 4kHz range. The math used can be 16-bit fixed point, and can 
+be implemented on an 8-bit or 16-bit processor relatively easily. When using filters with 
+long time constants, some 32-bit math may be necessary to handle the large numbers that 
+will accumulate. 
+ 
+Note that the just as the gyroscope must be accurate, the measurement of time in this 
+system must also be accurate, due to the integration step in the signal processing. For 
+example, the integration of the gyroscope data can be implemented in software as: 
+ 
+α’ = α+ω∆t 
+ 
+The new calculated position is α’, α is the previous position, ω is the gyroscope angular 
+velocity output, and ∆t is the time since the last update. Any error in the gyroscope data 
+will be contained in ω, but any error in the measurement of time will be contained in ∆t. 
+
+ 
+14 
+Either way, the product of ω∆t will contain an error that will propagate. For this reason, it 
+is important that the chosen microcontroller either have an external clock signal or crystal 
+to provide precision timing, or have an internal oscillator that is at least as accurate per 
+unit time as the gyroscope is per unit angular velocity. Ideally, it should be accurate 
+enough such that any errors in time have a negligible effect on ω∆t when compared with 
+the noise in the gyroscope.  
+ 
+Driver Requirements 
+ 
+Piezo and voice coil actuators require different driving signals. Piezo systems are 
+typically low current but high voltage, and must be driven with high voltage transistors or 
+opto-isolators, which allow low voltage inputs to control high voltage outputs. Voice 
+coils, in contrast, require low voltages but high currents, and will need a driver with an 
+H-bridge output stage. Low power can be obtained by using a PWM driver, as the 
+inductance of the coils prevents excessive current from flowing when the driving signal is 
+oscillating at a high frequency. This frequency should be well above 100kHz, ideally 
+closer to 1MHz. 
+
+ 
+15 
+ 
+Electronic Image Stabilization 
+ 
+In video systems, two problems arise due to hand jitter. As each frame is recorded by an 
+image sensor, just as it would be in a digital camera, the individual frames may be blurry; 
+this makes high resolution video problematic. For video cameras with high pixel 
+densities, optical image stabilization is required for achieving the target resolution. 
+However, video cameras of any resolution also face a slightly different problem. Even if 
+the individual frames are not blurred from the hand movement, this shaking will manifest 
+itself as a frame-to-frame jitter over time. This effect is familiar to anyone who has 
+attempted to sit through a home video made on a handheld camcorder without a 
+stabilization system. As the problem is not the blur within the individual frames, but the 
+shift from one frame to the next, it may not be necessary to adjust the optics of the system 
+to solve the problem. 
+ 
+Instead, a system can be used that is known as electronic image stabilization (EIS). 
+Gyroscopes are still used to detect the hand jitter, but instead of altering the direction of 
+the light as it approaches the image sensor, the image is simply shifted in software by a 
+certain number of pixels. 
+ 
+ 
+ 
+Figure 18. Above: jittery path of an object in video. Below: smoothed path with EIS. 
+ 
+
+ 
+16 
+In Figure 18, the top image shows a series of jittery frames, and the path of an object 
+within those frames. The bottom image shows the output of an EIS system in which the 
+frames have been shifted and cropped, and the resulting smoothed path of an object in the 
+video. This has an advantage over optical image stabilization in that there are no moving 
+parts, and the power dissipation can be much lower. However, if the resolution of the 
+camera or hand jitter becomes high enough to cause a noticeable blur within each frame, 
+simply shifting the frames in software will not solve the problem; optical image 
+stabilization must be used. In practice, some video cameras use a hybrid system 
+combining optical image stabilization and electronic image stabilization, allowing 
+intelligent compromises to be made on the fly, based on resolution, zoom, and the 
+amount of hand jitter present. 
+ 
+Note that EIS serves to line up a set of frames, and does not prevent a single frame from 
+being blurred. It is a system for video, and is not helpful in preventing blurry photographs 
+from being taken. However, as digital still cameras increasing support video, designers 
+may find it useful. For example, EIS can be used to stabilize the video presented on the 
+LCD screen, as a user frames a shot. Upon taking a picture, the camera can briefly 
+activate the OIS system for acquiring a high quality image. 
+ 
+Conclusion 
+ 
+Gyroscope-based optical and electronic 
+image stabilization systems are mature and 
+proven technologies that address the 
+quality 
+of 
+images. 
+OIS 
+has 
+been 
+penetrating the DSC market rapidly, and 
+as camera resolutions continue to increase, 
+optical image stabilization is expected to 
+become 
+as 
+standard 
+a 
+function 
+as 
+autofocus on every DSC. As engineers 
+struggle to pack advanced technologies 
+into the scarce and premium real estates of 
+handsets, small size and low cost are at the 
+top of their lists. With the fast pace of 
+increased CMOS sensors pixel densities 
+and feature offerings, such as auto focus and optical zoom, OIS is expected to enter into 
+the camera phone market very shortly. Many system designers are faced with the 
+challenges of introducing image stabilization into already crowded broad spaces. Until 
+recently, there have been no viable options that meet the demanding size and cost 
+requirements. Thanks to InvenSense’s innovative MEMS dual-axis solution, the barrier to 
+the implementation of OIS into a new generation of high performance camera phones has 
+been lifted, and solutions as early as spring o 2007 are expected. 
+ 
+ 
+ 
+ 
+Figure 19. InvenSense gyroscope wafer 
+
+ 
+17 
+ 
+About the Authors 
+ 
+David Sachs is a Systems Application Engineer at InvenSense. He has designed many 
+gyroscope-based systems at InvenSense and MIT’s Media Lab. His work ranges from 
+low-level 
+algorithmic 
+development 
+and 
+multi-sensor 
+fusion 
+of 
+gyroscopes, 
+accelerometers, and magnetic field sensors, to complete motion-sensing systems 
+including image stabilization systems, user interfaces, and gaming devices. He has a MS 
+from MIT, and a BA from Oberlin College. 
+ 
+Steve Nasiri is the Founder, President and CEO of InvenSense Inc. and a 26 years veteran 
+in the MEMS industry with expertise in fabrication and packaging of several MEMS 
+products. His extensive knowledge of MEMS fabrication and high-volume packaging 
+was instrumental in conceiving a novel mirror design for Transparent Networks, where 
+Mr. Nasiri served as the Vice President of Operations and MEMS Development and 
+where he derived the idea for the dual-axis gyroscope from optical device designs. He has 
+co-founded several successful Silicon Valley MEMS startup companies including 
+Sensym, NovaSensor, Integrated Sensor Solutions (ISS), ISS Nagano GmbH, Intelligent 
+MicroSensor Technology, and most recently Transparent Networks. He has an MBA from 
+Santa Clara University, and an MSME from San Jose State University, and BSME from 
+University of California Berkeley. He has 28 issued patents. 
+ 
+Daniel Goehl is the Director of Sales for InvenSense Inc. He has held senior level sales 
+and marketing management positions at several successful startup companies selling into 
+the wireless market. He has a degree in Economics from the University of Illinois.  
+ 
+References 
+ 
+Nasiri, Steven. "A Critical Review of MEMS Gyroscopes Technology and 
+Commercialization Status". 
+ 
+Nasiri, Steven and Seeger, Joseph, May 17, 2005. U.S. Patent #6,892,575, "X-Y axis 
+dual-mass tuning fork gyroscope with vertically integrated electronics and wafer-scale 
+hermetic packaging." 
+ 
+Nasiri, Steven and Flannery Jr., Anthony, September 6, 2005. U.S. Patent #6,939,473, 
+"Method of making an X-Y axis dual-mass tuning fork gyroscope with vertically 
+integrated electronics and wafer-scale hermetic packaging." 
+ 
+Furukawa, Hiroshi et al. March 9, 1976. U.S. Patent #3,942,862, “Image stabilizing 
+optical system having a variable prism”. 
+ 
+Hara, Yoshihiro et al. October 4, 2001. U.S. Patent Application #20010025477, “Control 
+mechanism with actuator employing shape memory alloy and method for adjusting servo 
+control of the control mechanism”. 
+ 
+
+ 
+18 
+Kakiuchi; Shinichi. January 12, 2006. U.S. Patent Application #20060008263, “Camera 
+provided with camera-shake compensation functionality”. 
+ 
+Kawahara, Hideo et. al. November 8, 2005, U.S. Patent #6,963,361, “Image sensing 
+method and apparatus capable of performing vibration correction when sensing a moving 
+image”. 
+ 
+Kitazawa, Tomofumi et. al, September 6, 2005. U.S. Patent #6,940,542, “Imaging 
+apparatus, and method and device for shake correction in imaging apparatus”. 
+ 
+Konica Minolta Photo Imaging, 2004. “Digital SLR Camera with World’s First Body-
+Integral Anti-Shake Technology”. 
+ 
+London, Barbara and Lipton, John. Photography, 8th Edition. Prentice Hall, 2004.  
+ 
+Masuda, Kazunori. January 9, 2003. U.S. Patent Application #20030007075, “Camera 
+system, camera, and lens apparatus”. 
+ 
+Micron Technology, Inc., 2006. “Lens Selection and Suppliers”. 
+Nikon Corp, 2005. “Precise camera-shake compensation at every angle”. 
+Noguchi, Kazuhiro. October 7, 2003. U.S. Patent #6,631,042, “Lens barrel having image 
+shake correcting function and optical device having same”. 
+Semiconductor Insights, September 20, 2005. “Micron MT9D011 CMOS Image Sensor 
+awarded Most Innovative Image Sensor”. 
+Toba, Akira. June 15, 1997. U.S. Patent #5,648,815, “Video camera with electronic 
+picture stabilizer”. 
+ 
+Washisu, Koichi. June 29, 2004. U.S. Patent #6,757,488, “Control apparatus for image 
+blur correction”. 
+ 
+Stavely, Donald J., Image Stabilization Technology Presentation, September 6, 2005. 
+ 
+ 

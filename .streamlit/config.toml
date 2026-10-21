@@ -1,0 +1,26 @@
+# The studio's base palette. Streamlit's defaults (red primary, blue focus rings,
+# a rainbow of status colours) are the loudest thing on the page, and on a dark
+# screen they turn five quiet states into five competing accents.
+#
+# One accent, everything else grey. State is carried by a word and a mark, not by
+# colour: see STATE_MARK in ui/studio.py. A control says what it does; nothing
+# decorates.
+
+[theme]
+base = "dark"
+primaryColor = "#d8d8d4"          # near-white: selection and focus, not alarm
+backgroundColor = "#0e0e10"
+secondaryBackgroundColor = "#16161a"
+textColor = "#e6e6e2"
+font = "sans serif"
+
+[server]
+headless = true
+fileWatcherType = "auto"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = true

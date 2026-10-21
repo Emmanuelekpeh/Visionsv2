@@ -1,0 +1,1235 @@
+=== PAGE 1 ===
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Verification Method of Vibratory Apparatus 
+ 
+For 
+ 
+CIPA DC-X011-2024 
+Measurement and Description Method for Image Stabilization 
+Performance of Digital Cameras (Optical System), 
+ 
+ 
+ 
+Published in x, 2024 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Published by 
+Camera & Imaging Products Association 
+
+=== PAGE 2 ===
+ 
+ 
+- 1 -
+THIS DOCUMENT IS PROVIDED “AS IS” BASIS WITHOUT WARRANTY OF 
+ANY 
+KIND, 
+EXPRESS, 
+IMPLIED, 
+STATUTORY 
+OR 
+OTHERWISE, 
+INCLUDING BUT NOT LIMITED TO ANY IMPLIED WARRANTIES OF 
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR 
+NONINFRINGEMENT. 
+ 
+IN NO EVENT SHALL EITHER CIPA, CIPA’S MEMBERS, THEIR 
+SUBSIDIARIES OR AFFILIATES BE LIABLE FOR ANY DAMAGES 
+WHATSOEVER (INCLUDING WITHOUT LIMITATION, LOSS OF BUSINESS 
+PROFITS, LOSS OF BUSINESS INFORMATION, LOSS OF BUSINESS 
+INTERRUPTION 
+OR 
+OTHER 
+COMPENSATORY, 
+INCIDENTAL 
+OR 
+CONSEQUENTIAL DAMAGES) ARISING OUT OF THIS DOCUMENT OR USE 
+THEREOF EVEN IF CIPA, CIPA’S MEMBERS, THEIR SUBSIDIARIES OR 
+AFFILIATES HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH 
+DAMAGES. 
+ 
+CIPA, 
+CIPA’S 
+MEMBERS, 
+THEIR 
+SUBSIDIARIES 
+OR AFFILIATES 
+DISCLAIMS AND 
+SHALL 
+HAVE 
+NO 
+OBLIGATION 
+OF 
+DEFENSE, 
+CONTRIBUTION OR INDEMNITY WITH RESPECT TO ANY ACTUAL OR 
+ALLEGED INTELLECTUAL PROPERTY INFRINGEMENT ARISING OUT OF 
+THIS DOCUMENT OR USE THEREOF. 
+ 
+ 
+Copyright © 2024 CIPA All Rights Reserved
+
+=== PAGE 3 ===
+ 
+ 
+- 2 -
+Contents 
+ 
+1. 
+Introduction .............................................................................................................................. - 3 - 
+2. 
+Scope ........................................................................................................................................ - 3 - 
+3. 
+Overview of Verification Method ............................................................................................ - 3 - 
+3-1 
+Basic Approach ................................................................................................................ - 3 - 
+3-2 
+Loads Shaken by the Vibratory Apparatus ....................................................................... - 5 - 
+3-3 
+Documents, Data, Software and Charts Provided by CIPA ............................................. - 5 - 
+3-4 
+Disclaimer ........................................................................................................................ - 5 - 
+3-5 
+Definition of Terms .......................................................................................................... - 5 - 
+3-6 
+Referenced Standards ....................................................................................................... - 6 - 
+4. 
+Measurement I ......................................................................................................................... - 7 - 
+4-1 
+Preconditions.................................................................................................................... - 7 - 
+4-2 
+Equipment and Environment for Measurement ............................................................... - 7 - 
+4-3 
+Measurement Procedures ................................................................................................. - 8 - 
+4-4 
+Judging Measurement Results ......................................................................................... - 9 - 
+5. 
+Measurement II ...................................................................................................................... - 11 - 
+5-1 
+Preconditions.................................................................................................................. - 11 - 
+5-2 
+Equipment and Environment for Measurement ............................................................. - 11 - 
+5-3 
+Settings of Camera to be Measured ............................................................................... - 15 - 
+5-4 
+Measurement Procedures ............................................................................................... - 16 - 
+5-5 
+Judging Measurement Results ....................................................................................... - 19 - 
+6. 
+Measurement III ..................................................................................................................... - 11 - 
+6-1 
+Preconditions.................................................................................................................. - 11 - 
+6-2 
+Equipment and Environment for Measurement ............................................................. - 11 - 
+6-3 
+Settings of Camera to be Measured ............................................................................... - 15 - 
+6-4 
+Measurement Procedures ............................................................................................... - 16 - 
+6-5 
+Judging Measurement Results ....................................................................................... - 19 - 
+ 
+
+=== PAGE 4 ===
+ 
+ 
+- 3 -
+Verification Method of Vibratory Apparatus 
+ 
+1. Introduction 
+This document specifies the method for verifying performance of the vibratory 
+apparatus used in measuring image stabilization performance in accordance with CIPA 
+Standard DC-011-2024 Measurement and Description Method for Image 
+Stabilization Performance of Digital Cameras (Optical System), as well as 
+measurement accuracy of intrinsic image degradation amount and total image degradation 
+amount (or measured handheld blur amount) as given in Section 4-2-8 Handheld Blur 
+Measurement Software in the above standard. (Hereinafter, CIPA Standard DC-011-
+2024 Measurement and Description Method for Image Stabilization Performance of 
+Digital Cameras (Optical System) will be abbreviated to just CIPA Standard DC-011-
+2024.) 
+As this document conforms with CIPA Standard DC-011-2024, it is has been written 
+assuming knowledge of the terms and measurement procedures for image stabilization 
+performance defined therein. Refer to the standard for further explanation on all terms 
+and measurement procedures for image stabilization performance not present in this 
+document. 
+ 
+2. Scope 
+This document specifies the method for verifying performance of the vibratory 
+apparatus used in measuring image stabilization performance in accordance with CIPA 
+Standard DC-011-2024, as well as measurement accuracy of intrinsic image degradation 
+amount and total image degradation amount (or measured handheld blur amount) as given 
+in Section 4-2-8 Handheld Blur Measurement Software in the above standard. It is not 
+applicable for any other measuring apparatuses or measuring procedures. 
+ 
+3. Overview of Verification Method 
+ 
+3-1 Basic Approach 
+Defined below are Measurement I, Measurement II, and Measurement III, three methods 
+for verifying performance of the vibratory apparatus used to measure image stabilization 
+performance in accordance with CIPA Standard DC-011-2024, as well as measurement 
+accuracy of intrinsic image degradation amount and total image degradation amount (or 
+measured handheld blur amount) as given in Section 4-2-8 Handheld Blur 
+Measurement Software in the above standard. 
+
+=== PAGE 5 ===
+ 
+ 
+- 4 -
+ 
+Measurement I: 
+Evaluates basic performance of the vibratory apparatus based on sine waves of differing 
+frequencies and amplitudes. 
+This method measures the amplitude and phase characteristics of vibrations from the 
+apparatus. For amplitude characteristics, it evaluates how well the vibration amplitude of 
+the input waveform matches that produced by the vibratory apparatus. For phase 
+characteristics, it evaluates the vibration phase lag at a specified frequency. 
+ 
+Measurement II: 
+Evaluates how the vibratory apparatus performs with complex vibrations, such as vibration 
+waveforms, at the center of the image, using a test waveform that mimics camera vibration from 
+camera shake. 
+This method measures, at the center of the image, the image degradation amount for images captured 
+when the image stabilization function is OFF with a camera shaken by the vibratory apparatus. It 
+evaluates how closely the measured handheld blur amount as calculated from the image degradation 
+amount matches the reference handheld blur amount as calculated from the average vibration angle of 
+the test waveform. 
+ 
+Measurement III: 
+Evaluates how the vibratory apparatus performs at the corner of the image (position at image height 
+60%) using a sine wave similar to the amplitude of camera vibration caused by a camera shake 
+component rotating about the optical axis. 
+This method measures, at the corner of the image (position at image height 60%), the image 
+degradation amount for images captured when the image stabilization function is OFF with a camera 
+shaken by the vibratory apparatus. It evaluates how closely the measured handheld blur amount as 
+calculated from the image degradation amount matches the reference handheld blur amount as 
+calculated from the average vibration angle of the test waveform. 
+ 
+Evaluations for vibratory apparatuses used to measure image stabilization in the 
+standard must meet the performance marks set for Measurement I, Measurement II, and 
+Measurement III. 
+Also, evaluations for measurement accuracy of intrinsic image degradation amounts and 
+total image degradation amounts (or measured handheld blur amount) as given in CIPA 
+Standard DC-011-2024 Section 4-2-8 Handheld Blur Measurement Software must 
+meet the performance marks set for Measurement II and Measurement III. 
+
+=== PAGE 6 ===
+ 
+ 
+- 5 -
+ 
+3-2 Loads Shaken by the Vibratory Apparatus 
+Mechanical components and motor specifications for the vibratory apparatus may vary significantly 
+depending on the mass (load) of the object to be shaken. There will likely be a great difference in cost 
+and development requirements for vibratory apparatuses made to accommodate wide load 
+ranges and those for more limited load ranges. There is no guarantee that 
+accommodating wide load ranges will meet the purpose or interests of the 
+measurer. Therefore, it is assumed that a specific load will be set for each 
+vibratory apparatus, and this verification method is to take the load range into account for 
+evaluations. 
+ 
+3-3 Documents, Data, Software and Charts Provided by CIPA 
+CIPA will provide the following documents, data, software and charts for verification: 
+1) 
+This document 
+2) 
+Two (2) test waveforms 
+3) 
+Two (2) average vibration angles 
+4) 
+Image clipping software with manual and instructions for use 
+5) 
+Handheld Blur Measurement Software (FindsBlur) with manual and instructions for use 
+6) 
+CIPA Handheld Blur Measurement Chart (for additional fee) 
+ 
+3-4 Disclaimer 
+All claims and actions taken against vibratory apparatus performance or specifications are the sole 
+responsibility of the supplier or measurer, even for apparatuses designed and manufactured to satisfy 
+predetermined performance with this verification method. 
+ 
+3-5 Definition of Terms 
+Definitions of terms used in this document are described below. Terms defined in CIPA Standard DC-
+011-2024 are not described in this document. Please refer to the standard for definitions. 
+ 
+3-5-1 Loads 
+Load refers to the total mass of the camera body, lenses and other attachments shaken by the vibratory 
+apparatus. If, for example, the load range is 300 g to 1 kg, this means that the vibratory apparatus can 
+vibrate objects with a total mass between 300 g and 1 kg. 
+ 
+3-5-2 Test Waveforms TWB-H and TWB-L 
+The test waveforms used in Measurement II. TWB-H and TWB-L are two test waveforms made to 
+
+=== PAGE 7 ===
+ 
+ 
+- 6 -
+resemble the vibration from camera shake. Which is used depends upon the load range shaken by the 
+vibratory apparatus. 
+The TWB-H and TWB-L files are in text format, named TWB-H-xxx.txt and TWB-L-xxx.txt, 
+respectively. Test waveforms are provided as angle data changing in the time direction for a length of 
+32 seconds. Data sampling frequency is 500Hz. The ‘xxx’ in the test waveform file names is a 3-digit 
+number giving the waveform version. If a test waveform has been revised, version differences are 
+managed with these numbers. 
+ 
+3-5-3 Average Vibration Angles of Composed Yaw/Pitch Component 
+These are the average values for the vibration angles of the composed yaw and pitch components at 
+each shutter speed when the camera is shaken using the test waveforms TWB-H and TWB-L. 
+Average vibration angle data files are in text format, with the file corresponding to TWB-H named 
+TAVA-1-xxx.txt and that corresponding to TWB-L named TAVA-2-xxx.txt. 
+Again, the ‘xxx’ in the file names is a 3-digit number giving the version number. The 3 digits are 
+used to manage the files, corresponding with the test waveform revisions. 
+ 
+3-5-4 Conversion Factor (fr) 
+The number used to calculate reference image degradation amount with Measurement II. 
+ 
+3-6 Referenced Standards 
+ 
+3-6-1 Referenced Standards 
+ 
+CIPA DCG-002 Specification Guideline for Digital Cameras 
+ 
+CIPA DCG-005 Measurement and Description Methods for Weight and Dimensions of 
+Digital Cameras 
+ 
+CIPA Standard DC-011-2024 Measurement and Description Method for Image Stabilization 
+Performance of Digital Cameras (Optical System) 
+ 
+3-6-2 Response to Revision of Reference Standards 
+If specifications referred to by this standard are revised, response will be as follows: 
+ 
+For specifications and guidelines managed by CIPA, revised editions shall be followed. 
+ 
+For other specifications, this standard shall be followed in principle until revised. 
+ 
+
+=== PAGE 8 ===
+ 
+ 
+- 7 -
+4. Measurement I 
+ 
+4-1 Preconditions 
+Vibratory apparatus evaluations with Measurement I are to follow Section 4-2 
+Equipment and Environment for Measurement and Section 4-3 Measurement 
+Procedures. 
+The number of measurements taken is left up to the discretion of the measurer, but the 
+measurer is not permitted to selectively choose which measurements to use. 
+An overview of the measurement method is shown below in Figure 4-1. 
+ 
+ 
+Figure 4-1: Overview of Measurement I 
+ 
+ 
+4-2 Equipment and Environment for Measurement 
+ 
+4-2-1 Sine Waves and Combinations Used in Evaluation 
+Measurement I uses sine waves with the frequencies and amplitudes shown in Table 4-
+2-1a to evaluate the amplitude and phase characteristics of the vibratory apparatus. During 
+the evaluation, the load is shaken in the yaw, pitch, and roll directions simultaneously in accordance 
+with the instructions in Table 4-2-1b and Table 4-2-1c. Table 4-2-1b shows the combination of 
+frequencies and amplitude for evaluating amplitude characteristics, and Table 4-2-1c shows that for 
+evaluating phase characteristics. 
+
+=== PAGE 9 ===
+ 
+ 
+- 8 -
+Table 4-2-1a: Combinations of sine wave frequency and amplitude used in 
+evaluations 
+Frequency AmplitudeAngular Velocity
+(Hz)
+(deg: ±)
+(deg/sec)
+a
+0.1
+2
+1.26
+b
+0.5
+2
+6.28
+c
+1
+1
+6.28
+d
+5
+0.2
+6.28
+e
+10
+0.1
+6.28
+ 
+ 
+ Table 4-2-1b: Combination of waveforms (for amplitude characteristic evaluation) 
+Pattern 1
+Pattern 2
+Pattern 3
+Pattern 4
+Pattern 5
+Yaw
+a
+b
+c
+d
+e
+Pitch
+c
+d
+e
+a
+b
+Roll
+e
+a
+b
+c
+d
+ 
+ 
+Table 4-2-1c: Yaw and pitch combinations (for phase characteristic evaluation) 
+Pattern 6
+Pattern 7
+Pattern 8
+Pattern 9 Pattern 10 Pattern 11
+Yaw
+c
+d
+c
+d
+-
+-
+Pitch
+d
+c
+-
+-
+c
+d
+Roll
+-
+-
+d
+c
+d
+c
+ 
+ 
+4-2-2 Measuring Devices 
+This specification does not specify the device to be used for measuring the vibrational 
+state of the vibratory apparatus. Therefore, the measurer is to use the optimal means 
+according to his measuring environment, whether it be angle sensors, angular velocity 
+sensors (gyroscopes), rotary encoders, laser displacement sensors or other devices. A 
+combination of multiple devices is also acceptable. However, the measuring device used 
+should be accurate enough to leave no doubt of the measurement results. 
+ 
+4-2-3 Temperature and humidity 
+The temperature and humidity shall be 23°C ± 2°C and 30 to 70%. Measurement may be 
+performed under other conditions as long as there is no room for doubt. 
+ 
+4-3 Measurement Procedures 
+Successively mount objects equivalent to the maximum and minimum weights of the 
+target load range to the vibratory apparatus and shake them in patterns 1-11 as given in 
+
+=== PAGE 10 ===
+ 
+ 
+- 9 -
+Section 4-2-1 Sine Waves and Combinations Used in Evaluation. Next, measure the 
+vibrational states using a device given in Section 4-2-2 Measuring Devices. If any 
+sensors or other devices are mounted to the vibratory apparatus for measurement, include 
+their mass to the load. 
+ 
+4-4 Judging Measurement Results 
+If the procedure given in Section 4-3 Measurement Procedures is followed with 
+objects equivalent to the maximum and minimum weights of the target load range 
+mounted to the vibratory apparatus and shaken, measurements meeting the following 
+performance guidelines are deemed to have satisfied the Measurement I evaluation:  
+ 
+There is less than ±5% difference between the measured amplitude values and 
+that of the input sine wave for all combinations for patterns 1-5. (See Figure 4-
+4a) 
+ 
+The phase difference in the respective waveform measurements is 90 degrees or 
+less for the combinations of patterns 6-11. (See Figure 4-4b) 
+ 
+ 
+Figure 4-4a: Illustration of amplitude differences 
+ 
+ 
+ 
+Difference in amplitude values
+Amplitude of measured results
+(Vibration amplitude of vibratory apparatus)
+Input sine wave
+Measured vibration
+from vibratory apparatus
+Amplitude of input sine wave
+Difference in amplitude values
+Amplitude of measured results
+(Vibration amplitude of vibratory apparatus)
+Input sine wave
+Measured vibration
+from vibratory apparatus
+Amplitude of input sine wave
+
+=== PAGE 11 ===
+ 
+ 
+- 10 -
+ 
+Figure 4-4b: Illustration of phase differences 
+ 
+Yaw 
+OR 
+Pitch 
+Pitch 
+OR 
+Yaw 
+Phase difference 
+Measured vibration 
+from vibratory apparatus 
+
+=== PAGE 12 ===
+ 
+ 
+- 11 - 
+5. Measurement II 
+ 
+5-1 Preconditions 
+ The evaluation of the vibratory apparatus in Measurement II shall be in accordance with Section 5-
+2 Equipment and Environment for Measurement, Section 5-3 Settings of Camera to be 
+Measured and Section 5-4 Measurement Procedures. The number of measurements taken is 
+left to the discretion of the measurer, but all measurement results shall be used without selecting only 
+those that are desirable. 
+Figure 5-1 provides an overview of the measurement method. 
+ 
+Figure 5-1: Overview of Measurement II and Measurement III 
+ 
+Measurement II is also used when verifying measurement accuracy of intrinsic image 
+degradation amount and total image degradation amount (or measured handheld blur 
+amount) as given in CIPA Standard DC-011-2024 Section 4-2-8 Handheld Blur 
+Measurement Software. Measurements are to follow Section 5-2 Equipment and 
+Environment for Measurement and Section 5-3 Settings of Camera to be Measured. 
+The number of measurements taken is left up to the discretion of the measurer, but the 
+measurer is not permitted to selectively choose which measurements to use. 
+ 
+5-2 Equipment and Environment for Measurement 
+Other than the details given below, measuring equipment and environment are to comply 
+ 
+ 
+Chart 
+Release operation
+Variable brightness 
+Vibratory apparatus
+  
+  
+Vibration waveform
+PC for handheld blur measurement 
+
+=== PAGE 13 ===
+ 
+ 
+- 12 -
+with the provisions of CIPA Standard DC-011-2024 Section 4-2 Equipment and 
+Environment for Measurement. 
+ 
+5-2-1 Handheld Blur Measurement Chart 
+CIPA handheld blur measurement chart shall be used when performing Measurement II. 
+ 
+5-2-2 Mounting of Camera to be Measured on Vibratory Apparatus 
+When mounting a camera to be measured on a vibratory apparatus, vibration of the 
+vibratory apparatus and that of the camera mounted on the vibratory apparatus have to 
+match. 
+When measuring a camera with a long-barrel lens, such as is found on high-powered 
+zoom lenses, vibrations of the camera body and lens may not match. This is because the 
+excitation induces strain in the lens, which prevents the applied vibration from being 
+correctly transmitted to the lens. Thus, when measuring a camera with a long-barrel lens, 
+fix not only the camera body but also the lens to the vibratory apparatus, or take other 
+measures to ensure that the lens and camera body vibrations match. 
+The vibration waveforms adopted in this standard are vibrations that rotate on the rotational axes of 
+yaw, pitch, and roll. Therefore, the positional relationship between the center of rotation of the 
+vibratory apparatus and the optical axis of the camera to be measured at the time of mounting affects 
+the vibration measurement results. 
+Therefore, to ensure measurement condition alignment, preferably the center of rotation of the 
+vibration table and the optical axis of the lens are aligned in the horizontal and vertical directions in 
+the plane orthogonal to the optical axis. 
+ 
+5-2-3 Test Waveforms TWB-H and TWB-L and Loads during Evaluation 
+Measurement II is to be taken using either one of test waveform TWB-H or TWB-L or 
+both waveforms. The yaw and pitch vibration waveforms of test waveforms TWB-H and TWB-L 
+are illustrated in Figure 5-2-3a, and the average vibration angles of the composed yaw and pitch 
+components are illustrated in Figure 5-2-3b. 
+The combinations for the test waveforms and loads in accordance with the load ranges 
+for the vibratory apparatus are given in Table 5-2-3a and Figure 5-2-3c.  
+Each test waveform uses the biaxial components of yaw and pitch, and the yaw and pitch 
+components are excited simultaneously. Refer to Figure 6-3a in CIPA Standard DC-011-2024 
+for handheld blur in the yaw and pitch directions. 
+Further, vibration waveforms can be revised as necessary to reflect changes in camera 
+shape, how pictures are taken, and the associated development of image stabilization 
+
+=== PAGE 14 ===
+ 
+ 
+- 13 -
+technology. Test waveforms can also be revised along with such changes. 
+ 
+ 
+ Figure 5-2-3a: Yaw and pitch vibration waveforms of test waveforms TWB-H (left) and TWB-L  
+(right) 
+ 
+ 
+  
+Figure 5-2-3b: Average vibration angles of composed yaw and pitch components of test waveforms 
+ 
+ 
+ 
+The test waveform 
+acquisition method will be 
+described separately.   
+The test waveform 
+acquisition method will be 
+described separately.   
+
+=== PAGE 15 ===
+ 
+ 
+- 14 -
+ 
+Table 5-2-3a: Test waveform and load combinations 
+≥600 g
+400 - 600 g
+< 400 g
+TWB-L
+TWB-H
+TWB-L
+TWB-H
+A
+Max-min
+－
+Max load
+－
+Min load
+B
+Max
+Min
+－
+Max load
+600 g
+－
+C
+Max
+-
+Min
+－
+Max load
+600 g
+－
+D
+Max-min
+Max load
+Max load
+－
+－
+E
+Max
+Min
+Max load
+Max load
+－
+－
+F
+Max-min
+Max load
+－
+－
+－
+Test Waveform and Load Used
+Case
+Vibratory Apparatus Load Range
+ 
+ 
+Figure 5-2-3c: Test waveform and load combinations 
+ 
+5-2-4 Shooting Distance 
+The shooting distance should be such that the range shown by the lines for each aspect ratio in Figure 
+4-2-1a of CIPA Standard DC-011-2024 can be shot to approximately fill the whole picture frame. This 
+distance is about 20 times the 35mm film equivalent focal length. 
+ 
+5-2-5 Handheld Blur Measurement Software 
+The intrinsic image degradation amounts and measured image degradation amounts for 
+images of the CIPA handheld blur measurement chart taken according to Section 5-4 
+Measurement Procedures are to be quantified using FindsBlur, the handheld blur 
+measurement software provided by the CIPA. 
+Load (total mass)
+600 g
+400 g
+H
+H
+L
+H
+L/H
+L/H
+H
+H
+: Using test waveform TWB-H (
+)
+L
+: Using test waveform TWB-L (
+)
+L/H
+: Using both TWB-H and TWB-L (
+)
+L (600 g) : Using waveform TWB-L with 600 g load (
+)
+Vibratory apparatus 
+load range
+Case A
+Case B
+Case C
+Case E
+Case F
+L (600 g)
+L (600 g)
+Case D
+Load (total mass)
+600 g
+400 g
+H
+H
+L
+H
+L/H
+L/H
+H
+H
+: Using test waveform TWB-H (
+)
+L
+: Using test waveform TWB-L (
+)
+L/H
+: Using both TWB-H and TWB-L (
+)
+L (600 g) : Using waveform TWB-L with 600 g load (
+)
+Vibratory apparatus 
+load range
+Case A
+Case B
+Case C
+Case E
+Case F
+L (600 g)
+L (600 g)
+Case D
+
+=== PAGE 16 ===
+ 
+ 
+- 15 -
+However, the handheld blur measurement software is specified to calculate the image degradation 
+amounts at the white and black edges near the center of the image. Therefore, as a pre-processing step, 
+it is necessary to clip the captured image, centering the clips about the areas subject to image 
+degradation amount calculation. Specifically, with use of the provided image clipping software, 
+portions of the image of the CIPA handheld blur measurement chart corresponding to the center and 
+four positions in diagonal directions at image height 60% are clipped, and these partial images are 
+stored in five different folders. This image clipping process may be performed using in-house software. 
+The image degradation amounts are then calculated by the handheld blur measurement software using 
+the images in each folder obtained by clipping partial images at the center. 
+Note however that the camera settings or measurement environment may prevent you 
+from obtaining appropriate measurements even using this software. If there are any doubts 
+regarding the results of a measurement, review the camera settings and measurement 
+environment before re-measuring or taking other such measures. 
+ 
+5-2-6 Loads 
+Referring to the load ranges given in Table 5-2-3a and Figure 5-2-3c, shall mount an 
+object of equivalent weight to the load on the vibratory apparatus before measuring. The 
+total mass of the camera as mounted on the vibratory apparatus shall be included in the 
+load. 
+ 
+5-3 Settings of Camera to be Measured 
+Other than the details given below, settings for the camera to be measured are to comply 
+with the provisions of CIPA Standard DC-011-2024 Section 4-3 Settings of Camera to 
+be Measured. 
+ 
+5-3-1 Image Stabilization Mode 
+Image stabilization is to be set to OFF. 
+ 
+5-3-2 Image Quality Mode (Compression Ratio) 
+Set the camera to its highest resolution mode (with the lowest compression ratio). 
+ 
+5-3-3 Image Quality Mode (The Number of Recording Pixels) 
+Set the camera to be measured to its highest number of recording pixels. Do not use 
+settings which exceed the effective number of pixels of the image sensor due to pixel 
+interpolation, image processing or other effects. 
+ 
+
+=== PAGE 17 ===
+ 
+ 
+- 16 -
+5-3-4 Focal Length Settings for the Camera to be Measured 
+Set to a 35mm film equivalent of approximately 100 mm. 
+ 
+5-3-5 Aspect Ratio 
+There is no specific set aspect ratio, but pixel interpolation, image processing and other 
+effects which change aspect ratio are prohibited. 
+ 
+5-4 Measurement Procedures 
+5-4-1 Calculating Conversion Factor (fr) 
+Pre-calculate the conversion factor (fr) for calculating reference image degradation 
+amount in step 3 of Section 5-4-2 Measuring Image Degradation Amount Based on 
+Live Shooting from the shooting conditions. The conversion factor (fr) used here is a value 
+equivalent to the 35mm film equivalent focal length f used to calculate the yaw/pitch theoretical 
+handheld blur amounts as given in step 2 of Section 4-5-1 Calculation of Basic Values Required to 
+Calculate Image Stabilization Performance of CIPA Standard DC-011-2024. The values needed 
+to calculate the conversion factor are given as (a)-(e) below. The calculation method is 
+shown in Figure 5-4-1. 
+ 
+Values needed to calculate the conversion factor (fr) 
+Shooting distance (m, distance from CIPA handheld blur measurement chart to 
+rotation axis of vibratory apparatus) 
+...(a) 
+Chart standard length for captured image (pixels) 
+...(b) 
+ 
+Width for captured image (pixels) 
+...(c) 
+ 
+Height for captured image (pixels) 
+...(d) 
+Standard CIPA handheld blur measurement chart length (= 288 mm) 
+...(e) 
+ 
+
+=== PAGE 18 ===
+ 
+ 
+- 17 -
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Figure 5-4-1: Method for calculating conversion factor (fr) 
+ 
+ 
+ 
+Conversion Factor (fr) = Shooting Distance (a)[m] x 
+𝐶𝐶ℎ𝑎𝑎𝑎𝑎𝑎𝑎 𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠 𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙ℎ (𝑏𝑏)[𝑝𝑝𝑝𝑝𝑥𝑥𝑥𝑥𝑥𝑥𝑥𝑥]
+𝐶𝐶ℎ𝑎𝑎𝑎𝑎𝑎𝑎 𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠 𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙ℎ (𝑒𝑒)[𝑚𝑚𝑚𝑚] x 
+√242+362[𝑚𝑚𝑚𝑚]
+ඥ𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼 𝑤𝑤𝑤𝑤𝑤𝑤𝑤𝑤ℎ (𝑐𝑐)2+𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼 ℎ𝑒𝑒𝑒𝑒𝑒𝑒ℎ𝑡𝑡 (𝑑𝑑)2[𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝] x 106 
+CIPA Handheld blur Measurement Chart 
+Camera to be measured 
+(a) Shooting distance  
+(m, distance from chart to rotation axis of vibratory apparatus) 
+Position at image height 60% 
+Actual chart length 432mm 
+(c) Image length [pixels] 
+(d) Image height [pixels] 
+(b) Chart standard 
+length [pixels] 
+(e) Standard CIPA handheld blur measurement chart length 
+(Actual chart length ＝ 288ｍｍ） 
+
+=== PAGE 19 ===
+ 
+ 
+- 18 -
+5-4-2 Measuring Image Degradation Amount Based on Live Shooting 
+As stated in Section 5-3 Settings of Camera to be Measured, set image stabilization to 
+OFF on the camera to be measured. At each of the test waveform and load combinations 
+in Section 5-2-3 Test Waveforms TWB-H and TWB-L and Loads during Evaluation, 
+the camera shall be shaken using the vibratory apparatus and how close the measured 
+handheld blur amount is to the reference handheld blur amount shall be measured. The 
+measurement position on the CIPA handheld blur measurement chart is one white and black edge 
+portion positioned at the center. The shutter speeds of the camera to be measured are 1/30, 
+1/15, 1/8 and 1/4 (seconds). The specific procedure is outlined below: 
+ 
+Figure 5-4-2: Measurement position (one location at the center) of Measurement II 
+ 
+ 
+1) Measure the intrinsic image degradation amount for the camera following the 
+procedure outlined in Section 4-4-1 Measurement of Intrinsic Image 
+Degradation Amount in CIPA Standard DC-011-2024. At this time, the shutter 
+speed of the camera to be measured is to be one of the four given above. 
+2) Following the procedure given in Section 4-4-2 Measurement of Total Image 
+Degradation Amount (in the Cases of Section 4-2-6 Selection Criteria I and II) in 
+CIPA Standard DC-011-2024, set image stabilization on the camera to be measured 
+to OFF and shake it with either test waveform TWB-H or TWB-L. From here, 
+measure the measured image degradation amount. The shutter speed of the camera 
+to be measured is the shutter speed used in step 1 above and at least 200 images are 
+to be captured. While there is no specified upper limit for number of images taken, 
+all images shall be used without selecting only those that are desirable. 
+3) Calculate the reference image degradation amount using the intrinsic image 
+degradation amount measured in step 1 and the test waveform average vibration 
+angle used in vibration in step 2. The calculation method of the reference image 
+Measurement position (one location) 
+
+=== PAGE 20 ===
+ 
+ 
+- 19 -
+degradation amount shall be in accordance with step 3 of Section 4-5-1 Calculation 
+of Basic Values Required to Calculate Image Stabilization Performance in 
+CIPA Standard DC-011-2024. If calculating theoretical handheld blur amount (μm), 
+use the conversion factor (fr) calculated in Section 5-4-1 Calculating Conversion 
+Factor (fr) instead of the 35mm film equivalent focal length f. 
+4) With the method explained in Section 4-5-2 Method of Converting Intrinsic 
+image degradation amount and Measured Image Degradation Amount into 35mm 
+Film Equivalent Values of CIPA Standard DC-011-2024, convert the measured 
+image degradation amount measured in step 2 to a 35mm film equivalent image 
+degradation amount. 
+5) Using the methods explained in steps 5 and 6 of Section 4-5-1 Calculation of Basic 
+Values Required to Calculate Image Stabilization Performance of CIPA 
+Standard DC-011-2024, calculate the reference handheld blur amount and measured 
+handheld blur amount from the reference image degradation amount and measured 
+image degradation amount as calculated in steps 3 and 4, respectively. 
+ 
+Change the shutter speed of the camera to be measured and repeat steps 1 through 5 
+above. 
+ 
+5-5 Judging Measurement Results 
+Measurement results from Section 5-4-2 Measuring Image Degradation Amount 
+Based on Live Shooting at each of the test waveform and load combinations indicated 
+in Section 5-2-3 Test Waveforms TWB-H and TWB-L and Loads during Evaluation 
+are deemed to have satisfied the Measurement II evaluation if they satisfy the following 
+performance requirement:  
+ 
+● At the center of the CIPA handheld blur measurement chart, the difference between the measured 
+handheld blur amount and reference handheld blur amount, obtained from the measurements in 
+Section 5-4-2, is ±10% or less of the reference handheld blur amount at shutter speeds of 1/30, 
+1/15, 1/8, and 1/4 (seconds) on the camera to be measured. 
+  The corners of the image at 60% are not judged. 
+ 
+ 
+If there is bias in shot timing, the values of measured handheld blur amount will vary 
+regardless of vibratory apparatus performance. As such, when the difference between 
+measured handheld blur amount and reference handheld blur amount is more than 10% 
+
+=== PAGE 21 ===
+ 
+ 
+- 20 -
+even though there are not any deficiencies in the vibratory apparatus, settings on the 
+camera to be measured, or conversion factor calculations, etc., check that there is no bias 
+in shot timing and re-measure. 
+
+=== PAGE 22 ===
+ 
+ 
+- 21 -
+6. Measurement III 
+ 
+6-1 Preconditions 
+The evaluation of the vibratory apparatus in Measurement III shall be in accordance with Section 6-
+2 Equipment and Environment for Measurement, Section 6-3 Settings of Camera to be Measured, 
+and Section 6-4 Measurement Procedures. The number of measurements taken is left to the 
+discretion of the measurer, but all measurement results shall be used without selecting only those that 
+are desirable. 
+Figure 5-1 provides an overview of the measurement method. 
+ 
+6-2 Equipment and Environment for Measurement 
+The equipment and environment for measurement, excluding the details below, shall conform to the 
+CIPA Standard DC-011-2024 Section 4-2 Equipment and Environment for Measurement. 
+ 
+6-2-1 Handheld Blur Measurement Chart 
+The handheld blur measurement chart shall be in accordance with Section 5-2-1 Handheld Blur 
+Measurement Chart. 
+ 
+6-2-2 Mounting of Camera to be Measured on Vibratory Apparatus 
+The mounting of the camera shall be in accordance with Section 5-2-2 Mounting of Camera to be 
+Measured on Vibratory Apparatus. 
+ 
+6-2-3 Test Waveforms (Sine Waves) and Loads during Evaluation 
+For Measurement III, the test waveforms are sine waves about the optical axis. The combination of 
+frequencies and amplitudes are shown in Table 6-2-3. 
+ 
+Table 6-2-3: Combinations of frequencies and amplitudes of sine waves used in Measurement III 
+Waveform 
+Frequency 
+[Hz] 
+Amplitude of sine 
+wave excited by 
+vibration table ± W 
+[deg] 
+Theoretical handheld blur amount [μm] 
+= 2 x Lr x tanW 
+P1 
+1 
+± 0.5 
+226.5 (with conversion factor Lr [mm]＝
+12.980) 
+P2 
+1 
+± 0.2 
+90.6 (with conversion factor Lr [mm]＝
+12.980) 
+ 
+ 
+
+=== PAGE 23 ===
+ 
+ 
+- 22 -
+6-2-4 Shooting Distance 
+The shooting distance shall be in accordance with Section 5-2-4 Shooting Distance. 
+ 
+6-2-5 Handheld Blur Measurement Software 
+The handheld blur measurement software shall be in accordance with Section 5-2-5 Handheld Blur 
+Measurement Software. 
+However, the handheld blur measurement software is specified to calculate the image degradation 
+amounts at the white and black edges near the center of the image. Therefore, as a pre-processing step, 
+it is necessary to clip the captured image, centering the clips about the areas subject to image 
+degradation amount calculation. Specifically, with use of the provided image clipping software, 
+portions of the image of the CIPA handheld blur measurement chart corresponding to the center and 
+four positions in diagonal directions at image height 60% are clipped, and these partial images are 
+stored in five different folders. This image clipping process may be performed using in-house software. 
+The image degradation amounts are then calculated by the handheld blur measurement software using 
+the images in each folder obtained by clipping partial images at four positions at image height 60%. 
+ 
+6-2-6 Loads 
+The test weight shall be the upper limit load supported by the vibratory apparatus. The total of the 
+camera to be measured mounted on the vibratory apparatus and the weight to be added shall be 
+adjusted so that it reaches the upper limit load. 
+ 
+6-3 Settings of Camera to be Measured 
+The settings shall be in accordance with Section 5-3 Settings of Camera to be Measured. 
+ 
+6-4 Measurement Procedures 
+6-4-1 Calculating Conversion Factor (Lr) 
+Pre-calculate the conversion factor (Lr) for calculating the reference image degradation amount in 
+step 3 of Section 6-4-2 Measuring Image Degradation Amount Based on Live Shooting from the 
+shooting conditions. The conversion factor (Lr) used here is a value equivalent to the 35mm film 
+equivalent distance L, from the center of the image to the measurement point, used to calculate the 
+roll theoretical handheld blur amount as given in step 2 of Section 4-5-1 Calculation of Basic Values 
+Required to Calculate Image Stabilization Performance of CIPA Standard DC-011-2024. This 
+distance L is the height of the position at image height 60%. The shooting distance shall be adjusted 
+so that the distance L is within 60 ± 3% during shooting. 
+The values required to calculate the conversion factor (Lr) are (c) through (h) below, and the 
+calculation method is shown in Figure 6-4-1. 
+
+=== PAGE 24 ===
+ 
+ 
+- 23 -
+ 
+Values Required to Calculate Conversion Factor (Lr) 
+Width for captured image [pixels]  
+ 
+ 
+ 
+ ...(c) 
+ 
+Height for captured image [pixels]  
+ 
+ 
+ 
+ ...(d) 
+Chart standard length for captured image [pixels] 
+ 
+...(g) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figure 6-4-1: Calculation method of conversion factor (Lr) 
+ 
+ 
+6-4-2 Measuring Image Degradation Amount Based on Live Shooting 
+As stated in Section 6-3 Settings of Camera to be Measured, with image stabilization set to OFF 
+on the camera to be measured, the camera shall be shaken using the vibratory apparatus and how close 
+the measured handheld blur amount is to the reference handheld blur amount shall be measured. The 
+measurement positions on the CIPA handheld blur measurement chart are four white and black edge 
+portions positioned at the corners on diagonal lines at image height 60%.  The shutter speeds of the 
+camera to be measured should be an integer multiple of 1 [second] to ensure proper exposure. The 
+specific procedure is outlined below: 
+Conversion factor (Lr) [mm] = Chart standard length (g) [pixels] x 
+24２+36２[mm] 
+Image width (c)2 + Image height (d)2 [pixels] 
+Position at image height 60% 
+Actual chart length 432mm 
+(c) Image length [pixels] 
+(d) Image height [pixels] 
+(g) Chart standard length [pixels] 
+Actual chart length = 259.6mm 
+Actual chart length 
+288mm 
+
+=== PAGE 25 ===
+ 
+ 
+- 24 -
+ 
+Figure 6-4-2: Measurement positions (four locations around) of Measurement III 
+ 
+ 
+ 1) Measure the intrinsic image degradation amount of the camera to be measured according to the 
+procedure described in CIPA Standard DC-011-2024 Section 4-4-1 Measurement of Intrinsic 
+Image Degradation Amount. The shutter speeds of the camera to be measured should be an 
+integer multiple of 1 [second] to ensure proper exposure. 
+ 2) Follow the procedure described in Section 4-4-2 Measurement of Total Image Degradation 
+Amount (in the case of Section 4-2-6 Selection Criteria I and II) in CIPA Standard DC-011-
+2024, and shake the camera to be measured (but with the image stabilization function OFF) with 
+the two types of waveforms described in Section 6-2-3 Test Waveforms to measure the 
+measured image degradation amount. The shutter speed of the camera to be measured is the 
+shutter speed used in step 1. At least 100 images are to be captured. While there is no specified 
+upper limit for number of images taken, all images shall be used without selecting only those 
+that are desirable. 
+ 3) Calculate the reference image degradation amount from the intrinsic image degradation amount 
+measured in step 1 and the angle of the amplitude of the test waveform used in vibration in step 
+2 (equivalent to the average vibration angle). The calculation method of the reference image 
+degradation amount shall be in accordance with step 3 of Section 4-5-1 Calculation of Basic 
+Values Required to Calculate Image Stabilization Performance in CIPA Standard DC-011-
+2024. However, when calculating the roll theoretical handheld blur amount (μm), use the 
+conversion factor (Lr) calculated in Section 6-4-1 Calculating Conversion Factor (Lr) instead 
+of the 35mm film equivalent distance L from the center of the image to the measurement point. 
+4) With the method described in Section 4-5-2 Method of Converting Intrinsic image 
+degradation amount and Measured Image Degradation Amount into 35mm Film Equivalent 
+Values of CIPA Standard DC-011-2024, convert the measured image degradation amount 
+measured in step 2 to a 35mm film equivalent image degradation amount. 
+Measurement positions (four locations) 
+
+=== PAGE 26 ===
+ 
+ 
+- 25 -
+5) From the reference image degradation amount and measured image degradation amount 
+calculated in steps 3 and 4, calculate the reference handheld blur amount and measured handheld 
+blur amount with the method described in steps 5 and 6 of Section 4-5-1 Calculation of Basic 
+Values Required to Calculate Image Stabilization Performance of CIPA Standard DC-011-
+2024. 
+ 
+Repeat the above steps 1 through 5 above with the different waveforms described in Section 6-2-3 
+Test Waveforms. 
+ 
+6-5 Judging Measurement Results 
+Measurement results from Section 6-4-2 Measuring Image Degradation Amount Based on Live 
+Shooting are deemed to have satisfied the Measurement III evaluation if they satisfy the performance 
+requirement described below. 
+ 
+Obtain the measured handheld blur amount corrected in accordance with Table 6-5-1 Correction 
+method of measured value of Measurement III. The reason for correction is that the vibration 
+waveform is a sine wave, not a roll waveform, and the calculated image degradation amount is shifted. 
+The correction compensates for this shift. 
+ 
+Table 6-5-1: Correction method of measured value of Measurement III 
+Measured 
+handheld blur 
+value N [μm] 
+Correction factor 
+Corrected measured 
+handheld blur amount 
+[μm] = N x A x B 
+Correction 
+factor A with 
+respect to limit 
+of image 
+degradation 
+amount 
+calculation 
+software
+Modification 
+factor B 
+unique to 
+single sine 
+wave vibration 
+P(1) 
+0.8 
+1.05 
+P(1) x 0.8 x 1.05 
+P(2) 
+P(2) x 0.8 x 1.05 
+ 
+● With each of the two types of waveforms described in Section 6-2-3 Test Waveforms, when the 
+shutter speed of the camera to be tested is an integer multiple of 1 [second] with proper exposure 
+at four white and black edge areas positioned on diagonal lines at image height 60% of the CIPA 
+handheld blur measurement chart, (1) and (2) are to be satisfied. 
+(1) The difference between the corrected measured handheld blur amount and reference handheld 
+blur amount, obtained from the measurements in Section 6-4-2, is ±50% or less of the reference 
+
+=== PAGE 27 ===
+ 
+ 
+- 26 -
+handheld blur amount at each of the four locations. 
+(2) Additionally, the difference between the average measured value at the four locations and the 
+reference handheld blur amount is ±10% or less of the reference handheld blur amount. 
+Measurement results are not judged at the center. The reason is that, in principle, roll blur is not 
+present at the center and cannot be evaluated. 
+ 
+If there is bias in shot timing, the values of measured handheld blur amount will vary regardless of 
+vibratory apparatus performance. As such, when the evaluation is not satisfied even though there are 
+not any deficiencies in the vibratory apparatus, settings on the camera to be measured, or conversion 
+factor (Lr) calculations, etc., check that there is no bias in shot timing and re-measure. 
+ 
+ 
+ 
+
+=== PAGE 28 ===
+ 
+ 
+- 27 -
+Any and all standards and guidelines published by CIPA have been set forth without 
+examining any possibility of infringement or violation of Intellectual Property Rights 
+(patent right, utility model right, trademark right, design right, copyright and any other 
+rights or legal interests of the same kind). 
+In no event shall CIPA be liable in terms of Intellectual Property Rights for the contents of 
+such standards and guidelines. 
+ 
+ 
+ 
+ 
+ 
+Verification Method of Vibratory Apparatus 
+Published in X, 2024 
+ 
+ 
+Published by  Camera & Imaging Products Association 
+       JCII BLDG., 25, Ichiban-cho, Chiyoda-ku, Tokyo, 102-0082 Japan 
+              TEL +81-3-5276-3891    FAX +81-3-5276-3893 
+ 
+ 
+ 
+ 
+All rights reserved 
+ 
+No part of this document may be reproduced in any form  
+or by any means without prior permission from the publisher. 
+ 
+ 
+ 

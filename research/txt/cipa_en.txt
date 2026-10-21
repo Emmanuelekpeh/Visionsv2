@@ -1,0 +1,3152 @@
+Standard of Camera & Imaging Products Association 
+CIPA DC-X011–Translation-2024 
+Measurement and Description Method 
+for Image Stabilization Performance of Digital Cameras 
+(Optical Systems) 
+This translation is based on the original Standard (CIPA DC-X011-2024). In the event of any 
+doubts arising as to the contents, the original Standard in Japanese shall prevail. 
+Established on       , 2024 
+Prepared by 
+Standardization Committee 
+Published by 
+Camera & Imaging Products Association 
+DRAFT
+
+i 
+ 
+ 
+THIS DOCUMENT IS PROVIDED ON AN “AS IS” BASIS WITHOUT WARRANTY OF 
+ANY KIND, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING BUT 
+NOT LIMITED TO ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS 
+FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT. 
+ 
+IN NO EVENT SHALL EITHER CIPA, CIPA’S MEMBERS, THEIR SUBSIDIARIES OR 
+AFFILIATES BE LIABLE FOR ANY DAMAGES WHATSOEVER (INCLUDING 
+WITHOUT LIMITATION, LOSS OF BUSINESS PROFITS, LOSS OF BUSINESS 
+INFORMATION, 
+LOSS 
+OF 
+BUSINESS 
+INTERRUPTION 
+OR 
+OTHER 
+COMPENSATORY, INCIDENTAL OR CONSEQUENTIAL DAMAGES) ARISING OUT 
+OF THIS DOCUMENT OR USE THEREOF EVEN IF CIPA, CIPA’S MEMBERS, THEIR 
+SUBSIDIARIES OR AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGES. 
+ 
+CIPA, CIPA’S MEMBERS, THEIR SUBSIDIARIES OR AFFILIATES DISCLAIMS AND 
+SHALL HAVE NO OBLIGATION OF DEFENSE, CONTRIBUTION OR INDEMNITY 
+WITH RESPECT TO ANY ACTUAL OR ALLEGED INTELLECTUAL PROPERTY 
+INFRINGEMENT ARISING OUT OF THIS DOCUMENT OR USE THEREOF. 
+ 
+ 
+Copyright © 2012-2024 CIPA All Rights Reserved 
+ 
+ 
+ 
+DRAFT
+
+ii 
+ 
+Contents 
+ 
+1. Introduction ....................................................................................................................................... 1 
+2. Scope ................................................................................................................................................. 2 
+3. Definition of Terms and Referenced Standards ................................................................................ 3 
+3-1 Definition of Terms..................................................................................................................... 3 
+3-2 Referenced Standards ................................................................................................................. 7 
+4. Measurement Method ....................................................................................................................... 8 
+4-1 Preconditions .............................................................................................................................. 8 
+4-2 Equipment and Environment for Measurement .......................................................................... 9 
+4-3 Settings of Camera to be Measured .......................................................................................... 16 
+4-4 Measurement Procedures .......................................................................................................... 20 
+4-5 Calculation of Image Stabilization Performance ...................................................................... 22 
+5. Description Method ........................................................................................................................ 34 
+5-1 Overview .................................................................................................................................. 34 
+5-2 Performance Description of Lens Integrated Camera with Image Stabilization Mechanism ... 36 
+5-3 Performance Description of Camera Body with Image Stabilization Mechanism ................... 38 
+5-4 Performance Description of Interchangeable Lens with Image Stabilization Mechanism ....... 40 
+5-5 Performance Description for Pairing a Camera Body with Image Stabilization Mechanism and 
+an Interchangeable Lens with Image Stabilization Mechanism ...................................................... 41 
+6. Explanation ..................................................................................................................................... 44 
+6-1 Background of Specifying Measurement Method .................................................................... 44 
+6-2 Vibratory Apparatus .................................................................................................................. 44 
+6-3 Vibration Waveform ................................................................................................................. 45 
+6-4 CIPA Handheld Blur Measurement Chart................................................................................. 48 
+6-5 Handheld Blur Measurement Software .................................................................................... 48 
+6-6 Shooting Distance ..................................................................................................................... 48 
+6-7 Number of Shots ....................................................................................................................... 49 
+6-8 Determination Level for Image Stabilization ........................................................................... 49 
+6-9 Image Stabilization Performance Calculation .......................................................................... 52 
+6-10 Lighting .................................................................................................................................. 52 
+6-11 Shooting Mode........................................................................................................................ 53 
+6-12 Image Quality Mode (Compression Ratio) ............................................................................. 53 
+6-13 Image Quality Mode (Number of Recording Pixels) .............................................................. 53 
+6-14 ISO Sensitivity ........................................................................................................................ 53 
+6-15 Flash ....................................................................................................................................... 54 
+DRAFT
+
+iii 
+ 
+6-16 Storage Media ......................................................................................................................... 54 
+6-17 Focal Length for Measurements (Cameras Mounted with Zoom Lenses) .............................. 54 
+6-18 Electronic (Digital) Zoom ...................................................................................................... 54 
+6-19 Focus Control ......................................................................................................................... 54 
+6-20 White Balance ......................................................................................................................... 55 
+6-21 Image Aspect Ratio ................................................................................................................. 55 
+6-22 Image Stabilization Mode ....................................................................................................... 55 
+6-23 Necessity of Measurement at Image Height 60% ................................................................... 55 
+6-24 Theoretical Handheld Blur Amount when Yaw/Pitch/Roll Handheld Blur Present ................ 55 
+6-25 Description Method ................................................................................................................ 60 
+6-26 Action when Number of Stops at Image Height 60% Is Not Measurable .............................. 66 
+6-27 Difference in Number of Stops of Image Stabilization Performance between Center and Corner
+ ........................................................................................................................................................ 67 
+6-28 Vibration Waveforms .............................................................................................................. 69 
+6-29 Difference in Number of Stops of Image Stabilization Performance Between 2015Standard 
+(CIPA DC-011–2015) and 2024 Standard (CIPA DC-X011-2024) ................................................. 70 
+7. Participating members .................................................................................................................... 72 
+ 
+ 
+Appendix (Informative) 
+ 
+A-1 Introduction ................................................................................................................................. 73 
+A-2 Basic concept of this Appendix ................................................................................................... 73 
+A-3 Explanation .................................................................................................................................. 73 
+A-3-1 Terminology relating to blurring .......................................................................................... 74 
+A-3-2 Examples of “output by blur detection device” .................................................................... 75 
+A-3-3 Explanation of “image stabilizer” and examples .................................................................. 75 
+A-3-4 Explanation of “blur reduction” and examples ..................................................................... 77 
+A-3-5 Objective axis-dependent and still- or video-dependent image stabilization ....................... 80 
+A-3-6 Combined use of image stabilizer function and blur reduction ............................................ 80 
+ 
+ 
+ 
+ 
+ 
+DRAFT
+
+iv 
+ 
+Revision History 
+ 
+Sept. 2012, Standard 
+Established 
+CIPA Standard DC-011-
+Translation-2012 
+- Measurement and Description Method for 
+Image Stabilization Performance of Digital 
+Cameras defined. 
+Feb. 2015, Standard 
+Revised 
+CIPA Standard DC-011-
+Translation-2015 
+- Added rules for notation on image 
+stabilization performance for cameras with 
+image stabilization for directions other than 
+yaw and pitch. 
+- Supplemental explanations added and format 
+adjusted throughout the standard. 
+Jan. 2024, Standard 
+Revised 
+CIPA Standard 
+DC-X011–2024 
+- Changed handheld blur determination level to 
+20 μm. 
+- Added roll handheld blur waveform to 
+vibration waveforms. 
+- Added image stabilization performance 
+measurement at image height 60%. 
+- Added supplemental explanations throughout 
+the standard. 
+ 
+ 
+ 
+ 
+ 
+DRAFT
+
+1 
+ 
+1. Introduction 
+ 
+As digital cameras have permeated the market in recent years, new functions have successively been 
+incorporated into new cameras to make them more convenient for users. One such function 
+commercialized in many cameras is image stabilization, which detects camera shake and corrects 
+image blur. The advantages of image stabilization performance are presented in brochures for equipped 
+products. To date, however, the industry has not developed any unified methods for measuring or 
+describing the image stabilization performance of cameras. This has made it difficult to compare image 
+stabilization performance between cameras based on their brochures. 
+To date, the Camera and Imaging Products Association (CIPA) has established standards and 
+guidelines for digital cameras, battery life, resolution, sensitivity and brochure descriptions. Brochures 
+of many digital cameras are prepared in compliance with these standards and guidelines, making for 
+fairer competition. 
+In the context of this background, this standard in 2012 added measurement and description methods 
+for image stabilization performance of digital cameras to existing standards and guidelines. In the 
+2015 revision, the standard added description methods for image stabilization performance for 
+cameras with image stabilization in directions other than yaw and pitch. In 2024, in response to 
+subsequent changes in photographic viewing environments, this standard is revised to allow for 
+measurement and description of roll image stabilization performance in addition to yaw and pitch. 
+ 
+This standard specifies the methods with regard to image stabilization as a type of blur suppression 
+as defined in 3-1-2; however, it does not specify methods with regard to blur reduction or motion blur 
+correction. 
+Typical systems of image stabilization include optical and electronic systems. In both systems, 
+exposure time (nearly equal to shutter speed) is an important factor. Electronic image stabilization, 
+however, has diverged into a broad spectrum of systems, many of which do not have clear definition 
+of exposure time, making it difficult to measure image stabilization performance on the basis of this 
+standard. 
+Hence, electronic image stabilization systems and hybrid image stabilization systems that use both 
+optical and electronic image stabilization are excluded from the application of this standard as 
+measurements are highly likely to be questionable. 
+ 
+In addition, for the purpose of supplementing the contents of this standard, an explanation of 
+terminology relating to "handheld blur" is provided in the appendix. 
+ 
+ 
+DRAFT
+
+2 
+ 
+2. Scope 
+ 
+This standard applies to digital cameras for consumers with optical image stabilization for still 
+image shooting, with the following provisions: 
+・ Professional or industrial applications in which users and suppliers arrange case-by-case 
+specifications are excluded. 
+・ Applications with electronic image stabilization systems and with hybrid image stabilization 
+systems that use both electronic and optical image stabilization are excluded. 
+・ Apparatuses such as camcorders and mobile phones with still image shooting ability shall not 
+be precluded from adopting this standard. 
+This standard is mainly meant for application in describing image stabilization performance in 
+brochures or other printed media and websites that specify the product. However, the objectives of this 
+standard are also to be complied with in notation on camera bodies and individual packages, as well 
+as expressions used in advertising campaigns and point-of-purchase advertising for sales promotions. 
+Furthermore, any party other than suppliers taking measurements based on this standard (hereinafter 
+called “measurer”) shall not be precluded from publishing the results of their measurements in their 
+own publication. 
+DRAFT
+
+3 
+ 
+3. Definition of Terms and Referenced Standards 
+ 
+3-1 Definition of Terms 
+The terms used in this standard are defined as given below. 
+ 
+3-1-1 Blur 
+"Blur" means deviation from a predetermined position. Used as a camera term, blur is broadly 
+divided into handheld blur and motion blur. 
+ 
+1) Handheld Blur  
+“Handheld blur” refers to a movement of a camera caused by unstable hands holding the camera, 
+resulting in blurring of a subject in an image taken. 
+ 
+2) Motion Blur  
+“Motion blur” refers to blurring of a subject in an image caused by movement of the subject or a 
+part of the subject during exposure, irrespective of any handheld blur. 
+ 
+3-1-2 Blur Suppression 
+“Blur suppression” refers to suppression of handheld blur or motion blur by some means of control 
+within a camera. Although blur suppression can be further classified into image stabilization and blur 
+reduction, this standard excludes applications for blur reduction. 
+Additionally, while image stabilization can be further classified into handheld blur correction and 
+motion blur correction, this standard excludes applications for motion blur correction. 
+ 
+1) Image Stabilization 
+This function corrects for handheld blur in the output image as caused by movement of the camera 
+body due to handheld blur (see 3-3-6) by using output by the blur detection device. 
+However, methods ultimately meant primarily to increase shutter speed by optimizing an exposure 
+control program are considered "blur reduction" as described below, even when using output by the 
+blur detection device. 
+ 
+2) Blur Reduction 
+“Blur reduction” is a function or mode for reducing handheld blur in an output image as caused by 
+either subject movement or handheld blur primarily by optimizing an exposure control program to 
+increase shutter speed. 
+Image stabilization and blur reduction shall not be confused, as there are great differences in their 
+DRAFT
+
+4 
+ 
+comprising technical elements. 
+ 
+ 
+ 
+3-1-3 Vibratory apparatus 
+A “vibratory apparatus” is an apparatus capable of generating vibration in response to the amplitude 
+of input vibration waveforms. Typically, the camera to be measured is mounted on the movable part 
+of the vibratory apparatus using given fixing methods to transmit the vibration to it.  
+ 
+3-1-4 Vibration Waveform 
+A “vibration waveform” is an embodiment of camera shake (vibration) that occurs when shooting 
+a subject with a camera by temporally shifting the amplitude value. A vibration waveform adopted in 
+this standard has three axes: yaw and pitch, which are vibration components especially dominant in 
+an image taken, and roll, which is a vibration component having the next most significant impact. 
+As the characteristics of camera shake vary depending on camera mass, two types of vibration 
+waveforms shall be employed: WB-H and WB-L. (For the definition of "weight," see CIPA DCG-005 
+Measurement and Description Methods of Weight and Dimensions of Digital Cameras.) 
+The WB-H and WB-L files are in text format, named WB-H-xxx.txt and WB-L-xxx.txt, respectively. 
+The waveforms are provided as angle data changing in the time direction for a length of 32 seconds. 
+Data sampling frequency is 500Hz. The ‘xxx’ in the waveform file names is a 3-digit number giving 
+the waveform version. If a waveform has been revised, version differences are managed with these 
+numbers. 
+ 
+3-1-5 Handheld Blur Amount 
+“Handheld blur amount” is an amount that corresponds to shift of a subject in an image taken as 
+induced by handheld blur. 
+ 
+3-1-6 Image Degradation and Image Degradation Amount 
+“Image degradation” refers to a phenomenon where deviation between the focal plane of a lens and 
+image plane of the image sensor or where handheld blur deteriorates the sharpness in an image taken. 
+Blur Suppression 
+Image Stabilization 
+Blur Reduction 
+Handheld Blur Correction 
+Motion Blur Correction 
+DRAFT
+
+5 
+ 
+Image degradation is sometimes caused by image processing of image data. “Image degradation 
+amount” is a quantified value of the magnitude of image degradation. 
+ 
+3-1-7 Handheld Blur Measurement Chart 
+A “handheld blur measurement chart” is a chart to be used as a subject in measuring image 
+stabilization performance. When establishing this standard, CIPA prepared a handheld blur 
+measurement chart called the “CIPA handheld blur measurement chart.” 
+ 
+3-1-8 Handheld Blur Measurement Software 
+"Handheld blur measurement software" is provided by CIPA and dedicated software for measuring 
+the intrinsic image degradation amount (3-1-10) and the total image degradation amount (3-1-14) from 
+a captured image using the CIPA handheld blur measurement chart (3-1-7). “Pixel” is the unit for the 
+image degradation amount generated by this software.   
+ 
+3-1-9 Stop (Stop Number) 
+According to APEX expressions, the difference in TV values is represented in ”stops.” For instance, 
+the difference between shutter speeds of 1/1000 (TV10) and 1/500 seconds (TV9) or that between 
+shutter speeds of 1/125 (TV7) and 1/60 seconds (TV6) accounts for one stop. 
+ 
+3-1-10 Intrinsic image degradation amount 
+“Intrinsic image degradation amount” is the image degradation amount of an image taken caused 
+by factors other than handheld blur. Intrinsic image degradation amount is unique to an individual 
+instrument and is dependent on the optical performance, effective number of pixels and image 
+processing of the camera to be measured. By removing intrinsic image degradation amount, almost all 
+factors affecting image stabilization performance other than the image stabilization function can be 
+removed. 
+ 
+3-1-11 Determination Level for Image Stabilization Performance  
+“Determination level for image stabilization performance” is the level used in judgments of image 
+stabilization performance calculations. In this standard, this level is defined as 20 μm. 
+ 
+3-1-12 Theoretical Handheld Blur Amount 
+“Theoretical handheld blur amount” is a theoretical value for the amount of measurable handheld 
+blur in an image taken with image stabilization turned OFF (the function is assumed to be OFF for 
+cameras without an OFF setting) when the camera to be measured is vibrated with a vibration 
+waveform. 
+DRAFT
+
+6 
+ 
+ 
+3-1-13 Reference Image Degradation Amount 
+“Reference image degradation amount” is the theoretical estimated image degradation amount for 
+an image taken with image stabilization turned OFF (the function is assumed to be OFF for cameras 
+without an OFF setting) when the camera to be measured is vibrated with a vibration waveform. This 
+amount is expressed as the square root of the sum of the squares of the intrinsic image degradation 
+amount and the theoretical handheld blur amount. 
+ 
+3-1-14 Total Image Degradation Amount 
+“Total image degradation amount” is the actual measurement value of image degradation amount 
+for an image taken with image stabilization turned ON when the camera to be measured is vibrated 
+with a vibration waveform. 
+ 
+3-1-15 Reference Handheld Blur Amount 
+“Reference handheld blur amount” is a reference value for use in calculating image stabilization 
+performance. The reference handheld blur amount is calculated by subtracting the intrinsic image 
+degradation amount from the reference image degradation amount caused when the camera is vibrated 
+for cameras not equipped with image stabilization or with image stabilization turned OFF (the function 
+is assumed to be OFF for cameras without an OFF setting). 
+ 
+3-1-16 Measured Handheld Blur Amount 
+“Measured handheld blur amount” is a value representing residual handheld blur after correction 
+with image stabilization of the camera to be measured ON. This value is calculated by subtracting 
+intrinsic image degradation amount from total image degradation amount. 
+ 
+3-1-17 Average Vibration Angle  
+“Average vibration angle” is the average value for vibration angles caused by vibration with a 
+vibration waveform (3-1-4) at each shutter speed.   
+Average vibration angle data files are in text format, with the file corresponding to WB-H named 
+AVA-1-xxx.txt and that corresponding to WB-L named AVA-2-xxx.txt. The file corresponding to 
+Selection Criteria III described in 4-2-6 is named AVA-3-xxx.txt. 
+Again, the ‘xxx’ in the file names is a 3-digit number giving the version number. The 3 digits are 
+used to manage the files, corresponding with the waveform revisions. 
+ 
+3-1-18 Shutter Speed 
+“Shutter speed” is a theoretical exposure time value. 
+DRAFT
+
+7 
+ 
+In this standard as well, shutter speeds are denoted using typical display values (30, 15, 8, 4, 2, 1, 1/2, 
+1/4, 1/8, 1/15, 1/30, 1/60, 1/125, 1/250, 1/500, 1/1000, etc.). At the time of calculation, real numbers 
+(32, 16, 8, 4, 2, 1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128, 1/256, 1/512, 1/1024, etc.) or values based on 
+real numbers shall be used. (Refer to CIPA DCG-008-2022 Guideline for Presentation Method of 
+Shutter Speed on Digital Cameras.) 
+ 
+3-1-19 Image Clipping Software 
+“Image Clipping Software” is dedicated software provided by CIPA that partially clips a captured 
+image using the CIPA handheld blur measurement chart (3-1-7) at the center of the image and four 
+positions at image height 60% in diagonal directions, storing each partial image in five different folders. 
+With the images stored in these five folders, intrinsic image degradation amount (3-1-10) and total 
+image degradation amount (3-1-14) are measured by the handheld blur measurement software (3-1-8), 
+as necessary. 
+ 
+3-2 Referenced Standards 
+ 
+3-2-1 Referenced Standards 
+• CIPA DCG-002 Specification Guideline for digital cameras 
+• CIPA DCG-005 Measurement and description methods of weight and dimensions of digital cameras 
+• CIPA DCG-008-2022 Guideline for Presentation Method of Shutter Speed on Digital Cameras 
+ 
+3-2-2 Response to Revision of Reference Standard 
+If the standards and guidelines referred to in this standard are revised, compliance shall be with the 
+revised editions. 
+DRAFT
+
+8 
+ 
+4. Measurement Method 
+ 
+4-1 Preconditions 
+ The objective of this standard is to specify how to measure image stabilization performance in the 
+case of users taking a shot with the camera in hand. Accordingly, measuring sessions will better 
+simulate real shooting if the camera to be measured is actually held by hand. This does, however, make 
+it difficult to eliminate variations due to differences among individual photographers or how well the 
+camera is designed for handheld shooting. In order to ensure fair measurement results, the camera to 
+be measured is to be mounted on a vibratory apparatus to vibrate the camera with a vibration waveform 
+to be discussed later, and image stabilization performance shall be measured on the basis of results of 
+shooting the handheld blur measurement chart specified in this standard. 
+ 
+Information on how to get information and tools (vibration waveforms, handheld blur measurement 
+software, CIPA handheld blur measurement chart, etc.) additionally required for the measurement of 
+image stabilization performance as specified in this standard shall be separately presented by CIPA. 
+ 
+Measurements of image stabilization performance shall comply with the following: 4-2 Equipment 
+and Environment for Measurement, 4-3 Setting of Camera to be Measured and 4-4 Measurement 
+Procedures. Determinations on the number of cameras to be measured is left to the supplier or the 
+measurer, as long as the number does not render questionable measurement results. Figure 4-1 shows 
+the overview of the measurement method.  
+Figure 4-1 Overview of Measurement Method 
+ 
+ 
+Chart 
+Release operation 
+Variable brightness 
+Vibratory apparatus 
+ 
+ 
+Vibration waveform 
+PC for handheld blur measurement 
+DRAFT
+
+9 
+ 
+4-2 Equipment and Environment for Measurement 
+ 
+4-2-1 Handheld Blur Measurement Chart 
+For this standard, a handheld blur measurement chart satisfying the following specifications shall 
+be used for the measurement of image stabilization performance. 
+1) The chart shall be comprised of measurement sites at the center of the image and positions at 
+image height 60%, and may optionally include a portion having natural color images. 
+2) The ratio of reflectance between the white and black regions of the measurement sites shall be 
+4:1 or higher, and the white and black region shall be wider than the expected maximum image 
+degradation amount. 
+3) No particular features are specified for the natural image portion, but the portion preferably 
+contains images similar to real subjects. 
+ 
+Use of the CIPA handheld blur measurement chart illustrated in Figure 4-2-1a is recommended. The 
+CIPA handheld blur measurement chart has natural color images inserted to facilitate focusing or 
+general purpose applications. The outline dimensions of the CIPA handheld blur measurement chart 
+are 1000 mm × 750 mm in consideration of shooting magnification. 
+White and black edge areas for measurement are provided at the center and at four locations at 
+image height 60% within the frames indicating the shooting range. To ensure measurement at corner 
+positions of image height 60% even with differing aspect ratios of imaging elements, the chart has 
+three frames (aspect ratios of 3:2, 4:3, and 16:9); therefore, the camera's shooting range shall be 
+adjusted in accordance with the format of the imaging element so that the frame lines substantially 
+match the screen edges to be shot. The lens focal length shall then be determined and the shooting 
+distance adjusted. This process is assumed in the descriptions of this standard below. 
+ 
+DRAFT
+
+10 
+ 
+ 
+Figure 4-2-1a CIPA handheld blur measurement chart (unit: mm) 
+ 
+Figure 4-2-1b: One frame of chart (unit: mm) 
+ 
+ 
+1000 
+750 
+4:3 
+3:2 
+16:9 
+Shooting range at each aspect ratio 
+Positions at image height 60% 
+424 
+480 
+519 
+754 
+720 
+692 
+216 
+Dimensions of one frame 
+144 
+40 
+40 
+64 
+40 
+40 
+136 
+DRAFT
+
+11 
+ 
+4-2-2 Lighting 
+Although no specific types of lighting are defined, lighting shall not cause flicker in the image 
+during shooting. Measures should also be taken to prevent reflection from the light source or uneven 
+illuminance on the handheld blur measurement chart to prevent any question relating to measurement 
+results. 
+Lighting with variable brightness is useful. 
+ 
+4-2-3 Temperature and Humidity 
+The temperature and humidity shall be 23°C ± 2°C and 30 to 70%. Measurements may be performed 
+under other conditions as long as there is no room for question. 
+ 
+4-2-4 Vibratory Apparatus 
+The vibratory apparatus to use shall function in a manner that accurately reproduces vibrations 
+according to the vibration waveforms. Always verify that the vibratory apparatus is vibrating 
+accurately before taking measurements. To do so, measurers of image stabilization performance or 
+manufacturers of vibratory apparatuses refer to Verification Method of Vibratory Apparatus 
+specified separately. 
+ 
+4-2-5 Mounting of Camera to be Measured on Vibratory Apparatus 
+When mounting the camera to be measured on the vibratory apparatus, vibration of the vibratory 
+apparatus and that of the camera to be measured mounted on the vibratory apparatus have to match.  
+When measuring a camera with a long-barrel lens (e.g. high-powered zoom lens), vibrations of the 
+camera body and the lens may not match due to distortion induced in the lens by excitation preventing 
+the applied vibration from being correctly transmitted to the lens. Thus, given measures are to be taken 
+for such measurements so that lens and camera body vibrations match, such as fixing the lens to the 
+vibratory apparatus in addition to the camera body. 
+The vibration waveforms adopted in this standard are vibrations that rotate on the rotational axes of 
+yaw, pitch, and roll; therefore, the positional relationship between the center of rotation of the vibratory 
+apparatus and the optical axis of the camera and lens to be measured at the time of mounting affects 
+the vibration measurement results. (Hereafter, camera and lens are abbreviated as camera.) 
+DRAFT
+
+12 
+ 
+Therefore, to ensure measurement condition alignment, the center of rotation of the vibration table 
+are preferably aligned with the optical axis of the lens in the horizontal and vertical directions on the 
+plane orthogonal to the optical axis. 
+Figure 4-2-5a Center of rotation of vibration table and optical axis of lens 
+ 
+Figure 4-2-5b Camera fixed with lens optical axis aligned with center of rotation of vibration table 
+ 
+ 
+Back of camera 
++x 
++y 
+Vibration table 
+Center of rotation of vibration table 
++Y 
++X 
+Line of sight in direction of chart for shooting 
+Optical axis of imaging lens 
+Align when 
+fixing camera 
+Vibration table 
+Center of rotation of vibration table 
++Y 
++X 
+Line of sight in direction of chart for shooting 
+Optical axis 
++y 
++x 
+DRAFT
+
+13 
+ 
+ 
+ 
+Figure 4-2-5c Fixed state of camera with bending optical system 
+ 
+4-2-6 Vibration Waveform 
+There are two types of vibration waveforms: WB-L and WB-H. Criteria for selecting a waveform 
+are as follows: (Here, total mass is the sum of the masses of a camera body, the included storage media 
+and battery, and a lens) 
+Selection Criterion I. WB-H shall be used for total mass of 600 g or more; 
+Selection Criterion II. WB-L shall be used for total mass of less than 400 g; 
+Selection Criterion III. Both WB-L and WB-H shall be used for total mass between 400 g and 600 
+g. 
+Both waveforms consist of 3-axis components: yaw, pitch, and roll. Yaw, pitch, and roll components 
+shall be excited at the same time. 
+ 
+(Note: Given that camera geometries and shooting methods change and image stabilization 
+techniques will be improved in response to such changes, the vibration waveforms specified in this 
+standard are subject to revision as necessary.) 
+ 
+4-2-7 Shooting Distance 
+ When the vibratory apparatus is stopped, the shooting distance shall be adjusted so that the white 
+and black edges at image height 60% at the four positions in the CIPA handheld blur measurement 
+chart in Figure 4-2-1a are within an image height of 60 ± 3%. This distance is 20 times the 35mm film 
+equivalent focal length. The objective of the adjustment is to ensure that the image is taken so that the 
+range of the frame indicated for each aspect ratio depicted in Figure 4-2-1a CIPA Handheld Blur 
+Measurement Chart covers the entire screen area when the vibratory apparatus is stopped. 
+Vibration table 
+Center of rotation of vibration table 
++Y 
++X 
+Chart direction for shooting 
+Optical axis 
+Vibration table 
+Camera 
++Z 
+Optical axis 
+Lens 
+Horizontal direction 
+DRAFT
+
+14 
+ 
+When using a handheld blur measurement chart other than the CIPA handheld blur measurement 
+chart, the measurement shall be made after confirmation that the measurement positions at image 
+height 60% are within image height 60 ± 3%. 
+ For example, when measurement is made with a camera having an aspect ratio of 3:2, the image 
+shall be taken with the range of the 3:2 brown frame in Figure 4-2-1a CIPA Handheld blur 
+Measurement Chart filling the entire screen. When taken with the imaging range properly filling the 
+screen, the image is taken within the red virtual solid line in Figure 4-2-7 Shift in Shooting Range and 
+Change in Image Height at Corners. In this case, the white and black edges at image height 60% at the 
+four locations on the chart are at image height 60% on the image. 
+With the shooting distance farther away and the image taken only within the purple virtual solid 
+line in Figure 4-2-7, the white and black edges at image height 60% at the four locations on the chart 
+are at image height 57% on the image. Conversely, with the shooting distance closer and the image 
+taken only within the green virtual solid line in Figure 4-2-7, the white and black edges at image height 
+60% at the four locations on the chart are at image height 63% on the image. 
+ 
+Figure 4-2-7 Shift in Shooting Range and Change in Image Height at Corners 
+ 
+4-2-8 Handheld Blur Measurement Software 
+Handheld blur measurement software (3-1-8) can be used to measure the intrinsic image degradation 
+amount and total image degradation amount of an image of the CIPA handheld blur measurement chart 
+Positions at image height 60% 
+Imaging range with corners of image at image height 57%
+Imaging range at aspect ratio 3:2 (corners of image at image height 60%)
+Imaging range with corners of image at image height 63%
+DRAFT
+
+15 
+ 
+as taken in accordance with 4-4 Measurement Procedures. This software generates an intrinsic image 
+degradation amount and a total image degradation amount in pixels. Use of this software is 
+recommended for measuring intrinsic image degradation amount and total image degradation amounts 
+for this standard. The CIPA handheld blur measurement chart shall be used without fail when this 
+software is used.  
+Unreasonable measurement results may be generated even when using this software depending on 
+the settings of the camera to be measured or measurement environment. If measurement results are 
+even slightly questionable, review the settings of the camera to be measured or the measurement 
+environment and take measures such as repeating the measurement. 
+ This handheld blur measurement software is specified to calculate the image degradation amount 
+at the white and black edges near the center of the image. Therefore, as a pre-processing step, the 
+captured image, centering the clips about the areas subject to image degradation amount calculation, 
+shall be clipped. Specifically, with use of the image clipping software separately provided by CIPA, 
+portions of the image of the CIPA handheld blur measurement chart corresponding to the center and 
+four positions in diagonal directions at image height 60% are clipped, and these partial images are 
+stored in five different folders. This image clipping process may be performed using in-house software. 
+Each image degradation amount is then calculated from the images in each folder with the handheld 
+blur measurement software. 
+ 
+ 
+4-2-8a Example of Image Clipping Range of Five Locations from Captured Image 
+ 
+If a method other than the handheld blur measurement software specified in this standard is used, 
+the intrinsic image degradation amount and total image degradation amount shall be measured in 
+accordance with the following: 
+1) The signal levels of the boundary regions between black portions and white portions in the image 
+of a shot chart shall be normalized from 0% to 100%. To eliminate the impact of noise, the number 
+of pixels in the section between 10% to 90% of signal levels (A in Figure 4-2-8) shall be calculated 
+Example of image clipping range 
+DRAFT
+
+16 
+ 
+and then multiplied by 10/8; 
+2) At this time, the tone characteristic shall be linearized to the extent possible. (Before 
+normalization, the signal level is tone corrected.) 
+3) For stable measurements, the boundary regions between black portions and white portions which 
+are the measurement locations of the image of the shooting chart shall be used. 
+Refer to the handheld blur measurement software instruction manual for details on how to measure 
+intrinsic image degradation amount and total image degradation amount using this software. 
+Any variation or error in measurement of the intrinsic image degradation amount and total image 
+degradation amount (or measured handheld blur amount) would compromise the image stabilization 
+performance measurements for this standard. As such, the accuracy of the measured intrinsic image 
+degradation amount, comprehensive image degradation amount and measured handheld blur amount 
+shall be verified without fail before starting the measurement. 
+Refer to the separately specified Verification Method of Vibratory Apparatus for methods of 
+verifying measurement. 
+ 
+ 
+ 
+Figure 4-2-8b Measuring intrinsic image degradation amount and total image degradation amount 
+ 
+ 
+4-3 Settings of Camera to be Measured 
+ 
+4-3-1 Power to be Used 
+Not specified. Cameras capable of using external power sources may use external power. 
+ 
+4-3-2 Shooting Mode 
+No specific shooting mode is stipulated. However, given that shooting shall begin within three 
+seconds after shooting is enabled following power ON, preferable shooting modes will either be 
+capable of remembering as many of the items specified in 4-3-3 to 4-3-20 as possible and setting them 
+0%
+100%
+90%
+10%
+A
+[画素]
+[信号レベル]
+0%
+100%
+90%
+10%
+A
+0%
+100%
+90%
+10%
+A
+[画素]
+[信号レベル]
+Signal level 
+Pixel    
+DRAFT
+
+17 
+ 
+in advance with the power OFF or allow for easy changing of the shutter speed. Note that the shooting 
+mode should not include any image processing which might produce questionable measurement 
+results. 
+As an example, many cameras have modes adapted to specific shooting scenes. Many such modes 
+include image processing that is optimized for given situations. This introduces the possibility of 
+questionable measurement results, making such modes unsuitable for image stabilization performance 
+measurement. Accordingly, such modes adapted to specific situations which include features such as 
+extreme edge enhancement shall not be used in principle, even if the mode includes allowing for easy 
+changing of the shutter speed. 
+ 
+4-3-3 Image Stabilization Mode 
+Setting shall be in the image stabilization mode to be measured. 
+ 
+4-3-4 Image Quality Mode (Compression Ratio) 
+Although no specific compression ratio is specified, a high image quality mode setting with low 
+compression ratio is preferable. 
+ 
+4-3-5 Image Quality Mode (Number of Recording Pixels) 
+Although no number is specified for recorded pixels, this will preferably be set to the maximum 
+number of recording pixels for the camera to be measured. However, settings that would exceed the 
+effective number of pixels of the image sensor by means of pixel interpolation, image processing or 
+other alterations shall not be adopted. 
+ 
+4-3-6 ISO Sensitivity 
+ISO sensitivity shall be set to minimize any image noise. If possible, ISO sensitivity should be set 
+to a constant value. 
+ 
+4-3-7 Flash 
+Not to be used. 
+ 
+4-3-8 Storage Media Capacity 
+Not specified. 
+ 
+4-3-9 Focal Length for Measurement (Cameras Mounted with Zoom Lenses) 
+Not specified. 
+ 
+DRAFT
+
+18 
+ 
+4-3-10 Electronic (Digital) Zoom 
+Not used. 
+ 
+4-3-11 Focus Control 
+No focus control system, such as autofocus and manual focus, is specified. However, the camera 
+shall be correctly focused on the handheld blur measurement chart. 
+ 
+4-3-12 White Balance  
+White balance shall be appropriate to the light sources used. 
+ 
+4-3-13 Color Setting 
+Although no specific color setting is specified, the factory default setting is preferable. 
+ 
+4-3-14 Exposure Setting 
+Although no specific exposure setting is specified, the camera shall be set such that it can shoot at 
+an appropriate exposure. 
+ 
+4-3-15 Aperture 
+Although no specific aperture value is specified, aperture shall be kept constant if possible when 
+shooting at the same focal length and the same shutter speed. 
+ 
+4-3-16 Aspect Ratio  
+Although no specific aspect ratio is specified, the factory default setting is preferable. 
+ 
+4-3-17 Continuous Shooting Mode 
+Although no specific continuous shooting mode is specified, camera settings should allow 
+performance of 4-4-1 Measurement of Intrinsic image degradation amount and 4-4-2 and 4-4-3 
+Measurement of Total Image Degradation Amount as discussed below. 
+ 
+4-3-18 Self Timer 
+Although no specific self-timer setting is specified, camera settings should allow performance of 4-
+4-1 Measurement of Intrinsic Image Degradation Amount and 4-4-2 and 4-4-3 Measurement of Total 
+Image Degradation Amount as discussed below. 
+ 
+4-3-19 Aberration Correction Setting 
+No specific aberration correction settings are specified, but factory default settings are preferable. 
+DRAFT
+
+19 
+ 
+ 
+4-3-20 Other 
+When shooting at differing shutter speeds, preferably no measurement conditions other than lighting 
+will be changed. Conditions that may result in questionable measurement results shall be avoided. 
+DRAFT
+
+20 
+ 
+4-4 Measurement Procedures 
+ 
+4-4-1 Measurement of Intrinsic image degradation amount: 
+1) Make preparations on the basis of environment settings described in 4-2 and 4-3; 
+2) Mount the camera to be measured on the vibratory apparatus; 
+3) Turn the power of the camera to be measured ON. For cameras mounted with a zoom lens, set 
+the lens to the focal length for image stabilization performance measurement. Here, in 
+accordance with the image aspect ratio of the camera to be measured, adjust the shooting 
+distance and the position of the camera to be measured or the position of the CIPA handheld 
+blur measurement chart so that the portion enclosed by the frame indicating the corresponding 
+aspect ratio in Figure 4-2-1a fills the entire screen during shooting; 
+4) The shutter speed shall be set around ”1/ focal length (35 mm film equivalent)”;  
+5) Start shooting with the vibratory apparatus stopped, shooting at least ten images. While there is 
+no specified upper limit for number of images taken, all images shall be used without selecting 
+only those that are desirable. Image stabilization is to be turned OFF, unless there is no OFF 
+setting. It is recommended to use a remote release, remote control or similar device if possible. 
+6) Reduce the shutter speed sequentially by at most one stop at a time. Continue shooting in like 
+fashion until the necessary and sufficient shutter speed is attained. 
+7) The intrinsic image degradation amount shall be measured at the center and, if a performance 
+description at each corner of the image is required, at each of the four positions at image height 
+60%. 
+The shooting environment and camera settings in 4-4-1 are generally not to be changed from the 
+Measurement of the Total Image Degradation Amount of 4-4-2 and 4-4-3. 
+ 
+4-4-2 Measurement of Total Image Degradation Amount (for 4-2-6 Selection Criteria I and II): 
+1) Make preparations on the basis of the environment setup shown in 4-2 and 4-3; 
+2) Mount the camera to be measured on the vibratory apparatus; 
+3) Turn the power of the camera to be measured ON. For cameras mounted with a zoom lens, set 
+the lens to the focal length for image stabilization performance measurement. Here, in 
+accordance with the image aspect ratio of the camera to be measured, confirm, if 
+necessary, the shooting distance as well as the position of the camera to be measured or the 
+position of the CIPA handheld blur measurement chart so that the portion enclosed by the frame 
+indicating the corresponding aspect ratio in Figure 4-2-1a fills the entire screen during shooting; 
+Further, shutter speed shall be set such that the measured handheld blur amount is estimated to 
+be at or around the determination level for image stabilization performance mentioned below. 
+After setting is completed, turn the power OFF once;  
+DRAFT
+
+21 
+ 
+4) Activate the vibratory apparatus using the vibration waveform stipulated in 4-2-6. Here, the 
+vibratory apparatus should remain continuously activated until Step 8) below is completed.  If 
+the vibratory apparatus deactivates in the middle due to its specification, resume vibration 
+immediately; 
+5) While vibrating, turn the power of the camera to be measured ON again at unspecified timing.  
+If the settings in 3) above are changed, reset them as soon as possible; 
+6) After steps 1) to 5) above are completed, with image stabilization ON for the camera to be 
+measured, turn the power ON and, once shooting is enabled, start shooting within three seconds. 
+Images shall be shot at an interval of approximately one second for a total of 10 shots. Turn the 
+power OFF after shooting is finished; 
+7) Repeat the Steps 5) and 6) and take 200 or more shots. While there is no specified upper limit for 
+number of images taken, all images shall be used without selecting only those that are desirable. 
+Note that the shooting operation is not to affect the vibrating state. Where permitted, use of a 
+remote release or a remote control is desirable; 
+8) Reduce or increase the shutter speed by at most one stop at a time and repeat Steps 3) to 7) above; 
+and 
+9) Finish measurement when two measurement results are obtained: the slowest shutter speed at 
+which the measured handheld blur amount does not exceed the determination level for image 
+stabilization performance, and the fastest shutter speed at which it exceeds the determination 
+level for image stabilization performance. 
+ 
+4-4-3 Measurement of Total Image Degradation Amount (for 4-2-6 Selection Criterion III): 
+1) Make preparations on the basis of the shooting environment given in 4-2 and 4-3; 
+2) Mount the camera to be measured on the vibratory apparatus; 
+3) Turn the power of the camera to be measured ON. For cameras mounted with a zoom lens, set 
+the lens to the focal length for image stabilization performance measurement. Here, in 
+accordance with the image aspect ratio of the camera to be measured, confirm, if 
+necessary, the shooting distance as well as the position of the camera to be measured or the 
+position of the CIPA handheld blur measurement chart so that the portion enclosed by the frame 
+indicating the corresponding aspect ratio in Figure 4-2-1a fills the entire screen during shooting; 
+Further, shutter speed shall be set such that the measured handheld blur amount is estimated to 
+be at or around the determination level for image stabilization performance mentioned below. 
+After setting is completed, turn the power OFF once; 
+4) Activate the vibratory apparatus using the vibration waveform stipulated in 4-2-6. Here, the 
+vibratory apparatus should remain continuously activated until Step 8) below is completed.   If 
+the vibratory apparatus deactivates in the middle due to its specification, resume vibration 
+DRAFT
+
+22 
+ 
+immediately; 
+5) While vibrating, turn the power of the camera to be measured ON again at unspecified timing.  
+If the settings in 3) above are changed, reset them as soon as possible; 
+6) After steps 1) to 5) above are completed, with image stabilization ON for the camera to be 
+measured, turn the power ON and, once shooting is enabled, start shooting within three seconds. 
+Images shall be shot at an interval of approximately one second for a total of 10 shots. Turn the 
+power OFF after shooting is finished; 
+7) Repeat Steps 5) and 6) using two kinds of waveforms, and take 100 or more shots for each 
+waveform. While there is no specified upper limit for number of images taken, all images shall 
+be used without selecting only those that are desirable. Note that the shooting operation is not 
+to affect the vibrating state. Where permitted, use of a remote release or a remote control is 
+desirable; 
+8) Reduce or increase the shutter speed by at most one stop at a time and repeat Steps 3) to 7) above; 
+and 
+9) Finish measurement when two measurement results are obtained: the slowest shutter speed at 
+which the measured handheld blur amount does not exceed the determination level for image 
+stabilization performance, and the fastest shutter speed at which it exceeds the determination 
+level for image stabilization performance. 
+ 
+4-4-4 Action when Total Image Degradation Amount at Image Height 60% Is Not Measurable 
+ If, due to the long focal length of the lens, the position of image height 60% on the handheld blur 
+measurement chart during excitation is outside the screen or close to the screen edge, making 
+measurement not possible, exclude photographs not measurable at the position of image height 60% 
+on the handheld blur measurement chart; then it is recommended to take additional photographs until 
+at least 200 measurable photographs are obtained for selection criteria I and II, or additional 
+photographs may be taken until at least 100 measurable photographs each are obtained for selection 
+criteria III using two kinds of waveforms and to calculate the total image degradation amount using 
+those photographs. However, if the number of additional shots is large, the measurement at image 
+height 60% may be canceled. (Refer to the explanation provided in 6-26.) 
+ 
+4-5 Calculation of Image Stabilization Performance  
+ 
+4-5-1 Calculation of Basic Values Required to Calculate Image Stabilization Performance 
+Six quantitative values are used to calculate image stabilization performance: intrinsic image 
+degradation amount, theoretical handheld blur amount, reference image degradation amount, 
+measured image degradation amount, reference handheld blur amount, and measured handheld blur 
+DRAFT
+
+23 
+ 
+amount. 
+The main objectives of calculations are: 
+a) To remove the effects of image degradation, which is included in the total image degradation 
+amount as measured in 4-4-2 and 4-4-3 and caused by factors other than handheld blur. 
+b) To allow for calculation of image stabilization performance according to this standard even for 
+cameras incapable of turning image stabilization OFF. 
+For further detail, see ”6. Explanation.” Methods of calculating these values will be shown below. 
+ 
+1) Intrinsic image degradation amount 
+Intrinsic image degradation amount is quantified from the image taken according to the method 
+described in 4-4-1. Specifically, the square root of the sum of the squares of the horizontal and vertical 
+image degradation amounts as obtained from each image taken shall be calculated, and then the total 
+of such values is averaged by the number of shots. If the averaged intrinsic image degradation amount 
+is in pixels, it shall be converted into the 35 mm film equivalent intrinsic image degradation amount 
+[µm] according to the method described in 4-5-2 below. However, values that are clearly questionable 
+in the results of the image degradation amount measurement shall not be used. At least 10 values are 
+to be used in calculating the average. 
+ 
+2) Theoretical handheld blur amount 
+Theoretical handheld blur amounts are to be calculated for each shutter speed using the following 
+equation. Given the different average vibration angles for selection criteria I, II and III as described in 
+4-2-6 Vibration Waveform, note that the amount corresponding to the vibration waveform used in the 
+measurement shall be employed. First, the yaw and pitch theoretical handheld blur amounts shall be 
+calculated. This yaw/pitch theoretical handheld blur amount is proportional to the 35mm film 
+equivalent focal length and the yaw/pitch average vibration angle. 
+ 
+Yaw/pitch theoretical handheld blur amount [μm] = 35mm film equivalent focal length f [mm] × tan 
+θyp × 1000 
+θyp: Yaw/pitch average vibration angle 
+ 
+If the 35mm film equivalent focal length is unknown, the conversion factor (fr) may be 
+used. 
+Yaw/pitch theoretical handheld blur amount [μm] = conversion factor (fr)  [mm] x tan 
+DRAFT
+
+24 
+ 
+θyp x1000 
+ 
+ 
+Figure 4-5-1a Each factor for obtaining the conversion factor (fr) 
+ 
+ 
+Figure 4-5-1b Shooting Distance (a) 
+ 
+Next, the roll theoretical handheld blur amount shall be calculated. This roll theoretical handheld 
+Position at image height 60% 
+Actual chart length 432mm 
+(c) Image length [pixels] 
+(d) Image height [pixels] 
+(b) Chart standard 
+length [pixels] 
+(e) Standard CIPA handheld blur measurement chart length 
+(Actual chart length ＝ 288ｍｍ） 
+CIPA Handheld Blur Measurement Chart 
+Camera to be measured 
+(a) Shooting distance  
+(m, distance from chart to rotation axis of vibratory apparatus) 
+Conversion Factor (fr) = Shooting Distance (a)[m] x 
+𝐶𝐶ℎ𝑎𝑎𝑎𝑎𝑎𝑎 𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠 𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙ℎ (𝑏𝑏)[𝑝𝑝𝑝𝑝𝑥𝑥𝑥𝑥𝑥𝑥𝑥𝑥]
+𝐶𝐶ℎ𝑎𝑎𝑎𝑎𝑎𝑎 𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠𝑠 𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙𝑙ℎ (𝑒𝑒)[𝑚𝑚𝑚𝑚] x 
+√242+362[𝑚𝑚𝑚𝑚]
+ඥ𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼 𝑤𝑤𝑤𝑤𝑤𝑤𝑤𝑤ℎ (𝑐𝑐)2+𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼𝐼 ℎ𝑒𝑒𝑒𝑒𝑒𝑒ℎ𝑡𝑡 (𝑑𝑑)2[𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝𝑝] x 106 
+DRAFT
+
+25 
+ 
+blur amount is proportional to the 35mm film equivalent distance from the center of the image to the 
+measurement point and the roll average handheld blur amount. The peripheral measurement points are 
+positions at image height 60%. At the center, L = 0; therefore, the roll theoretical handheld blur amount 
+is 0. Further, there is no relationship with the 35mm film equivalent focal length. 
+Roll theoretical handheld blur amount [μm] = 35mm film equivalent distance from center of image to 
+measurement point L [mm] × tan θr × 1000 
+θr: Roll average vibration angle 
+L: 0mm at center, 12.980mm at 35mm film equivalent image height 60%. 
+ 
+Lastly, the theoretical handheld blur amount is obtained by the square root of the sum of the squares 
+of the yaw/pitch theoretical handheld blur amount and the roll theoretical handheld blur amount. 
+ 
+3) Reference image degradation amount 
+Reference image degradation amount is calculated using the following equation. Note that values at 
+the same shutter speed shall be used for the intrinsic image degradation amount and the theoretical 
+handheld blur amount. 
+2
+2
+)
+Amount[um]
+Blur
+Motion
+l
+Theoretica
+(
+)
+Amount[um]
+Offset
+Bokeh
+(
+Amount[um]
+Bokeh
+ive
+Comprehens
+Estimated
++
+=
+ 
+ 
+4) Total Image Degradation Amount 
+Measured image degradation amount is quantified from the image taken according to the methods 
+described in 4-4-2 and 4-4-3. Specifically, the square root of the sum of the squares of the horizontal 
+and vertical image degradation amounts as obtained from each image taken shall be calculated, and 
+then the total of such values is averaged by the number of shots. If the averaged intrinsic image 
+degradation amount is in pixels, it shall be converted into the 35 mm film equivalent measured 
+intrinsic image degradation amount [μm] according to the method described in 4-5-2 below.  
+This quantification shall be performed at the center and, if a performance description of image 
+Theoretical handheld blur amount [μm] =  
+(Yaw/pitch theoretical handheld blur amounts [μm])2 + (Roll theoretical handheld blur amount 
+DRAFT
+
+26 
+ 
+height at the corner of the image is required, performed at each of the four positions at image height 
+60% as well. 
+However, values that are clearly questionable in the results of the image degradation amount 
+measurement shall not be used. At least 200 values shall be used to calculate averages for 4-4-2, and 
+at least 100 shall be used for each case in 4-4-3. 
+ 
+5) Reference Handheld Blur Amount 
+Reference handheld blur amount is calculated using the following equation. Note that the reference 
+image degradation amount and the intrinsic image degradation amount shall be values measured at the 
+identical shutter speed. Factors that may affect images taken, such as ISO sensitivity, shall be identical. 
+ 
+Reference handheld blur amount [µm] = Reference image degradation amount [µm] − Intrinsic image degradation 
+amount [µm] 
+ 
+6) Measured Handheld Blur Amount 
+Measured handheld blur amount is calculated using the following equation. Note that the total image 
+degradation amount and the intrinsic image degradation amount are to be measured at the same shutter 
+speed. Factors that may affect images taken, such as ISO sensitivity, shall be identical. If the measured 
+handheld blur amount becomes a negative value, the value shall be 0 µm. 
+ 
+Measured Handheld Blur Amount [µm] = Total image degradation amount [µm] - intrinsic 
+image degradation amount [µm] 
+ 
+This calculation shall be performed at the center and, if a performance description of image height 
+at the corner of the image is required, performed at each of the four positions at image height 60% as 
+well. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+DRAFT
+
+27 
+ 
+ 
+Figure 4-5-1c Average Vibration Angle of Composed Yaw/Pitch Component 
+ 
+ 
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+1/2000
+1/1000
+1/500
+1/250
+1/125
+1/60
+1/30
+1/15
+1/8
+1/4
+0.5'
+1'
+2'
+4'
+8'
+15'
+30'
+Average vibration angles
+[°]
+Shutter speeds [sec]（display values）
+Average vibration angles of composed yaw and pitch components
+Selection Criterion I
+Selection Criterion II
+Selection Criterion III
+DRAFT
+
+28 
+ 
+ 
+Figure 4-5-1d Average Vibration Angle of Roll 
+ 
+ 
+ 
+ 
+ 
+ 
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+1/2000
+1/1000
+1/500
+1/250
+1/125
+1/60
+1/30
+1/15
+1/8
+1/4
+0.5'
+1'
+2'
+4'
+8'
+15'
+30'
+Average vibration angles
+[°]
+Shutter speeds [sec]（display values）
+Average vibration angles of roll
+Selection Criterion I
+Selection Criterion II
+Selection Criterion III
+DRAFT
+
+29 
+ 
+ 
+                 Figure 4-5-1e Theoretical Handheld Blur Amount 
+ 
+ 
+ 
+ 
+Figure 4-5-1f Reference image degradation amount 
+ 
+Theoretical  
+Handheld blur Amount 
+Shutter Speed 
+[sec] 
+1/100
+1/2
+ボケオフセット量 
+[sec. 
+1/125 
+1/2
+ボケオフセット量 
+Handheld blur Amount 
+or 
+Mage Degradation Amount
+Intrinsic image  
+degradation amount 
+Reference image degradation amount
+[sec.] 
+1/100 
+1/2 [sec
+1/125 
+1/2 
+Handheld blur Amount 
+or 
+Mage Degradation Amount 
+Theoretical  
+Handheld blur Amount
+Shutter Speed 
+[μm] 
+DRAFT
+
+30 
+ 
+Figure 4-5-1g Measured image degradation amount 
+ 
+ 
+ 
+Measured 
+Comprehensive  
+Mage 
+Degradation
+Amount 
+[sec. 
+1/100 
+1/2[sec] 
+1/125 
+1/2
+Reference image degradation amount 
+Handheld blur Amount 
+or 
+Mage Degradation Amount 
+Shutter Speed
+Theoretical  
+Handheld blur Amount
+Intrinsic image  
+degradation amount 
+[μm] 
+DRAFT
+
+31 
+ 
+4-5-2 Method of Converting Intrinsic Image Degradation Amount and Measured Image Degradation 
+Amount into 35 mm Film Equivalent Values 
+If the units for intrinsic image degradation amount and total image degradation amount are left as 
+the number of pixels, image stabilization performance cannot be determined. Thus, a method of 
+conversion into 35 mm film equivalent values (the unit is µm) is described below. 
+ 
+Value on 35 mm film equivalent [µm] = Intrinsic Image Degradation Amount (or Total image 
+degradation amount)[pixel] × (Diagonal Length of one Frame of 35 mm Film[µm]/ Diagonal 
+Length of Taken Image[pixel]) 
+ 
+1) Diagonal Length of one Frame of 35 mm Film 
+One frame of 35 mm film is 24 mm in the vertical direction, and 36 mm in the horizontal 
+direction. Accordingly, the diagonal length can be calculated as follows: 
+ 
+1000
+36
+24
+Length[um]
+Diagonal
+2
+2
+×
++
+=
+ 
+ 
+2) Diagonal Length of Image Taken 
+Diagonal Length of Image Taken [pixels] can be calculated as follows: 
+ 
+2
+2
+)
+Direction
+Horizontal
+in
+Pixels
+Recorded
+of
+Number
+the
+(
+)
+Direction
+Vertical
+in
+Pixels
+Recorded
+of
+Number
+the
+(
+l]
+Taken[pixe
+Image
+of
+Length
+Diagonal
++
+=
+ 
+ 
+ 
+4-5-3 Image Stabilization Performance Calculation 
+Image stabilization performance is calculated on the basis of the reference handheld blur amount 
+and measured handheld blur amount from the values calculated in 4-5-1. The image stabilization 
+performance at the center shall be calculated using the reference handheld blur amount and the 
+measured handheld blur amount at the center. If a performance description of image height at the 
+corner of the image is required, the average value of the four positions at image height 60% shall be 
+used as the image stabilization performance at the position of image height 60%. The average value 
+of the four positions may be the number of stops obtained from the average of the measured handheld 
+blur amounts at the four positions or the average of the number of stops obtained at each of the four 
+positions. The number of stops at each of the four positions obtained in the process shall have a large 
+DRAFT
+
+32 
+ 
+enough number of decimal places to minimize the error when the number of stops is set to a 0.5 stop 
+increment after averaging. In this method, difference between shutter speeds where both reference 
+handheld blur amount and measured handheld blur amount are at the determination level for image 
+stabilization performance is calculated as a stop number (0.5 stop increment and fractions less than 
+0.5 stop are dropped). 
+ 
+ 
+Figure 4-5-3a Image stabilization performance 
+ 
+Both reference handheld blur amount and measured handheld blur amount are discretely acquired 
+at intervals of at most one stop. Accordingly, these amounts are calculated from the two shutter speeds 
+on either side of the determination level for image stabilization performance. 
+Using Figure 4-5-3b as an example, SS_OFF, where the reference handheld blur amount becomes 
+the determination level for image stabilization performance, is calculated by linearly interpolating the 
+intersection on the logarithmic axis between the determination level for image stabilization 
+performance and the line connecting reference handheld blur amount SS1 and reference handheld blur 
+amount SS2. 
+Likewise, SS_ON, where the measured handheld blur amount becomes the determination level for 
+image stabilization performance, is calculated by linearly interpolating the intersection on the 
+logarithmic axis between the determination level for image stabilization performance intersection and 
+the line connecting measured handheld blur amount SS3 and measured handheld blur amount SS4. 
+The difference between SS_OFF and SS_ON will give the number of stops of the image 
+1/100
+[sec.]
+1/2
+1/125 
+[sec 
+1/2
+Intrinsic image  
+degradation amount 
+Handheld blur amount 
+or 
+Mage Degradation Amount 
+Measured handheld blur amount 
+Determination level for 
+image stabilization 
+performance 
+Shutter Speed 
+[μm] 
+Reference handheld blur amount 
+Image stabilization performance
+DRAFT
+
+33 
+ 
+stabilization performance. 
+ 
+ 
+Figure 4-5-3b Image Stabilization Performance Calculation Method 
+ 
+ 
+SS1
+SS2 
+SS3
+SS4
+SS_OFF
+SS_ON 
+SS1
+SS2 
+SS3
+SS4
+SS_OFF
+SS_ON 
+Shutter Speed
+Reference handheld blur amount
+Measured handheld blur amount 
+Determination level for 
+image 
+stabilization 
+performance  
+[μm] 
+Image stabilization performance (Stop) 
+Handheld blur 
+amount 
+DRAFT
+
+34 
+ 
+5. Description Method 
+5-1 Overview 
+This chapter specifies the description methods. 
+In the establishment of this standard, two vibration waveforms (WB-H and WB-L) are specified 
+which quite faithfully simulate characteristics of camera shake as induced by handheld shooting. 
+These two vibration waveforms were developed by analyzing extensive measurement data and 
+adding further theoretical considerations. 
+In real situations, however, shooting generally starts by taking the camera out of a pocket or bag, 
+adjusting certain settings, determining the shot composition by looking through a viewfinder or LCD 
+monitor, and then pressing the shutter button. Thus, cameras tend to be subjected to large vibrations 
+and shaking other than camera shake that arise during shooting. For some cameras, such factors may 
+adversely affect the image stabilization performance at the instant of shooting which this standard is 
+intended to address. Still, faithfully reproducing the adverse effect such vibrations have on 
+measurements is not easy under this standard using a vibratory apparatus. It is also technically possible 
+to produce a camera that is intentionally designed to generate favorable measurement results without 
+regard to practicality with special settings that are adapted to the characteristics of the camera vibration 
+waveforms specified in this standard. 
+Image stabilization performance in such cameras would be significantly lower than presented in the 
+brochure or other documentation in actual handheld shooting. Accordingly, if the image stabilization 
+performance for such cameras is presented in their brochures or the like as measured under this 
+standard without modification, it would be misleading and detrimental to users. Therefore, suppliers 
+shall take great care not to make any presentation of image stabilization performance that may be 
+misleading or detrimental to users. If the image stabilization performance presented in the brochure or 
+the like is only available under specific conditions, such conditions shall be expressly stated unless 
+such conditions or facts are easily attainable by users from other information. 
+ 
+Performance and other specifications of the camera shall be measured according to the setup given 
+in 4. Measurement Method in this standard and described based on the specifications in 5. Description 
+Method. Here, description of measurement conditions and other information may be omitted except 
+where mandatory. 
+Description of values measured using methods other than those in this standard is not prohibited, 
+but such descriptions shall be made less prominently and measurement conditions shall be described. 
+If a numerical value to be described is an integer, its fractional portion may be omitted, 
+irrespective of digits specified for each item. (Example: 2.0 stops ⇒ 2 stops) 
+Specific names, designations, Japanese long-sound symbols, and distinctions between single-byte 
+and double-byte expressions may be used in customary expressions or names used by the suppliers or 
+DRAFT
+
+35 
+ 
+measurers provided that they do not cause misunderstanding. It shall be noted that:  
+Items clearly specified to be uniformly used and names defined in this standard shall follow such 
+specifications; and names that may be confused with those defined in this standard shall not be used 
+under a different definition. 
+ 
+The method of describing image stabilization performance in brochures shall be as follows. 
+Image stabilization performance shall be described using "stops." Values shall be rounded to the 
+nearest 0.5-stop (e.g., 2.7 stops → 2.5 stops) and described as shown in the following example. Also, 
+image stabilization performance may be described for multiple focal lengths. Here, 
+a) The factory default setting is recommended for image stabilization mode. When image 
+stabilization performance is described by itself in this mode, the name of the image 
+stabilization mode used in the measurement may be omitted. 
+b) When using an image stabilization mode other than the factory default setting, the name of the 
+image stabilization mode used for measurement shall be clearly described. 
+c) For zoom lenses, the focal length (35 mm film equivalent) at which measurement is made or 
+information replacing the focal length (such as “telephoto end”) shall clearly be described. 
+d) If the image stabilization performance presented is only available under specific conditions, 
+such conditions shall be expressly stated unless such conditions or facts are easily attainable by 
+users from other information. 
+e) When using the measurement methods of this standard to measure image stabilization for other 
+than yaw, pitch and roll, take care not to mix yaw/pitch/roll corrections with corrections for 
+other axes in the measurement results. 
+f) When denoting image stabilization for axes other than yaw, pitch and roll, either clearly state 
+that the results were measured using proprietary measuring methods not conforming to CIPA 
+standards, or add other expressions to that effect. 
+g) In specification tables or brochure descriptions, the presence/absence of a roll image stabilizer 
+shall be clearly described. 
+h) The fact that measurements were made on the basis of this standard (CIPA Standard DC-X011–
+2024) shall be clearly indicated. If there is no risk of confusion with other CIPA standards, 
+such an abbreviated description as CIPA2024 compliant is allowed to be used. 
+ 
+Note: Rules for description method of electronic image stabilization systems and of hybrid image 
+stabilization systems that use both electronic and optical stabilization are specified in CIPA DCG-007 
+Description Method for Image Stabilization Performance of Digital Cameras (Electronic/Hybrid 
+Systems). 
+ 
+DRAFT
+
+36 
+ 
+5-2 Performance Description of Lens Integrated Camera with Image Stabilization Mechanism 
+5-2-1 Lens Integrated Camera with Image Stabilization in Roll Direction 
+Provisions 
+The number of stops of image stabilization performance both at the center and at image height 60% 
+shall be listed. 
+However, if 4-4-4 Action when Total Image Degradation Amount at Image Height 60% Is Not 
+Measurable of 4 Measurement Method is applicable and the measurement at image height 60% is 
+canceled, only the number of stops of the image stabilization performance at the center shall be 
+presented; then an explanation indicating that measurement of the number of stops at image height 
+60% image height was not taken shall be provided. 
+In specification tables or brochure descriptions, the presence of a roll image stabilizer shall be 
+clearly described. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops and Corner 4 stops (yaw/pitch/roll 
+performance, 5-axis image stabilization, IS auto of image stabilization mode at focal length of 
+55mm (35mm film equivalent: 85mm), CIPA2024 compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops and Corner 4 stops (yaw/pitch/roll performance, yaw/pitch/roll/shift image 
+stabilization at a wide-angle end) 
+Center 6 stops and Corner 5.5 stops (yaw/pitch/roll performance, yaw/pitch/roll/shift image 
+stabilization at a telephoto end), CIPA2024 compliant 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops and Corner 4 stops (yaw/pitch/roll 
+performance, 5-axis image stabilization, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops and Corner 4 stops* (yaw/pitch/roll 
+performance: CIPA2024 compliant)  
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+    yaw/pitch/roll/shift image stabilization 
+ 
+Description Example 5: When measurement at corners canceled 
+DRAFT
+
+37 
+ 
+・Image stabilization performance: Center 5 stops, not measured at corner (yaw/pitch/roll 
+performance, 5-axis image stabilization, IS auto of image stabilization mode at focal length of 
+600mm (35mm film equivalent: 900mm), CIPA2024 compliant) 
+ 
+ 
+5-2-2 Lens Integrated Camera with Image Stabilization in Yaw/Pitch Directions and without 
+Image Stabilization in Roll Direction 
+Provisions 
+The number of stops of image stabilization performance at the center shall be described. 
+In specification tables or brochure descriptions, the absence of a roll image stabilizer shall be clearly 
+indicated. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, 2-axis image 
+stabilization, IS auto of image stabilization mode at focal length of 55mm (35mm film 
+equivalent: 85mm), CIPA2024 compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops(yaw/pitch performance, yaw/pitch/shift image stabilization at focal length of 
+55mm (35mm film equivalent: 85mm)) 
+Center 6 stops (yaw/pitch performance, yaw/pitch/shift image stabilization at focal length of 
+200mm (35mm film equivalent: 300mm)), CIPA2024 compliant 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, yaw/pitch/shift image 
+stabilization, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops* (yaw/pitch performance: CIPA2024 
+compliant) 
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+    yaw/pitch/shift image stabilization 
+ 
+ 
+DRAFT
+
+38 
+ 
+5-3 Performance Description of Camera Body with Image Stabilization Mechanism 
+5-3-1 Camera Body with Image Stabilization in Roll Direction 
+Provisions 
+The number of stops of image stabilization performance both at the center and at image height 60% 
+shall be listed. 
+However, if 4-4-4 Action when Total Image Degradation Amount at Image Height 60% Is Not 
+Measurable of 4 Measurement Method is applicable and the measurement at image height 60% is 
+canceled, only the number of stops of the image stabilization performance at the center shall be 
+presented; then an explanation indicating that measurement of the number of stops at image height 
+60% image height was not taken shall be provided. 
+Lenses capable of utilizing the image stabilization performance shall be listed together by model 
+name. 
+In specification tables or brochure descriptions, the presence of a roll image stabilizer shall be 
+clearly described. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops and Corner 4 stops (yaw/pitch/roll 
+performance, 5-axis image stabilization with AB lens, IS auto of image stabilization mode at 
+focal length of 55mm (35mm film equivalent: 85mm), CIPA2024 compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops and Corner 4 stops (yaw/pitch/roll performance, yaw/pitch/roll/shift image 
+stabilization with AB lens at focal length of 55mm (35mm film equivalent: 85mm)) 
+Center 6 stops and Corner 5.5 stops (yaw/pitch/roll performance, yaw/pitch/roll/shift image 
+stabilization with AB lens at focal length of 200mm (35mm film equivalent: 300mm)), 
+CIPA2024 compliant 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops and Corner 4 stops (yaw/pitch/roll 
+performance, 5-axis image stabilization with EF lens, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops and Corner 4 stops* (yaw/pitch/roll 
+performance: CIPA2024 compliant) 
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+DRAFT
+
+39 
+ 
+    yaw/pitch/roll/shift image stabilization with GH lens 
+ 
+Description Example 5: When measurement at corners canceled 
+・Image stabilization performance: Center 5 stops, not measured at corner (yaw/pitch/roll 
+performance, 5-axis image stabilization with AB lens, IS auto of image stabilization mode at 
+focal length of 600mm (35mm film equivalent: 900mm), CIPA2024 compliant) 
+ 
+ 
+5-3-2 Camera Body with Image Stabilization in Yaw/Pitch Directions and without Image 
+Stabilization in Roll Direction 
+Provisions 
+The number of stops of image stabilization performance at the center shall be described. 
+Lenses capable of utilizing the image stabilization performance shall be listed together by model 
+name. 
+In specification tables or brochure descriptions, the absence of a roll image stabilizer shall be clearly 
+indicated. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, 2-axis image 
+stabilization with AB lens, IS auto of image stabilization mode at focal length of 55mm (35mm 
+film equivalent: 85mm), CIPA2024 compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops (yaw/pitch performance, yaw/pitch/shift image stabilization with AB lens at 
+focal length of 55mm (35mm film equivalent: 85mm)) 
+Center 6 stops (yaw/pitch performance, yaw/pitch/shift image stabilization with AB lens at 
+focal length of 200mm (35mm film equivalent: 300mm)), CIPA2024 compliant 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, yaw/pitch/shift image 
+stabilization with EF lens, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops* (yaw/pitch performance: CIPA2024 
+compliant) 
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+DRAFT
+
+40 
+ 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+    yaw/pitch/shift image stabilization with GH lens 
+ 
+ 
+5-4 Performance Description of Interchangeable Lens with Image Stabilization Mechanism 
+5-4-1 Interchangeable Lens with Image Stabilization in Yaw/Pitch Directions and without Image 
+Stabilization in Roll Direction 
+Provisions 
+The number of stops of image stabilization performance at the center shall be described. 
+Camera bodies capable of utilizing the image stabilization performance shall be listed together by 
+model name. 
+Camera body used for measurement may be taken with or without image stabilization. 
+However, if possible, the image stabilization of the camera body used for measurement 
+be disabled. 
+In specification tables or brochure descriptions, the absence of a roll image stabilizer in the lens shall 
+be clearly stated. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, lens with 2-axis 
+image stabilization, IS auto of image stabilization mode with AB camera at focal length of 
+55mm (35mm film equivalent: 85mm), CIPA2024 compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops (yaw/pitch performance, lens: yaw/pitch image stabilization with AB camera 
+at a wide angle end) 
+Center 6 stops (yaw/pitch performance, lens: yaw/pitch image stabilization with AB camera 
+at telephoto end), CIPA2024 compliant 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, lens: yaw/pitch/shift 
+image stabilization with all cameras, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops* (yaw/pitch performance: CIPA2024 
+compliant) 
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+DRAFT
+
+41 
+ 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+     lens: yaw/pitch/shift image stabilization with AB camera 
+ 
+ 
+5-5 Performance Description for Pairing a Camera Body with Image Stabilization Mechanism 
+and an Interchangeable Lens with Image Stabilization Mechanism 
+5-5-1 Pairing with Image Stabilization in Yaw/Pitch/Roll Directions 
+Provisions 
+The number of stops of image stabilization performance both at the center and at image height 60% 
+shall be listed. 
+However, if 4-4-4 Action when Total Image Degradation Amount at Image Height 60% Is Not 
+Measurable of 4 Measurement Method is applicable and the measurement at image height 60% is 
+canceled, only the number of stops of the image stabilization performance at the center shall be 
+presented; then an explanation indicating that measurement of the number of stops at image height 
+60% image height was not taken shall be provided. 
+The camera body and lens capable of achieving the image stabilization performance shall be listed 
+together by model name. 
+In specification tables or brochure descriptions, the presence of a roll image stabilizer shall be 
+clearly described. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops and Corner 4 stops (yaw/pitch/roll 
+performance, 5-axis image stabilization with AB camera and AB lens, IS auto of image 
+stabilization mode at focal length of 55mm (35mm film equivalent: 85mm), CIPA2024 
+compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops and Corner 4 stops (yaw/pitch/roll performance, yaw/pitch/roll/shift image 
+stabilization with AB camera and AB lens at focal length of 55mm (35mm film equivalent: 
+85mm)) 
+Center 6 stops and Corner 5.5 stops (yaw/pitch/roll performance, yaw/pitch/roll/shift image 
+stabilization with AB camera and AB lens at focal length of 200mm (35mm film equivalent: 
+300mm)), CIPA2024 compliant 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops and Corner 4 stops (yaw/pitch/roll 
+DRAFT
+
+42 
+ 
+performance, 5-axis image stabilization with EF camera and EF lens, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops and Corner 4 stops* (yaw/pitch/roll 
+performance: CIPA2024 compliant) 
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+     yaw/pitch/roll/shift image stabilization with GH camera and GH lens 
+ 
+Description Example 5: When measurement at corners canceled 
+・Image stabilization performance: Center 5 stops, not measured at corner (yaw/pitch/roll 
+performance, 5-axis image stabilization with AB camera and AB lens, IS auto of image 
+stabilization mode at focal length of 600mm (35mm film equivalent: 900mm), CIPA2024 
+compliant) 
+ 
+ 
+5-5-2 Pairing with Image Stabilization in Yaw/Pitch Directions and without Image Stabilization 
+in Roll Direction 
+Provisions 
+The number of stops of image stabilization performance at the center shall be described. 
+The camera body and lens capable of achieving the image stabilization performance shall be listed 
+together by model name. 
+In specification tables or brochure descriptions, the absence of a roll image stabilizer shall be clearly 
+indicated. 
+Description Example 1 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, 2-axis image 
+stabilization with AB camera and AB lens, IS auto of image stabilization mode at focal length 
+of 55mm (35mm film equivalent: 85mm), CIPA2024 compliant) 
+ 
+Description Example 2 
+・Image stabilization performance: 
+Center 5 stops (yaw/pitch performance, yaw/pitch/shift image stabilization with AB camera 
+and AB lens at focal length of 55mm (35mm film equivalent: 85mm)) 
+Center 6 stops (yaw/pitch performance, yaw/pitch/shift image stabilization with AB camera 
+and AB lens at focal length of 200mm (35mm film equivalent: 300mm)), CIPA2024 
+compliant 
+DRAFT
+
+43 
+ 
+ 
+Description Example 3: Prime lenses only 
+・Image stabilization performance: Center 5 stops (yaw/pitch performance, yaw/pitch/shift image 
+stabilization with EF camera and EF lens, CIPA2024 compliant) 
+ 
+Description Example 4: Cameras with image stabilization for other than just yaw/pitch/roll 
+・Image stabilization performance: Center 5 stops* (yaw/pitch performance: CIPA2024 
+compliant) 
+    Reduced to 25% (shift performance: based on in-house measurement methods) 
+    *At focal length of 50mm (35mm film equivalent: 100mm), 
+     yaw/pitch/shift image stabilization with GH camera and GH lens 
+DRAFT
+
+44 
+ 
+6. Explanation 
+ 
+6-1 Background of Specifying Measurement Method 
+This chapter specifies measurement methods in an effort to contribute to sound development within 
+the industry through the realization of fair competition. 
+When measuring image stabilization performance, the most understandable way is to compare the 
+results with image stabilization OFF against those with image stabilization ON and quantitatively 
+describe the difference as the effect of image stabilization. When doing so, the intrinsic image 
+degradation amount is first removed from the figures for both the ON and OFF states before 
+comparison. This allows for image degradation elements caused by factors other than camera shake to 
+be easily removed and produces fairer measurement results. 
+Meanwhile, in the measurement method for this standard, the camera to be measured is vibrated 
+using a vibratory apparatus with the vibration waveforms specified by the standard and prescribed 
+performance. Accordingly, handheld blur amounts with image stabilization OFF should theoretically 
+be similar among cameras, exhibiting only subtle individual differences. Results of measurements for 
+this standard performed on many cameras have confirmed that in actuality, there is no significant 
+difference among cameras. 
+With fully automated cameras already on the market, there are already cameras without a mode 
+where image stabilization is OFF. This makes it difficult to measure all the cameras based on whether 
+image stabilization is ON or OFF. This trend is predicted to grow even further in the future. 
+Considering the errors that occur with measurement and the man-hours involved, completing 
+measurement with image stabilization ON only instead of measuring twice with image stabilization 
+both ON and OFF will cut the chances for measurement errors in half and also reduce the work load. 
+For the above reasons, in this standard, image stabilization performance is calculated from the 
+reference handheld blur amount, which corresponds to measurement results with image stabilization 
+OFF, and measured handheld blur amount, which is the measurement result with image stabilization 
+ON. 
+ 
+ 
+6-2 Vibratory Apparatus 
+In measuring a camera’s image stabilization performance, the most realistic scenario is to shoot the 
+handheld blur measurement chart with the camera by hand. The scale and characteristics of camera 
+shake will vary among different individuals, however, and the same person may even produce different 
+results with a different camera or shooting conditions. 
+To specify the methods for measurement and describe image stabilization performance, such 
+uncertainties shall be eliminated. Using a mechanical device to generate vibration simulating camera 
+DRAFT
+
+45 
+ 
+shake and transmitting the vibration to the camera is an effective means of achieving this affect. Such 
+devices are called vibratory apparatuses. A vibratory apparatus is designed to reproduce camera shake 
+by human hands with an electric signal called a vibration waveform applied to vibrate the movable 
+part of the apparatus. 
+ 
+Figure 6-2-1 Vibratory apparatus 
+ 
+ 
+6-3 Vibration Waveform 
+Preferably, the vibration waveform will be as close as possible to camera shake characteristics. 
+Accordingly, CIPA has collected camera shake frequencies and amplitudes from many people by 
+attaching a sensor to a camera and separating them into yaw, pitch and roll. Vibration waveforms were 
+generated by analyzing the collected data and extracting characteristic frequency and amplitude to 
+synthesize the waveforms. 
+Handheld blur has six directional components in total: yaw, pitch, roll, X, Y, and Z. At a shooting 
+distances of about 20 times the focal length, however, yaw and pitch followed by roll are dominant, 
+making the other directions practically negligible. Thus, waveforms with only three-axis components 
+were adopted. 
+DRAFT
+
+46 
+ 
+ 
+ 
+Figure 6-3a Shake Directions 
+ 
+In the process of analyzing the characteristics of camera shake, the frequency and amplitude of the 
+camera shake have been verified as differing between interchangeable lens cameras and compact 
+cameras. One major factor is the difference in total mass. Accordingly, two types of vibration 
+waveforms have been created to include optimal amplitude and frequency components for both camera 
+segments: WB-H for interchangeable lens cameras and WB-L for compact cameras. 
+In principle, the two waveforms are used for different purposes in carrying out measurements: one 
+for interchangeable lens cameras and the other for compact cameras. However, there are some compact 
+cameras with total mass close to that of interchangeable lens cameras, and further a new category of 
+cameras called non-reflex (mirrorless) cameras have now hit the market. For cameras with a total mass 
+somewhere between that of a compact camera and interchangeable lens camera, using only one of the 
+two waveform types has been confirmed to produce a discrepancy between the measured image 
+stabilization performance and image stabilization performance* as acquired in a shooting experiment 
+with many test subjects (Figure 6-3b). 
+Thus, the type of vibration waveform to use for calculating image stabilization performance is 
+determined by total mass instead of camera category. WB-L is used for total masses of less than 400 
+＋ 
+- 
+Shake in Pitch Direction (Side View)
+＋ 
+- 
+Shake in Yaw Direction (Plane View) 
++ 
+- 
+Shake in Roll Direction (Rear View) 
+DRAFT
+
+47 
+ 
+g, WB-H is used for total masses of 600 g and above, and both of the vibration waveforms are used 
+for cameras between 400 g and 600 g. This is a result of statistical calculation based on results of 
+measurement on many cameras. 
+Taking the weighted average of measurement results according to the total mass when both types 
+of vibration waveforms are used was originally considered, but there was no significant difference in 
+results despite the more complex computation. Thus, a standard arithmetic method was settled upon. 
+* In the experiment, image stabilization performance was measured from images taken with image 
+stabilization ON and with image stabilization OFF. Image stabilization performance was 
+measured according to the method described in 4-4. Performance was calculated by comparing 
+values corresponding to the measured handheld blur amount acquired from images taken with 
+image stabilization ON and with image stabilization OFF at the determination level for image 
+stabilization performance. In the experiment, however, yaw and pitch waveforms were used to 
+calculate the image stabilization performance at the center of the image, and not the roll waveform. 
+ 
+ 
+Fig. 6-3b Test Result 
+手ぶれ補正効果の乖離[段]
+カメラ総質量[g]
+縦軸：「４．測定方法」に基づく手ぶれ補正効果[段] －被験者による撮影実験で得られた手ぶれ補正効果[段]
+WB-L 使用時
+WB-H 使用時
+2波形使用時
+手ぶれ補正効果の乖離[段]
+カメラ総質量[g]
+縦軸：「４．測定方法」に基づく手ぶれ補正効果[段] －被験者による撮影実験で得られた手ぶれ補正効果[段]
+WB-L 使用時
+WB-H 使用時
+2波形使用時
+WB-L 使用時
+WB-H 使用時
+2波形使用時
+Using WB-H 
+Using WB-L 
+Using both 
+waveforms 
+Ordinate: Image stabilization performance [stop] Based on "4. Measurement Method" 
+ - Image stabilization performance in Actual Usage State [stops] 
+Deviation of Image Stabilization 
+Performance [stops] 
+ 
+Total camera weight (g) 
+DRAFT
+
+48 
+ 
+6-4 CIPA Handheld Blur Measurement Chart 
+To facilitate focusing and for general versatility, the CIPA handheld blur measurement chart uses 
+natural images as shown in Figure 4-2-1. 
+ 
+ 
+6-5 Handheld Blur Measurement Software 
+In finding the intrinsic image degradation amount and total image degradation amount, while it is 
+possible, for example, to visually read out the width of the boundary region between the black and 
+white portions of the chart, it is not possible to eliminate variations among measurements. Thus, 
+handheld blur measurement software was developed to eliminate variation and for improved 
+convenience. 
+ 
+ 
+6-6 Shooting Distance 
+In principle, the distance between the handheld blur measurement chart and the camera to be 
+measured when measuring image stabilization performance shall be about 20 times the 35 mm film 
+equivalent focal length. This distance has been calculated in light of practical aspects to minimize 
+doubt about measurement results and the experiment environment. As an example, the shooting 
+distance for a camera with a 35 mm film equivalent focal length of 100 mm is about 2 m. 
+For a wide-angle lens having a 35 mm film equivalent focal length of 24 mm, the shooting distance 
+will be no more than 500 mm. In this situation, the handheld blur measurement chart, vibratory 
+apparatus, and lighting device can interfere, making measurement difficult. Conversely, the shooting 
+distance for a telephoto lens having a 35 mm film equivalent focal length of at least 500 mm would be 
+10 m or more, which could possibly make a shooting site with the proper conditions impractical. 
+In such unavoidable cases, shooting distance may be increased or shortened from 20 times the 35 
+mm film equivalent focal length by the minimum amount required.  
+Chart 
+Shooting Distance ≅ 20× Focal Length 
+Vibratory apparatus 
+DRAFT
+
+49 
+ 
+Figure 6-6 Shooting Distance 
+ 
+6-7 Number of Shots 
+The vibration waveforms shown in 6-3 are used to measure image stabilization performance in this 
+standard. However, there may be image stabilization performance errors due to bias in the data 
+collected if not enough shots are taken. 
+Thus, the specified minimum number of shots for each shutter speed in this standard is 200. 
+Shooting experiments (shooting at a shutter speed of 1/8 second) on many test subjects have 
+statistically revealed that taking roughly 200 images can suppress 95% of the variations in every 
+measurement of total image degradation amount to the determination level for image stabilization 
+performance or less. 
+ 
+ 
+6-8 Determination Level for Image Stabilization 
+With handheld blur amount from images being the variable measured to determine the image 
+stabilization performance, it can be challenging to measure performance when there is only a little 
+image degradation or handheld blur. 
+In photography, the diameter of what is called the circle of confusion is often used for determining 
+image degradation. The largest circle of confusion incapable of determining image degradation and 
+handheld blur is referred to as the permissible circle of confusion. The size of the permissible circle of 
+confusion will differ based on factors such as the size of the picture viewed, viewing distance and the 
+basis for calculation. 
+Thus, a level was derived by experiment that is close to the size of the permissible circle of 
+confusion and leaves no doubts about the performance measurement that is the determination level for 
+image stabilization performance. 
+In recent years, the viewing environment of photographs has become more diverse, no longer being 
+limited to postcard size, and includes A4 or larger prints as well as viewing by computer monitors, 
+smartphones, tablets, and television monitors. With such diversity, photographs and images to be 
+viewed are expanding more than before. 
+Specifically, images were created by enlarging the diameter of the circle of confusion incrementally 
+by computer simulation, and then prints of various sizes of A4 and larger were subjected to panel 
+testing at viewing distances from which the entire image could be seen. Panel tests were conducted 
+using a 24-inch PC monitor as a representative of self-illuminating displays, with the entire image 
+displayed at a normal viewing distance. 
+Generally, sensory evaluations of image quality will have a reference set at a point where at least 
+10% of panelists can recognize the difference in image quality. In the two panel test, approximately 
+DRAFT
+
+50 
+ 
+10% of panelists could determine image degradation or blur in the permissible circle of confusion at 
+a diameter of about 24 μm. 
+The permissible circle of confusion for each viewing device was calculated on the basis of the screen 
+size and viewing distance. That is, given 1 minute as the angle between two points which a person 
+with an eyesight of 1.0 (20/20 vision) is capable of discriminating and 600mm as the viewing distance, 
+for example, then, on the viewing device screen, this is equivalent to: 
+tan (1/60°) × 600 [mm] × 1000 [μm/mm] = 175 [μm] 
+Therefore, image degradation of 175 µm or less on the viewing device display screen can be said to 
+be almost unrecognizable by the viewer. 
+If this viewing device is an A4 print (diagonal length 364mm) and the camera is a 35mm full size 
+(diagonal length 43.3mm) camera, then, on the imaging element,  
+175 [μm] × 43.3 [mm] / 364 [mm] = 21 [μm] 
+is the equivalent image degradation amount. 
+From the above result, the determination level for image stabilization performance was set to 20 
+μm. 
+ 
+ 
+DRAFT
+
+51 
+ 
+ 
+ 
+Figure 6-8a Print Viewing Example 
+ 
+ 
+ 
+Figure 6-8b PC Monitor Viewing Example 
+ 
+ 
+ 
+PC monitor 
+Approx. 600mm~ 
+A4 or larger print 
+DRAFT
+
+52 
+ 
+ 
+ 
+Figure 6-8c A4 Size and 35mm Film 
+ 
+ 
+6-9 Image Stabilization Performance Calculation 
+Generally, the measured handheld blur amount rapidly increases as shutter speeds slow down. 
+Accordingly, the actual handheld blur amount is a curve connecting handheld blur amounts acquired 
+discretely at intervals of at most one stop. While deriving the precise function for this curve would 
+require advanced mathematical techniques, linear approximation does not produce significant error as 
+long as intervals are at most one stop. Further, as the reference handheld blur amount forms a curve 
+similar to that of the measured handheld blur amount, linear approximation of these is expected to 
+have the errors in both cancel each other out and further reduce error. 
+Thus, this standard avoids using a complex curve for calculating image stabilization performance 
+with linear approximation connecting two points with a straight line. 
+ 
+ 
+6-10 Lighting 
+Since the type and color temperature of lighting are unlikely to greatly affect measurement results, 
+no type of lighting is specified. However, the full handheld blur measurement chart shall be evenly lit 
+during measurement. Accordingly, the number of lights, positioning and other layout details will 
+require consideration. 
+Brightness of lighting is to be adjustable in case brightness adjustments are required to change the 
+shutter speed for settings in which shutter speed cannot be changed easily by camera operation. In 
+such cases, combined use with a neutral density (ND) filter can be effective. 
+ 
+ 
+A4 print size 
+Diagonal length 364mm 
+35mm film size 
+Diagonal length 43.3mm 
+1/8.4× 
+DRAFT
+
+53 
+ 
+6-11 Shooting Mode 
+ With regard to the shooting mode for measuring image stabilization performance, while no specific 
+shooting mode is stipulated, shooting modes will preferably be capable of remembering as many of 
+the items specified in 4-3-3 to 4-3-19 as possible and setting them in advance with the power OFF 
+given that shooting shall begin within three seconds after shooting is enabled following power ON.  
+This is required because shooting cannot start immediately if camera settings for measurement are 
+adjusted after the power is turned ON.  
+Next, the option of a mode "allowing for easy changing of the shutter speed" is mentioned. This is 
+recommended to make it easier to change shutter speeds when fulfilling the requirement to measure 
+handheld blur amounts at each shutter speed. 
+Many cameras, however, only have shooting modes such as "Auto" and "Program" that 
+automatically change shutter speed and aperture values according to the shooting environment and 
+state of the subject. For such cameras, measures will be required for changing the shutter speed, such 
+as adjusting the brightness of lighting. 
+ 
+ 
+6-12 Image Quality Mode (Compression Ratio)  
+While no compression ratio is specified, image compression may result in noise effects which raise 
+doubts about the measurement results. Accordingly, a high image quality mode with low compression 
+ratio is preferable. 
+   
+ 
+6-13 Image Quality Mode (Number of Recording Pixels)  
+While no number of recording pixels is specified, fewer recording pixels may degrade resolution to 
+the point that doubts are raised about the measurement results. Accordingly, taking images at the 
+maximum number of pixels offered by the camera as not to impact resolution is preferable. 
+ 
+ 
+6-14 ISO Sensitivity 
+While no ISO sensitivity is specified, the noise effects from shooting at high sensitivity may raise 
+doubts about the measurement results. Accordingly, ISO sensitivity should be set relatively low to 
+prevent noise. 
+However, some cameras do not allow the user to set ISO sensitivity. For such cameras, make every 
+effort not to render questionable measurement results. As noise levels change with ISO sensitivity 
+changes, camera settings should prevent ISO sensitivity changes where possible. 
+ 
+DRAFT
+
+54 
+ 
+ 
+6-15 Flash 
+Flashes may change image quality by emitting light and raise doubts about the measurement results. 
+Many cameras do not allow shutter speed adjustments with the flash activated. Accordingly, 
+measurement shall be made with the flash OFF. 
+ 
+ 
+6-16 Storage Media 
+Since types and capacities of storage media are not likely to raise issues with measurement results, 
+none are specified. However, storage media of extremely small capacity will have to be replaced 
+frequently during measurement and will require data to be deleted. This would be a concern as 
+changing camera settings may result in inconsistent measurements. 
+Accordingly, storage media with sufficiently large capacity, that will not have to be replaced during 
+measurements, are more convenient. 
+ 
+ 
+6-17 Focal Length for Measurements (Cameras Mounted with Zoom Lenses) 
+With optical zoom factors and focal length ranges varying from product to product, not every digital 
+camera can be measured at the same focal length. At first, the possibility of methods of selecting from 
+several predetermined focal lengths at both the wide-angle and telephoto end was considered. Given 
+that some cameras cannot select specific focal lengths, the decision on a focal length for measurement 
+will be left up to suppliers and measurers. Meanwhile, some cameras also offer different image 
+stabilization performance at different focal lengths. For this reason, the focal length for the 
+measurement shall be clearly labeled when listing image stabilization performance. 
+ 
+ 
+6-18 Electronic (Digital) Zoom 
+Electronic (digital) zoom shall not be used as it deteriorates image quality, which may raise doubts 
+about measurement results. 
+ 
+ 
+6-19 Focus Control 
+Whether autofocus (AF) or manual focus (MF) is used, measurements cannot distinguish between 
+handheld blur and the lens being out of focus if the camera is not properly focused on the handheld 
+blur measurement chart. This could possibly raise questions about measurement results. 
+Accordingly, the camera shall be properly focused on the handheld blur measurement chart when 
+DRAFT
+
+55 
+ 
+measuring. 
+ 
+ 
+6-20 White Balance 
+While white balance settings are not specified, shooting with extremely unbalanced color 
+temperature settings could raise questions about measurement results. Accordingly, white balance is 
+to be set appropriately for the light source to be used. 
+ 
+ 
+6-21 Image Aspect Ratio 
+While some cameras are capable of changing the image aspect ratio during imaging, differences in 
+image aspect ratio are unlikely to raise issues with measurement results for image stabilization 
+performance. There is thus no need to specify the image aspect ratio. The factory default setting mode 
+is recommended. 
+ 
+ 
+6-22 Image Stabilization Mode 
+Cameras may have one of several types of image stabilization modes. Some modes keep image 
+stabilization constantly on, while in others image stabilization may only be turned on when the shutter 
+is released. Some even have variable image stabilization characteristics depending on the shooting 
+mode and zoom position. 
+Generally, most cameras will have a factory default auto shooting mode. As suppliers recommend 
+shooting mode to be set to auto, image stabilization modes where the camera operates in this state 
+should be used. 
+In some cases, settings for image stabilization are not available in the factory default shooting mode, 
+or image stabilization modes other than the factory default setting may exhibit higher image 
+stabilization performance at a certain focal length. In these cases, the supplier or measurer is not 
+precluded from selecting the appropriate image stabilization mode. However, if an image stabilization 
+mode other than the factory default setting is used, the name of the image stabilization mode used in 
+measurement shall be clearly listed. 
+ 
+ 
+6-23 Necessity of Measurement at Image Height 60% 
+ If hand-held night shots are taken with a camera that corrects only for yaw and pitch handheld blur, 
+there may still be blur-like image degradation at the corner of the image. In recent years, the range in 
+which AF (auto focus) is possible within an image has expanded, and the main subject is often placed 
+DRAFT
+
+56 
+ 
+in the corner of the screen. 
+Therefore, in addition to measurement at the center of the image, the decision was made to add 
+measurement at positions of image height 60% at the corners of the image. 
+ 
+Camera Shake Characteristics 
+ Camera shake has components in six axes total (yaw, pitch, roll, X, Y, and Z). For the sake of 
+explanation, assume that there is a left-handed coordinate system in three-dimensional space 
+(Cartesian coordinate system with X, Y, and Z axes) and that the optical axis of the imaging lens is 
+coincident with the Z axis. 
+ The X, Y, and Z components are the handheld blur in which reciprocating translational motion 
+occurs in the X-, Y-, and Z-axis directions, respectively. The Z component is the handheld blur in the 
+optical axis direction. The remaining X and Y components are the handheld blur in planes 
+perpendicular to the optical axis. The vertical and horizontal handheld blur together are generally 
+referred to as the shift component or shift handheld blur. 
+ The yaw, pitch, and roll components are the handheld blur in which reciprocating rotational motion 
+occurs about the X axis, Y axis, and Z axis, respectively. The reciprocating rotational motion about the 
+Y axis and the reciprocating rotational motion about the X axis are called the yaw component and the 
+pitch component. The reciprocating rotational motion about the optical axis (Z axis) is called the roll 
+component. 
+ The X, Y, and Z components, when converted to the amounts of handheld blur on an imaging 
+surface, are proportional to the magnification of the image. When the shooting distance is 20 times the 
+focal length or more, the amount of handheld blur decreases considerably, and the yaw, pitch, and then 
+roll components become dominant in the amount of handheld blur on the imaging plane, and the other 
+three axis components of X, Y, and Z can be virtually ignored. 
+ 
+ 
+Figure 6-23a Coordinate System 
+ 
+ 
++X 
++Y 
++Z 
++Pitch 
++Yaw 
++Roll 
+Left-handed coordinate system 
+DRAFT
+
+57 
+ 
+Degree of Image Height Impact on Roll Component 
+ The roll component is a reciprocating rotational handheld blur about the optical axis (Z axis), 
+resulting in a Handheld Blur amount of zero at the center of the image plane (image height 0%). The 
+handheld blur amount then increases in proportion to the image height. 
+In this standard, the vibration waveforms are those of the three axis components of yaw, pitch, and 
+roll. While the number of stops of the image stabilization performance for the yaw and pitch 
+components can be measured at the center of the image plane (image height 0%), measurement of the 
+number of stops of the image stabilization performance for yaw, pitch, and roll components requires 
+measurement at a certain image height at the corners of the image. 
+ 
+ 
+Figure 6-23b Roll Handheld blur Amount at Given Moment 
+ 
+Reason for Measuring Corner of Image at Height 60% 
+ When the positions of main subjects (people, eyes, animals, plants, etc.) were measured in multiple 
+photographs, more than 95% of the subjects were positioned within a radius of image height 60% 
+about the center of the imaging plane. 
+ 
+Figure 6-23c Example of Main Subject Position (Eye Position) 
+Roll Handheld blur amount at a given moment 
+Image height 100% 
+Circle with radius at image height 30% 
+Circle with radius at image height 60% 
+● 
+Image height 100% 
+Image height A% 
+● ● 
+DRAFT
+
+58 
+ 
+ 
+ 
+ 
+Figure 6-23d Distribution of Main Subject Positions 
+ 
+ 
+The decision was therefore made to measure the number of stops of image stabilization performance 
+at two positions: the center of the imaging plane, where many main subjects are present, and at image 
+height 60%, which is an outer edge where main subjects are present. 
+ 
+Reason for Use of Average Value of Number of Stops at Four Corners 
+For the measurement at image height 60%, a total of four locations at points B in Figure 4-23e on 
+diagonal lines are measured, and an average value of the number of stops of the image stabilization 
+performance is used. 
+ 
+ 
+Figure 6-23e Measurement Positions of Number of Stops of Image Stabilization Performance 
+ 
+ 
+ When the remaining handheld blur components following camera based image stabilization is 
+checked, the center of rotation of the roll residual handheld blur is sometimes shifted from the center 
+of the image. As a result, the number of stops of image stabilization performance at the four positions 
+● 
+● 
+● ● ● 
+● 
+● 
+● 
+● 
+● 
+● 
+● ●
+● ● 
+● 
+● 
+● 
+● ● ● 
+● 
+● 
+● 
+● 
+● 
+● 
+● 
+● 
+● 
+●
+● 
+● 
+●
+● ●● 
+●
+● 
+● 
+● 
+● 
+●
+● ● 
+● 
+● 
+● 
+● 
+● 
+Circle with radius at image height 60% 
+● 
+Center of image 
+Circle with radius at image height 60% 
+● 
+Center measurement position 
+Measurement positions B (four) at image height 60% 
+B 
+B 
+B 
+B 
+DRAFT
+
+59 
+ 
+on the diagonal lines at image height 60% may differ in value. To mitigate this variation, the average 
+value of the four locations is used. 
+ As illustrated in the figure below, if the center of rotation of the roll handheld blur of the remaining 
+handheld blur is shifted from the center of the image during roll image stabilization, the remaining roll 
+handheld blur amounts at the four B positions differ, increasing as the distance from the center of 
+rotation of the roll handheld blur of the remaining handheld blur increases. To indicate performance 
+in detail, it would be best to indicate the number of stops of image stabilization performance at the 
+four locations; however, because doing so would result in an increase in number of display values, the 
+decision was made that the average value of the four positions at image height 60% shall be presented. 
+This average value may be the number of stops obtained from the average of the measured handheld 
+blur amounts at the four positions or may be the average of the number of stops obtained at each of 
+the four positions. 
+If the number of decimal places in the number of stops at each of the four positions 
+obtained in the process has large enough to minimize the error when the number of stops 
+is set to a 0.5 stop increment after averaging, the difference between these two averaging 
+methods becomes minute. 
+ 
+Figure 6-23f Example of Shifted Center of Rotation of Remaining Roll Handheld Blur 
+ 
+ 
+6-24 Theoretical Handheld Blur Amount when Yaw/Pitch/Roll Handheld Blur Present 
+As described in 2) Theoretical Handheld Blur Amount of 4-5-1 Calculation of Basic Values 
+Required to Calculate Image Stabilization Performance, the following equality is defined in this 
+standard: 
+ The yaw and pitch vibration waveforms and roll vibration waveform excited by the vibration table 
+are vectors in the same plane when observed on the imaging plane of a camera and, when considered 
+● 
+Center of image 
+Remaining roll handheld blur 
+● 
+Center of rotation of remaining roll handheld blur (example) 
+Theoretical handheld blur amount [μm] =  
+(Yaw/pitch theoretical handheld blur amounts [μm])2 + (Roll theoretical handheld blur amount 
+[μm])2 
+DRAFT
+
+60 
+ 
+in the context of a single image taken at a certain shutter speed, have components that add to and 
+cancel out each other. Therefore, to strictly obtain a theoretical handheld blur amount, preferably 
+simulation is performed for each focal length and each shutter speed using the vibration waveforms. 
+However, the correlation between the yaw/pitch vibration waveforms and the roll vibration waveform 
+is low and, even if the theoretical handheld blur amount is statistically calculated as the square root of 
+the sum of the squares of the yaw/pitch theoretical handheld blur amount and the roll theoretical 
+handheld blur amount, the difference from the value strictly obtained from such simulation is small. 
+ Therefore, in this standard, the theoretical handheld blur amount is determined by the square root of 
+the sum of the squares. The advantage of this method is, as long as there are two tables of numerical 
+values, namely the yaw/pitch average vibration angle and the roll average vibration angle for each 
+shutter speed, the simplicity of calculating the theoretical handheld blur amount at any focal length 
+using a mathematical formula. 
+On the other hand, the method of strictly obtaining the theoretical handheld blur amount by 
+simulation requires the measurer to obtain the theoretical handheld blur amount for each shutter speed 
+at all focal lengths from wide-angle to telephoto. 
+ 
+ 
+6-25 Description Method 
+Meaning of Each Section of Performance Description 
+In this revision, the main section of the performance description example for, for example, a camera 
+body with a yaw/pitch/roll image stabilization mechanism, is A stops at center, B stops at corner 
+(yaw/pitch/roll performance, *). 
+ The words "center" and "corner" written before the number of stops are easy words to indicate the 
+location of the performance measurement within the screen. Center means "performance at the center 
+position of the image at image height 0%" and corner means "performance at a corner position at 
+image height 60%.” 
+ The “yaw/pitch/roll performance” written after “Center A stops and Corner B stops” means that the 
+comprehensive evaluation was for yaw/pitch/roll image stabilization performance.  Evaluation 
+is performed at the center where, although the image stabilization performance of roll 
+cannot be evaluated, many main subjects are placed, and evaluation is performed at the 
+corner to evaluate the image stabilization performance of the three components yaw, 
+pitch, and roll combined. 
+Information such as the camera name, lens name, and focal length is added in * as necessary. 
+ 
+ 
+ 
+DRAFT
+
+61 
+ 
+ 
+ 
+ 
+ 
+Figure 6-25a Explanation of Wording in Performance Description (1) 
+ 
+ 
+The main section of the performance description example of a single imaging lens is Center A stops 
+(yaw/pitch performance, *). 
+Center means performance at center at image height 0%. 
+ The “yaw/pitch performance” written after “Center A stops” means that the evaluation was for 
+yaw/pitch image stabilization performance and conducted only at the center without a roll handheld 
+blur component. General image stabilization mechanisms built into imaging lenses can compensate 
+for yaw/pitch and shift handheld blur, but cannot compensate for roll handheld blur. Therefore, only 
+the center was evaluated and not the corner positions. 
+Information such as the camera name, lens name, and focal length is added in * as necessary. 
+ 
+ 
+Figure 6-25b Explanation of Wording in Performance Description (2) 
+ 
+ 
+Variations of Performance Description Examples in Brochures 
+ Description examples are provided in 5. Description Method. The following are variations based on 
+Center A stops and Corner B stops (yaw/pitch/roll performance, *) 
+Means evaluation was for yaw/pitch/roll image stabilization performance 
+Means performance at center at image height 0% 
+Means performance at corner at image height 60% 
+Center A stops (yaw/pitch performance, *) 
+Means evaluation was for yaw/pitch image stabilization performance 
+Means performance at center at image height 0% 
+DRAFT
+
+62 
+ 
+the description examples. These variations, however, are merely examples and not limitations. 
+ 
+Variation of 5-3-1 Camera Body with Image Stabilization in Roll Direction of 5-3 Camera Body with 
+Image Stabilization Mechanism: 
+ 
+Example of specifying all contents in specification table: 
+Specification Table of Camera B 
+XX 
+XX 
+Image 
+stabilization 
+yaw/pitch/roll/shift image stabilization 
+Image 
+stabilization 
+performance 
+Center 5 stops and Corner 4 stops (yaw/pitch/roll performance, 24-70mm lens, f = 
+70mm, IS auto of image stabilization mode) 
+YY 
+YY 
+ 
+Example specifying contents separately in specification table and description: 
+Specification Table of Camera B 
+XX 
+XX 
+Image 
+stabilization 
+performance 
+Center 5 stops and Corner 4 stops (yaw/pitch/roll performance, 24-70mm lens, f = 
+70mm, IS auto of image stabilization mode) 
+YY 
+YY 
+ 
+Example of specifying all contents in description: 
+ 
+In description: 
+. . . This camera B is equipped with a 5-axis image stabilization mechanism . . .  
+In description: 
+. . . This camera B is equipped with a 5-axis image stabilization mechanism. 
+. . . The image stabilization performance: Center 5 stops and Corner 4 stops with a 24-70mm lens 
+(yaw/pitch/roll performance, f = 70mm, IS auto of image stabilization mode) . . . 
+DRAFT
+
+63 
+ 
+ 
+Variation of 5-4-1 Interchangeable Lens with Image Stabilization in Yaw/Pitch Directions of 5-4 
+Interchangeable Lens with Image Stabilization Mechanism 
+Example of specifying all contents in specification table: 
+Specification Table of Lens A 
+XX 
+XX 
+Image 
+stabilization 
+Yaw/pitch image stabilization 
+Image 
+stabilization 
+performance 
+Center 5 stops (yaw/pitch performance, f = 70mm, IS auto of image stabilization mode 
+with camera B) 
+YY 
+YY 
+ 
+Example specifying contents separately in specification table and description: 
+Specification Table of Lens A 
+XX 
+XX 
+Image 
+stabilization 
+performance 
+Center 5 stops (yaw/pitch performance, f = 70mm, IS auto of image stabilization mode 
+with camera B) 
+YY 
+YY 
+ 
+ 
+Example of specifying all contents in description: 
+ 
+In description: 
+. . . This lens A is equipped with a 2-axis image stabilization mechanism (yaw/pitch image 
+stabilization) . . . 
+In description: 
+. . . This lens A is equipped with a 2-axis image stabilization mechanism. 
+. . . The image stabilization performance: Center 5 stops with camera B (yaw/pitch performance, f = 
+70mm, IS auto of image stabilization mode) . . .  
+DRAFT
+
+64 
+ 
+ 
+Explanation of Performance Description Examples in Brochure of Interchangeable Lens 
+In a brochure of an individual interchangeable lens, only the number of stops of image stabilization 
+performance at the center is described in principle in accordance with the provisions of 5-4 
+Interchangeable Lens with Image Stabilization Mechanism of 5 Description Method. However, the 
+number of stops of image stabilization performance at the center and at image height 60% may be 
+indicated in accordance with the provisions of 5-5 Pairing of Camera Body with Image Stabilization 
+Mechanism and Interchangeable Lens with Image Stabilization Mechanism. 
+Two examples of such descriptions are given below. 
+ 
+Example specifying contents separately in specification table and description: 
+Specification Table of Lens A 
+XX 
+XX 
+Image 
+stabilization 
+Yaw/pitch image stabilization 
+Image 
+stabilization 
+performance 
+Center 5 stops (yaw/pitch performance, f = 70mm, with camera B) 
+YY 
+YY 
+ 
+ 
+Example of specifying all contents in specification table: 
+Specification Table of Lens A 
+XX 
+XX 
+Image 
+stabilization 
+Yaw/pitch image stabilization 
+In description: 
+. . .  
+When this lens A is paired with camera C (equipped with yaw/pitch/roll image stabilization mechanism), 
+the performance is Center 5.5 stops and Corner 4.5 stops (yaw/pitch/roll performance, f = 70 mm), 
+When this lens A is paired with camera D (equipped with 5-axis image stabilization mechanism), the 
+performance is Center 6 stops and Corner 5 stops (yaw/pitch/roll performance, f = 70 mm), 
+. . .  
+DRAFT
+
+65 
+ 
+Image 
+stabilization 
+performance 
+Center 5 stops (yaw/pitch performance, f = 70mm, with camera B), 
+Center 5.5 stops and Corner 4.5 stops (yaw/pitch/roll performance, f = 70mm, with 
+camera C (equipped with yaw/pitch/roll image stabilization mechanism)), 
+Center 6 stops and Corner 5 stops (yaw/pitch/roll performance, f = 70mm, with camera 
+D (equipped with 5-axis image stabilization mechanism)) 
+YY 
+YY 
+ 
+Example of Use of Performance Description 
+ If the number of stops of image stabilization performance are listed as Center A stops and Corner B 
+stops, the photographer can take advantage of the two stop values. 
+For example, if photographing a person at the center of the image and not concerned about handheld 
+blur in the peripheral background or an out-of-focus periphery, the photographer can set the shutter 
+speed with reference to the number of stops of image stabilization performance at the center (A) and 
+take the photograph with minimal handheld blur. 
+ 
+Figure 6-25c Photographing a Person (with Eyes Substantially at Center, and Periphery Out-of-
+Focus) 
+ 
+If photographing a person at the corner of the screen, the photographer can set the shutter speed 
+with reference to the number of stops of image stabilization performance at the corner (B) and take 
+the photograph with minimal handheld blur. 
+● 
+● 
+Circle at image height 60% 
+● 
+● 
+Circle at image height 60% 
+DRAFT
+
+66 
+ 
+Figure 6-25d Photographing a Person (with Eyes at Image Height 60%) 
+ 
+ 
+In landscape photography in which the entire screen is in focus, it is often preferred to take the 
+photograph with minimal handheld blur both at the center of the image and the corner of the image. 
+In this case, the photographer can set the shutter speed with reference to the number of stops of image 
+stabilization performance at the center (A) and at the corner (B) and take the photograph across a wide 
+range of the screen with minimal handheld blur. 
+ 
+ 
+Figure 6-25e Photographing a Landscape (with Entire Screen in Focus at Infinity) 
+ 
+ 
+In this way, the photographer can set an appropriate shutter speed that does not cause noticeable 
+handheld blur of the main subject by using two different numbers of stops of image stabilization 
+performance on the basis of the position (image height) of the main subject. 
+ 
+ 
+6-26 Action when Number of Stops at Image Height 60% Is Not Measurable 
+With a super-telephoto lens of about 800mm (35mm film equivalent), for example, when vibration 
+is started after the center of the image is aligned with the center of the CIPA handheld blur 
+measurement chart, an image may be captured with the center of the image and the center of the chart 
+significantly misaligned. As a result, the position at image height 60% on the chart may be off-screen 
+or close to the edge of the screen, making measurement not possible. 
+ This occurs when the image stabilization operation of the lens or camera is not aligned with the 
+low-frequency, large-amplitude operation of the vibration table. The diagonal measurement positions 
+at image height 60% on the chart tend to be close to the screen edge at the maximum amplitude of 
+pitch handheld blur. The maximum amplitude of pitch handheld blur of the vibration waveform TWB-
+H is approximately ±0.4°. With an image aspect ratio of 3:2, the angles (margin angles) from the 
+Circle at image height 60% 
+DRAFT
+
+67 
+ 
+diagonal positions at image height 60% to the top and bottom edges of the image are calculated to be 
+1.4 degrees at a focal length of 200mm, 0.7 degrees at 400mm, 0.5 degrees at 600mm, and 0.4 degrees 
+at 700mm. Depending on the image stabilization characteristics and exposure timing, the focal length 
+of a lens with a margin angle of less than the maximum amplitude of approximately ±0.4 degrees is 
+700 mm (margin angle: 0.4 degrees) or greater, possibly causing the chart diagonal measurement 
+positions at image height 60% to be off-screen or close to the screen edge, making measurement not 
+possible. 
+In this state, the performance descriptions specified in 5-2 Performance Description of Lens 
+Integrated Camera with Image Stabilization Mechanism, 5-3 Performance Description of Camera 
+Body with Image Stabilization Mechanism, and 5-5 Performance Description of Pairing of Camera 
+Body with Image Stabilization Mechanism and Interchangeable Lens with Image Stabilization 
+Mechanism cannot be listed. 
+On the other hand, with a focal length of 200mm (margin angle: 1.4 degrees) or less, there is enough 
+margin for a maximum amplitude of approximately ±0.4 degrees, never resulting in chart diagonal 
+measurement positions at image height 60% being off-screen or close to the screen edge and the 
+consequential impossibility of measurement. 
+ 
+Examples of Action when Number of Stops at Image Height 60% Is Not Measurable 
+Example 1: 
+If measurement is not possible at image height 60%, measurement can often be carried out by setting 
+the focal length of the lens to be measured to a wider angle. 
+ 
+Example 2: 
+ When 4-4-4 Action when Total Image Degradation Amount at Image Height 60% Is Not Measurable 
+of 4. Measurement Method is applicable, photographs not measurable at image height 60% may be 
+excluded. In this case, additional photographs may be taken until at least 200 measurable photographs 
+are obtained for selection criteria I and II, or additional photographs may be taken until at least 100 
+measurable photographs each are obtained for selection criteria III using two kinds of waveforms, and 
+the total image degradation amount may be calculated using those photographs. 
+However, if the number of additional shots is large, the measurement at image height 60% may be 
+canceled. 
+ If the measurement is canceled, only the number of stops of image stabilization performance at the 
+center of the image shall be listed, and the description shall clearly indicate that the number of stops 
+at image height 60% was not measured, in accordance with 5. Description Method. 
+ 
+ 
+DRAFT
+
+68 
+ 
+6-27 Difference in Number of Stops of Image Stabilization Performance between Center and 
+Corner 
+ The number of stops of image stabilization performance tends to be lower at the corner than at the 
+center. The amount of reduction in the number of stops at the corner relative to the center tends to be 
+smaller for telephoto lenses than for wide-angle lenses. The reason is as follows. 
+ For ease of explanation, description will be made using a wide-angle lens having focal length of 
+24mm and a telephoto lens having focal length of 200mm as examples. 
+ 
+ In principle, there is no roll handheld blur effect at the center. Therefore, the technical difficulty of 
+reducing the 200μm combined yaw and pitch handheld blur amount caused by vibration waveforms 
+to the handheld blur determination level of 20μm, that is, to 1/10, is about the same for both the 24mm 
+wide angle and the 200mm telephoto. 
+ 
+ On the other hand, at the corners (image height 60%), there is a roll handheld blur effect, and the 
+shutter speed corresponding to a 200μm combined yaw, pitch, and roll handheld blur amount caused 
+by vibration waveforms is approximately 1.5 seconds at 24mm and approximately 1/19 seconds at 
+200mm. At this time, the ratio of the roll handheld blur amount to the combined yaw, pitch, and roll 
+handheld blur amount and the roll handheld blur amount are 23% and approximately 57μm at 24mm 
+and 3% and approximately 7μm at 200mm. 
+The yaw and pitch handheld blur amounts are values close to 200μm, and thus the technical 
+difficulty of reducing these amounts to 1/10 is the same as that at the center described above. 
+However, compared to the yaw and pitch handheld blur amounts, the roll handheld blur amounts 
+are as small as 57μm and 7μm, and the technical difficulty of further reducing these small amounts to 
+1/10 is high. 
+ Therefore, even if it is technically possible to reduce the yaw and pitch handheld blur amounts to 
+1/10, it may not be possible to reduce the roll handheld blur amount to 1/10. As a result, the number 
+of stops of image stabilization performance tends to be lower at the corners than at the center. 
+ The roll handheld blur amounts are 57μm at 24mm and already a minute 7μm at 200mm. Therefore, 
+even if the handheld blur amount cannot be reduced to 1/10, the amount of residual handheld blur is 
+very small. Thus, with the roll handheld blur amount at 200mm being small to begin with, the residual 
+handheld blur is very small even if the blur reduction effect is small. Accordingly, at 200mm, compared 
+to 24mm, the reduction in the number of stops of image stabilization performance at the corners tends 
+to be small compared to that at the center. 
+ In other words, the yaw and pitch handheld blur amounts increase in proportion to focal length, but 
+the roll handheld blur amount does not change. As the focal length becomes increasingly telephoto, 
+the shutter speed to be measured increases and the yaw and pitch handheld blur amounts and roll 
+DRAFT
+
+69 
+ 
+handheld blur amount are reduced by the same ratio. Therefore, the roll handheld blur effect is 
+relatively small, and the difference between the numbers of stops at the center and at the corner tends 
+to decrease in the telephoto range. 
+ 
+ 
+Figure 6-27 Example of Difference in Number of Stops of Image Stabilization Performance 
+ 
+ 
+6-28 Vibration Waveforms 
+ The 2024 standard DC-X011-2024 revision adds a roll motion blur component to the vibration 
+waveforms, resulting in the vibration waveforms having the three rotating components of yaw, pitch, 
+and roll. Camera shake caused by the human hand includes components in six axes total (yaw, pitch, 
+roll, X, Y, and Z), but the three X, Y, and Z translational components are not addressed herein. Camera 
+shake has components in six axes total (yaw, pitch, roll, X, Y, and Z). 
+ Ideally, the vibration waveforms should be similar to those of camera shake caused by the human 
+hand. Using advanced measurement technology, CIPA measured the vibration of a handheld camera, 
+analyzed the roll vibration component, and successfully standardized the roll vibration waveform for 
+the vibration table in this revision. This standard makes it possible to induce vibration and take 
+measurements in a state closer to the camera shake caused by the human hand than the 2015 standard 
+DC-001-2015 by using three-axis vibration including yaw and pitch, which are particularly dominant 
+vibration components of the captured image, and roll, a component having the next largest impact. 
+ 
+Reason for Measurement Based on Vibration of All Three Axes 
+ The first reason for measurement based on all three axes is to simulate camera shake in a state closer 
+to that caused by the human hand. Therefore, regardless of the image height of measurement, vibration 
+on the three axes of yaw, pitch, and roll shall be required. 
+ 
+ The second reason is to further include evaluation of roll image stabilization. This evaluation 
+Circle with radius at 
+image height 60% 
+(corner)
+● 
+Center measurement 
+position 
+Example of wide-angle lens 
+Center 5.0 stops 
+Corner 4.0 stops 
+● 
+● 
+Example of telephoto lens 
+Center 5.0 stops 
+Corner 4.5 stops 
+● 
+DRAFT
+
+70 
+ 
+requires measurement at a certain image height, such as image height 60%, with vibration on the three 
+axes of yaw, pitch, and roll. 
+On the other hand, at the center of the image, roll handheld blur does not occur in principle, resulting 
+in the expectation that the number of stops of image stabilization performance would be the same even 
+if the measurement thereof at the center of the image was simplified to measurement based on vibration 
+on the two axes of yaw and pitch instead of the three axes of yaw, pitch, and roll. However, actual 
+measurement, at times, told a different story. 
+One possible factor is the overall difficulty of image stabilization. That is, when only yaw and pitch 
+vibrations are used and not roll vibration, it is only necessary for the sensor to separately detect yaw 
+and pitch motion blur and for the image stabilization mechanism to stabilize the two yaw and pitch 
+components. However, in the case of vibration with the three components of yaw, pitch, and roll, it is 
+necessary for the sensor to separately detect the yaw, pitch, and roll components of the camera shake 
+and for the image stabilization mechanism to stabilize the three components of yaw, pitch, and roll. 
+ In this standard, therefore, regardless of whether image stabilization performance at image height 
+60% is measured or not, the three vibration waveforms of yaw, pitch, and roll shall be simultaneously 
+applied during all measurements. 
+ 
+Explanation of Shift Handheld Blur 
+Current cameras are sometimes equipped with a mechanism configured to reduce handheld blur 
+translating in two axial directions within a plane orthogonal to the optical axis. This handheld blur is 
+referred to as "shift handheld blur.” 
+The impact of shift handheld blur appears at imaging distances closer than about 20 times the 35mm 
+film equivalent focal length, and is even greater at magnifications close to 1x (equal magnification) 
+with lenses called macro lenses or micro lenses. 
+ 
+Why Shift Image Stabilization Was Not Standardized in this Revision 
+In order to properly evaluate shift image stabilization, the shift vibration waveform and imaging 
+magnification shall be appropriately set. With the distance being so close, the measurement accuracy 
+is greatly affected by the positioning accuracy of the camera on the vibration table, the positioning 
+accuracy of the center of rotation of the vibration table, and the positioning accuracy and squareness 
+of the chart. In addition, changes in focus during vibration also impact measurement accuracy. 
+However, at this time, without an evaluation method properly satisfying these conditions, this 
+standard does not incorporate a method for measuring shift image stabilization performance. 
+ 
+ 
+6-29 Difference in Number of Stops of Image Stabilization Performance Between 2015 Standard 
+DRAFT
+
+71 
+ 
+(CIPA DC-011–2015) and 2024 Standard (CIPA DC-X011-2024) 
+ In the 2015 standard (CIPA DC-011-2015), yaw and pitch vibration waveforms were used to 
+measure the number of stops of image stabilization performance at the center of the image at a 
+handheld blur determination level of 63μm. 
+In the 2024 standard (CIPA DC-X011-2024), the roll vibration waveform is newly added to the 
+yaw and pitch vibration waveforms of the 2015 standard to measure the number of stops of image 
+stabilization performance at the center of the image and at image height 60% at a handheld blur 
+determination level of 20μm. 
+ 
+ With the handheld blur determination level being tightened from 63μm to 20μm, the amount of 
+handheld blur in an image shall be reduced on the camera to 20μm or less, possibly changing the 
+number of stops of image stabilization performance measured with the camera. 
+ 
+ Further, with a roll vibration waveform being added to the yaw and pitch vibration waveforms, the 
+three vibration components shall be accurately separated into the yaw, pitch, and roll vibration 
+components and detected on the camera. Thus, while the 2015 standard only required the separate 
+detection of two components, the 2024 standard requires separate detection of three components, 
+which increases technical difficulty and, as a result, is likely to reduce the number of stops of image 
+stabilization performance. 
+ 
+ 
+ 
+DRAFT
+
+72 
+ 
+7. Participating members 
+The bulk of the deliberations over the formulation of the standards described in this document was 
+performed by the Anti-blur Sub-Working Group. 
+The members of the Sub-Working Group are listed below; 
+ 
+Standardization Committee 
+ 
+Technical Working Group 
+ 
+Anti-blur Sub-Working Group 
+ 
+ 
+ 
+DRAFT
+
+73 
+ 
+ 
+Appendix (Informative) 
+ 
+Explanation of Terminology 
+Relating to Handheld Blur for Digital Cameras 
+ 
+A-1 Introduction 
+ 
+CIPA has issued the “CIPA DCG-002-2012 Specification Guideline for Digital Cameras (Revised 
+Version)” as a guideline for describing the specifications of digital cameras in brochures and the like. 
+The document includes definitions of terminology relating to handheld blur, and how it should be used. 
+Such terminology includes “image stabilization” and “blur reduction,” and also “blur suppression,” 
+which is a generic term encompassing the former two expressions. 
+However, at present, it is possible to find examples in brochures and on the websites of suppliers 
+where such expressions relating to handheld blur have been defined differently or without clear 
+distinctions between them. Aside from causing confusion for users, such misuse of terminology 
+prevents fair competition between rival enterprises. 
+For the above reason, this Appendix seeks to systematically reorganize the terminology relating to 
+handheld blur used for digital cameras and provides a definition-based explanation.  
+The same information in this appendix also forms the content of the appendix of “CIPA DCG-007-
+2015 Description method for Image Stabilization Performance of Digital Cameras (Electronic/Hybrid 
+Systems).” 
+ 
+A-2 Basic concept of this Appendix 
+ 
+“CIPA DCG-002-2012 Specification Guideline for Digital Cameras (Revised Version)” contains 
+“Commentary (6)-3. Further clarifications of ‘image stabilizer’ and ‘blur reduction’,” in which 
+examples are provided of how “(a) image stabilizer” and “(b) blur reduction {mode}” as described in 
+“Item 17: Blur Suppression” are respectively used. This appendix reproduces Commentary (6)-3 but 
+provides more, detailed explanation. 
+ 
+A-3 Explanation 
+ 
+In line with the establishment of “CIPA DCG-002-2012 Specification Guideline for Digital Cameras 
+(Revised Version),” “CIPA DCG-007-2015 Description Method for Image Stabilization Performance 
+of Digital Cameras (Electronic/Hybrid Systems),” and this present standard, further clarification is 
+DRAFT
+
+74 
+ 
+given of the definitions of “image stabilization” and “blur reduction.” Also indicated are “terminology 
+relating to blurring,” examples of “output by blur detecting devices,”  definition of the “image 
+stabilizer” function and examples, the definition of “blur reduction” and examples, cases where the 
+image stabilizer function has a different method and subject, and when both the image stabilizer 
+function and blur reduction are present. 
+ 
+A-3-1 Terminology relating to blurring 
+ 
+“Blur” is interpreted as displacement from a given position, and when used as camera terminology, 
+blur can be broadly classified into “handheld blur” and “motion blur”. 
+“Handheld blur” refers to blurring of the subject in shot images as a result of camera movement due 
+to instability of the hand(s) holding the camera. “Motion blur” refers to blurring of the subject in shot 
+images as a result of movement of part or all of the subject during shooting irrespective of whether or 
+not there is handheld blur. 
+Note that although “vibration isolation” is known as a method of preventing shake, “vibration 
+isolation” in used in regard to equipment that prevents vibration from being applied to the camera 
+itself, and is therefore terminology from a different field to image stabilization. 
+ 
+ 
+The tree diagram given above shows terminology relating to blur. The following content about 
+blur suppression is given in the “CIPA DCG-002-2012 Specification Guideline for Digital Cameras 
+(Revised Version),” but here contains more, detailed explanation. 
+ 
+A-3-1-1 Blur suppression 
+The expressions “image stabilizer” and “blur reduction” are generic terms and refer to 
+Blur Suppression 
+Image Stabilization 
+Blur Reduction(using a fast shutter speed with high 
+Sensitivity, selecting an image from plural images, etc. 
+Handheld Blur Correction / 
+Image Stabilization*1 
+Motion Blur Correction*2 
+*1 Optical systems(VAP, lens shift system, sensor shift system, etc. 
+    Electronic systems(image synthesis image restoration, etc.) 
+    Hybrid systems(concurrently using an optical system and an electronic system) 
+*2Electronic systems(image synthesis, tec.) 
+DRAFT
+
+75 
+ 
+the suppression of “handheld blur” and/or “motion blur” by some kind of control means 
+provided in a camera. “Blur suppression” is broadly classified into “image stabilizer” and 
+“blur reduction”. 
+ 
+a) Image stabilizer 
+This refers to a function that uses the output by a blur detection device to correct 
+blurring in output images caused by movement of the camera itself (due to handheld blur 
+or the like) and/or movement of the subject. However, even if the output by a blur 
+detection device is used, systems where shooting is carried out using a fast shutter speed 
+as a result of optimization by an exposure control program and systems where no 
+significant improvement is observed in output images in which handheld blur has been 
+corrected are regarded as b) “blur reduction.” 
+The category “image stabilizer” is divided into “handheld blur correction” and “motion 
+blur correction.” Optical, electronic and hybrid systems exist for “handheld blur 
+correction.” 
+ 
+b) Blur reduction 
+This refers to a function or mode that reduces blurring in output images caused by 
+movement of the subject and/or handheld blur and its main means is using a fast shutter 
+speed as a result of optimization by an exposure control program. Although blur 
+reduction is one method of an exposure control mode and a sensitivity control mode, there 
+are no problems with this function being separately referred to as a blur reduction 
+function or mode. 
+ 
+A-3-2 Examples of “output by blur detection device” 
+ 
+a) Measurement using a gyro-sensor or the like. 
+b) Measurement by comparing images from continuous shooting (motion vectors between 
+continuously shot images or the like) 
+c) Measurement through analysis of blur (image degradation) in single images (calculation of the 
+blur (image degradation function))  
+ 
+A-3-3 Explanation of “image stabilizer” and examples 
+ 
+A-3-3-1 Explanation 
+The image stabilizer function is interpreted here to mean a function that uses the output by a blur 
+DRAFT
+
+76 
+ 
+detection device to correct blurring in output images caused by movement of a camera itself (due to 
+handheld blur or the like) and/or movement of the subject. Accordingly, if there is significant 
+deterioration in image quality as a side effect of correction when no significant correcting effect has 
+been achieved, or when the probability of a correcting effect being obtained is extremely low, it is not 
+possible to regard the technology being used as “image stabilizer” technology. 
+ 
+A-3-3-2 Optical, electronic, and hybrid systems 
+Out of the examples of the image stabilizer function given below in A-3-3-3, a) and b) are called 
+optical systems, while c) to e) are called electronic systems. Systems that use a combination of optical 
+and electronic technology are called “hybrid systems” and usually have characteristics of both types 
+of technology. Examples of hybrid systems are listed below. 
+･ Systems where optical and electronic technology operates simultaneously. 
+･ Systems that appropriately switch between optical and electronic technology according to the 
+shooting conditions and the extent of the handheld blur. 
+･ Systems where correction according to an optical system and correction according to an electronic 
+system are carried out on different axes, with both systems being present. 
+ 
+A-3-3-3 Examples of systems that are considered to be suitable for classification as “image 
+stabilizer” systems. (NB. These are just examples, and the image stabilizer function is not limited 
+to such.) 
+ 
+a) A method where subject displacement in the image caused by handheld blur is corrected by 
+moving part or all of the lens in parallel relative to the image sensor using the output by a blur 
+detection device. 
+b) A method where subject displacement in the image caused by handheld blur is corrected by 
+rotating or moving in a perpendicular direction relative to the optical axis using the output by a 
+blur detection device. 
+c) A method where multiple images with reduced blur are taken at a fast shutter speed and such 
+images are combined (aligned etc.) using the output by a blur detection device to obtain an 
+output image with reduced blur and virtually the same image quality (S/N) as an image shot at 
+the usual shutter speed. 
+d) A method where an image with reduced blur shot at a fast shutter speed and an image shot at the 
+usual shutter speed are combined (aligned etc.) using the output by a blur detection device to 
+obtain an output image with reduced blur and virtually the same image quality (S/N) as an 
+image shot at just the usual shutter speed. 
+e) A method that is based on processing using a point spread function, an inverse filter or the like 
+DRAFT
+
+77 
+ 
+and uses information output by a blur detection device to restore an image with little blur from 
+a shot image. 
+ 
+ 
+A-3-4 Explanation of “blur reduction” and examples 
+ 
+A-3-4-1 Explanation 
+Blur reduction is interpreted here to mean a function or mode of reducing blurring in output images 
+that is caused by movement of the subject and/or handheld blur. It is mainly achieved using a fast 
+shutter speed as a result of optimization by an exposure control program. In this way, since “image 
+stabilization” and “blur reduction” have very different technical aspects, such expressions should not 
+be confused. 
+ 
+A-3-4-2 Characteristics of “blur reduction” 
+Example characteristics of blur reduction are given below. 
+Merits: Since blur reduction can be achieved simply by optimization of an exposure control program, 
+implementation is simple and such technology is also effective against motion blur. 
+Demerits: Since high ISO sensitivity is required in many cases, there is increased noise in the shot 
+images. 
+ 
+A-3-4-3 Difference in image quality between “image stabilizer” and “blur reduction”  
+Fig. 1 shows an example comparison between the blur suppression effects of the image stabilizer 
+function and blur reduction. Although setting the functions of image stabilizer and blur reduction to 
+ON results in a similar reduction in handheld blur, an increase in noise is observed in the image with 
+blur reduction. 
+In this way, since blur reduction is a method that suppresses handheld blur while mainly sacrificing 
+image quality (and S/N in particular), it is appropriate to regard blur reduction as having no image 
+stabilization effect. Accordingly, when measuring and describing image stabilization effects, it is 
+necessary to pay particular attention to excluding effects achieved by blur reduction. 
+ 
+ 
+DRAFT
+
+78 
+ 
+Fig. 1. Difference in image quality between image stabilization and blur reduction 
+ 
+A-3-4-4 Examples of systems that are considered to be suitable for classification as “blur 
+reduction” (NB. These are just examples, and blur reduction is not limited to such.) 
+ 
+a) A method that sets sensitivity higher than in the usual shooting mode, shoots an image with a 
+higher-than-usual shutter speed, and carries out image processing such as edge enhancement to 
+compensate for loss of resolution in the shot image. 
+b) A method that sets sensitivity higher than in the usual shooting mode, shoots an image with a 
+higher-than-usual shutter speed, and carries out image processing such as noise reduction to 
+compensate for S/N deterioration in the shot image. 
+c) A method that sets sensitivity higher than in the usual shooting mode and shoots an image with 
+a higher-than-usual shutter speed when motion detection for the subject has found that all or 
+part of the subject is moving at a given speed or faster. 
+d) A method that sets sensitivity higher than for the usual shooting mode, takes multiple shots with 
+a higher-than-usual shutter speed, and records only images that the camera has determined to 
+have the least blurring. 
+e) A method that shoots multiple images while gradually changing the sensitivity and shutter speed, 
+and records only images that the camera has determined to have the best balance between the 
+amount of blur and S/N. 
+f) A method that shoots at both the usual shutter speed and a higher-than-usual shutter speed, and 
+DRAFT
+
+79 
+ 
+records the image shot at the usual shutter speed if there is little blurring, or records the image 
+shot at the higher-than-usual shutter speed if there is significant blurring with the usual shutter 
+speed. 
+ 
+A-3-5 Objective axis-dependent and still- or video-dependent image stabilization 
+ 
+In a camera equipped with a hybrid image stabilizer function, if such camera has several axes where 
+correction is carried out optically and other axes where correction is carried out electronically, this 
+should be clearly indicated to users (see a) below). If the  image stabilizer function is also enabled 
+during the shooting of video images, when the correcting system or objective axes for correction are 
+different to those used in shooting still images, care should be taken to clearly indicate such to users 
+(see b) below). 
+ 
+a) Yaw/pitch is optically corrected, while up-down, left-right, and rotation are electronically 
+corrected. 
+b) Correction is carried out on two axes (yaw and pitch) when shooting still images and correction 
+is further carried out on the up-down, left-right, and rotational axes (i.e., a total of five axes) 
+when shooting video images. 
+ 
+A-3-6 Combined use of image stabilizer function and blur reduction 
+ 
+As described earlier, since the effect of the image stabilizer function and the effect of blur reduction 
+cannot be directly compared, when measuring the effect of the electronic image stabilizer function, it 
+is necessary to completely eliminate the effect of blur reduction. However, since there are many 
+cameras that exhibit the properties described in a) and b) below, sufficient attention needs to be paid 
+when measuring and describing the effect of the image stabilizer function. 
+ 
+a) A configuration that functions only as an image stabilizer when there is little blurring, but 
+increasingly functions as a handheld blur reducer according to blurring level. It functions as 
+only a handheld blur reducer at or above a given level of blurring. 
+b) A configuration that functions as an image stabilizer and handheld blur reducer when there is 
+little blurring, but functions as only a handheld blur reducer at or above a given level of blurring. 
+ 
+ 
+DRAFT
+
+80 
+ 
+ 
+Any and all standards and guidelines published by CIPA have been set forth without 
+examining any possibility of infringement or violation of Intellectual Property Rights 
+(patent right, utility model right, trademark right, design right, copyright and any other 
+rights or legal interests of the same kind). 
+In no event shall CIPA be liable in terms of Intellectual Property Rights for the contents of 
+such standards and guidelines. 
+ 
+ 
+ 
+ 
+ 
+CIPA DC-X011-Translation-2024 
+ 
+ 
+Published by Camera & Imaging Products Association 
+MA Shibaura Bldg., 3-8-10, Shibaura, Minato-ku, Tokyo, 108-0023 JAPAN 
+              TEL +81-3-5442-4800    FAX +81-3-5442-4801 
+ 
+ 
+ 
+ 
+All rights reserved 
+ 
+No part of this standard may be reproduced in any form  
+or by any means without prior permission from the publisher. 
+ 
+ 
+ 
+ 
+ 
+DRAFT

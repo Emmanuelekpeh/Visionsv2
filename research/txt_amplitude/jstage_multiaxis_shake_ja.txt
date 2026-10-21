@@ -1,0 +1,743 @@
+=== PAGE 1 ===
+The Institute of Image Information and Television Engineers
+NII-Electronic Library Service
+The
+　工nstitute
+　of
+　工mage
+　工nformation
+　and
+　Television
+　Engineers
+MMS2010
+−9
+　CE2010 −9
+カメラ撮影時の多軸方向手プレ解析
+　　　　　　　　　　　林謙一　日下博也
+　橋秀幸
+パナソニ
+ック株式会社AVC
+デバイス開発センター
+〒571−8504 大阪府門真市松生町1−15
+　　　　E −mai1
+：　｛hayashi．kenichi
+，　kusaka．hiroya
+，　hashi．hideyuki｝＠jp．panasonic．
+com
+　あらまし　ジャイ
+ロセ
+ンサと画像処理を組み合わせることにより、回転手プレと並進手プレを分離し、両者を精
+度よく測定する方法とその測定結果について報告する．これにより、従来は正確な測定が困難であった並進手プレ
+による撮影画像
+へ
+の影響の定量的な分析を可能とした．
+　キーワード　手プレ，並進，測定，ジャイロセンサ，画像処理，カメラ
+New
+　Approach
+　on 　Multi−axial 　Analysis　of 　Camera 　Shake
+Kenichi
+　HAYASHI
+　Hiroya　KUSAKA
+　and 　Hideyuki　HASHI
+AVC
+　Devices　Development　Center，
+　Panasonic　Corporation　1−15Matsuo −cho ，
+　Kadoma −shi ，
+　Osaka ，571−8504 ∫apan
+　　　　　　　　E 一
+ 
+il
+：
+｛hayas  ．kenichi
+，　kusaka．hiroya
+，　hashi．hide鉢i｝  p．panasonic．
+com
+　Abstract　A 　new
+　measurement
+　on 　camera
+　shakes
+　featUring
+　a 　combination
+　of 　a　gyroscope
+　and 　signal 　processing
+　is
+　reported
+．
+For　higher
+　accuracy
+，　shake
+　movements
+　are 　separated
+血to 　rotational
+　and
+　translational
+　motions ．
+　Advanced
+　quantitative
+　analysis
+on 　image　quality
+　is
+　also 　presented
+　considering
+　the　effect　f士om
+　translation
+　which
+　was
+　not 　discussed
+　previously
+．
+　Keyword 　Camera　shako ，
+　Translation
+，　Measurement，　gyroscope，
+　Image　Processing，
+　Ca 
+era
+1．はじめに
+　手プ
+レ量を定量的に評価する技術として、点光源を
+撮影し、撮影画像上に記録された点像の軌跡を分析す
+る方法や［1］、点光源の代わりに複数の
+テ
+ス
+トパターン
+を撮影し、画像処理を行う方法が提案されて
+いる［21．
+さらに高速撮影が
+卩∫能なカメラを用
+い
+て固定テ
+ス
+トパ
+ターンを動画撮影
+し、得られたシーケン
+ス
+に対して特
+徴点追跡処理を行うことにより、手プレを測定する方
+法が提案され
+てい
+る［3 ］．しか
+し［1］で
+は
+カメ
+ラの運動に
+関する詳細な分析はされて
+いない．また［2 ］、［3 ］では回
+転手プ
+レと並進手プ
+レ
+の分離がで
+きず、測定された手
+プ
+レは全て回転手プ
+レとして扱われている．しか
+し図
+1 に示すように、撮影時の手プレには回転運動による
+手プレ
+（回転手プレ）と並進運動による手プ
+レ
+（並進
+手プ
+レ）が存在する．
+　そこで我
+々
+はジャイ
+ロ
+セ
+ンサ
+と画像処理を組み合
+わせることにより、回転手プレと並進手プレを分離し、
+　
+　
+驢
+一
+mrO2Re
+1
+／
+i薄
+　　PitCh
+　　
+e2P
+Yawe2
+▼
+onta
+虱
+図1　
+カ
+メラの回転運動
+（左）と並進運動
+（右）
+両者を精度よく測定する方法を新たに開発した．そ
+の
+概要
+と測定結果
+にっ
+い
+て報告する．また
+この結果よ
+り
+従来は定量的に論じられることが無か
+った並進手プレ
+の画像への影響を明らかにする．
+2。測定原理
+　一般に画像処理による手プ
+レ測定で
+は、検出される
+手プレが並進手プレと回転手プレの和となる．一方ジ
+ャイ
+ロ
+セ
+ンサで手プ
+レ測定を行う場合で
+は、原理的に
+回転手プ
+レ
+の
+みが検出できる．従
+っ
+て画像処理測定と
+ジャイ
+ロ測定を同時に行い、そ
+の差をとれば並進手プ
+レを求めることができる．
+　本報では［2］に記載の画像処理測定法を用いる．この
+画像処理測定法におい
+て
+は、重畳露光されたテ
+ス
+トパ
+ターン
+に対してパ
+ターン
+マ
+ッチ
+ング処理を行うこ
+とに
+より、並進手プ
+レおよび回転手プ
+レに起因するテ
+ス
+ト
+パ
+ターンの水平〆垂直方向移動量
+Dlx 【
+mm
+】、
+　Dly ［
+mm
+】
+を得る．またジャイ
+ロ
+測定では、ジ
+ャイ
+ロ出力をゲイ
+ン調整後に、積分する
+ことによりYaw
+！PitchtRoll 方向
+のカメラの回転角θ2y ［deg ］、θ 2p ［degj 、θ 2r［deg ］が得
+られる．こ
+こでカメラー
+テ
+ス
+トパターン間距離をL ［
+mm
+】
+とすると、θ 2y ［deg ］、θ2p ［deg ］からテ
+ス
+トパ
+ターン上
+の水平1垂直方向移動量D2x ［mm
+］、D2y ［mm
+］が以下の式
+で算出できる．
+一39 一
+N 工工一
+Eleotronio
+　Library
+　
+
+=== PAGE 2 ===
+The Institute of Image Information and Television Engineers
+NII-Electronic Library Service
+The
+　工nstitute
+　of
+　工mage
+　工nformation
+　and
+　Television
+　Engineers
+満
+｝韆
+1讎
+燃
+夛
+趣二
+図2 　Dx 、
+　Dlx 、
+　D2x
+の関係
+黶璽
+1郷
+騨
+鱗
+乱＿繊
+1
+靆叢萋
+1鷺
+し鍵钁廴」
+y
+　　D2x
+＝Ltan
+θ 2y 　　　　　　　
+（1）
+　　D2y
+＝Ltan
+θ 2p 　　　　　　　　（2）
+　D2x 、
+　D2y
+は回転手プ
+レに起因するものになる、よ
+っ
+て並進手プ
+レDx 、
+　Dy
+は次式で算出できる．
+　　Dx ＝Dlx −D2x 　　　　　　　　（3）
+　　Dy
+＝Dly
+−D2y
+　　　　　　　　（4 ）
+　図2 にDx 、
+　Dlx 、
+　D2x
+の
+関係を示す．
+3．測定装置
+　図3 に開発
+した測定装置の構成を示す．テ
+ス
+トパ
+タ
+ーン発生装置は9 枚
+の
+テス
+トパ
+ターンを60Hz
+周期で
+切り替え、モ
+ニ
+タに表示する．テス
+トパターンは、互
+い
+に異なり、手プ
+レによ
+っ
+て重なり難い
+ようにデザイ
+ンされて
+いる，今回は露光時問をlf8 秒とした．1 回
+の撮影中に同
+じテ
+ス
+トパ
+ターンが現れないよう9 パ
+タ
+ーンを用意し、テ
+ス
+トパ
+ターンの表示周期を露光時間
+より長くした，またテ
+ス
+トパ
+ターン発生装置は、9
+パ
+ターン
+の
+うちの所定の
+1 パ
+ターン
+の表示に合わせテ
+ス
+トパターン同期信
+号を出力する．
+　LED
+ア
+レイは16
+×
+16
+個のLED
+か
+らな
+り、左上か
+ら右下に向か
+っ
+てlms
+間隔で点灯位置が移動する．
+右下に達すると、左上
+に点灯位置が戻る．つ
+まり
+256msec
+周期で点灯位置の走査を繰り返す．また左上
+鵜
+齶
+　　　　　データ戮欝ノ數難
+蟹
+　　　図3 　測定装置の構成
+図4 　タイ
+ミングチャート
+端点
+の
+LED
+が点灯するタイ
+ミン
+グでLED
+同期信号を
+出力する，
+　カメラは3 軸ジャイ
+ロ
+セ
+ンサが装着され、レリーズ
+ボタン押下時に
+レ
+リーズタイミング信号を出力する．
+被験者は
+このカ
+メラを用い
+て、モ
+ニ
+タ上
+のテ
+ス
+トパ
+タ
+ーン
+とLED
+ア
+レイを同時に撮影する．
+　データ取得1計算装置は、カメラから3 軸ジャイ
+ロ信
+弓’、レリーズタイミング信号及び撮影画像、テス
+トパ
+ターン発生装置からテス
+トパターン同期信号、LED
+ア
+レイ
+からLED
+同期信号を取り込み、これ
+らの同期を取
+っ
+て、既に説明した手プ
+レ算出処理を正確に行
+う、図
+4
+はデータ取得1計算装置が取得する信号の
+タイ
+ミ
+ン
+グチャートである．撮影画像上のLED
+ア
+レイの発光位
+置と
+レ
+リーズタイ
+ミン
+グ信号からカメラの実露光期間
+を決定する．またテ
+ス
+トパ
+ターン同期信号か
+ら個々
+の
+テス
+トパ
+ターンの正確な表示タイミングを決定する．
+4．測定結果
+　10
+人
+の被験者
+に
+対
+し
+て、Panasonic
+製
+DSC
+（DMC
+−TZ3 ）を用
+い、露光時間1！8 秒、片手持ちとい
+う条件で得られた100 個以上の並進手プ
+レ測定結果の
+分布を図5 に、また同時に得られた回転手プ
+レ測定結
+果の分布を図6 に示す．並進手プ
+レは水平方向が垂直
+方向に対
+して、回転手プ
+レはYaw
+〆Roll 方向が
+Pitch
+方
+向に対して平均値で30 ％以上大きい
+こ
+とがわかる．ま
+た、水平方向並進手プ
+レを0．59mm
+（測定結果の平均
+値）、Yaw
+方向回転手プ
+レをO 、11deg
+（測定結果
+の平均
+値）とした時、それぞれの手プ
+レによる画像
+（画像サ
+イズは3072
+× 2304pixel を想定）上
+の
+プ
+レ量を算出した
+結果を、焦点距離28mm
+と280mm
+の場合につ
+い
+て図7
+に示す．どちらの焦点距離の場合でも、画像上のプ
+レ
+に対して、撮影距離300mm
+以遠では回転手プレが、
+300mm
+より近側では並進手プ
+レが支配的になる．これ
+は近い被写体を撮影する場合に並進手プ
+レの影響が無
+視できない
+こ
+とを示す，
+一40 一
+N 工工一
+Eleotronio
+　Library
+　
+
+=== PAGE 3 ===
+The Institute of Image Information and Television Engineers
+NII-Electronic Library Service
+The
+　工nstitute
+　of
+　工mage
+　工nformation
+　and
+　Television
+　Engineers
+5．まとめ
+　ジャイ
+ロ
+セ
+ンサと画像処理を組み合わせることに
+より、回転手プレと並進手プレを分離し、両者を個別
+に測定する方法を開発するとともに、その測定結果を
+示
+した，また
+この測定結果を用い
+て並進手プ
+レと回転
+手プ
+レ
+の画像
+へ
+の影響を定量的に示す
+こ
+とができた．
+　
+4G
+　
+35
+　3D
+癒25
+齷
+20
+　
+15
+　
+］9
+　
+5
+　
+0o
+　　
+o．
+4D
+．
+8 　　12
+　　1．
+6
+　プレ量［
+mm ］
+2
+TOO％
+8 鵬
+δ曠
+蟹
+40％瞭
+2鵬
+o駕
+　　　　　　　　　　　文　
+献
+［1］F ．Xiao
+，　A ．
+　Silverstein
+，　J．
+　Farrel1，’
+℃amera
+・Motion
+　　and
+　Effective　Spatial　Resolution，，
+　in　Proc．
+　Int，
+　　C 〔》ngr ．
+　ofImaging
+　Science，
+　pp ．33 −36 ，2006 ，
+［2］Nishi，
+　K ．
+　and 　Ogino ，
+　R ，
+　”3D 　camera
+−shake
+　　measurement
+　and
+　analysis
+，”Proc ．
+　IEEE
+　InternationaI
+　　Conference 　on
+　Multimedia 　and
+　Expo ，
+　pp ．1271 ・1274 ，
+　　2007 ．
+［3】Or ，　E ．
+M ．
+　and
+　Pundik
+，　D ．，”Hand
+　motion
+　and
+　image
+　　stabilizatien
+　　in　　hand −held　　devices ，
+’
+「
+　　IEEE
+　　Transactions
+　on 　Consumer
+　Electronics，
+　53（4），
+　　pp ，1508 −1512 ，2007 ．
+圈
+団垂直
+（t ス
+トグラム）
+−tt一垂直
+（累積度数）
+WW
+水平
+（t ス
+トクラム）
+＋
+水平
+（累積度数）
+図5 　並進手プ
+レ量分布
+　
+3巳
+　
+3D
+　
+25
+癒2D
+鰹
+】5
+　
+董0
+　
+5
+　
+0
+100％
+80 ％
+60％
+脇
+40 ％
+瞬
+20％
+o駕
+O　　　O，
+06　0，
+］2　0．
+1霆　O．24　　0 ，
+3　　e ，36　0，42
+　　　　　　プレ角
+匚deg］
+P 矚Pitch （ヒス
+トグラム）
+m 躪RoM
+（ヒス
+トグラム）
+＋
+Ya 押
+（累積度数）
+匚コYaw
+（ヒス
+トグラム）
+士
+Pitoh （累積度数）
+“
+Roll
+（累積度数）
+図6 　回転手プ
+レ量分布
+　
+leoo
+　
+100
+隰
+塰
+101ll
+　
+1
+↑丶
+　
+0．
+l
+　
+o．
+Ol
+　
+　
+　lo
+IOO 　　　　
+1000　　　　10006
+　　　撮景彡距離匚mm ］
+loaOO臼
+一一水平方向並進
+（f＝28mm）
+−
+Yaw方向回転　@（f ＝28mm
+一■水平方向
+並進（f＝280m
+j
+一畔卿方
+向回転
+（f＝280r
+）
+図7
+　撮影距離と
+画像上の
+推定
+レ
+量
+41
+一
+N 工工一Eleotronio
+　Library
+　

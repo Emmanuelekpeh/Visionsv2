@@ -1,0 +1,35 @@
+{
+  "schema": 2,
+  "slug": "unchosen-stale-test",
+  "name": "Unchosen Stale Test",
+  "concept": "",
+  "created": "2026-10-14 11:55:18",
+  "saved": "2026-10-14 11:55:18",
+  "logline": "",
+  "characters": "",
+  "scenes": [
+    {
+      "id": "sc1",
+      "name": "scene 1",
+      "palette": "neutral"
+    }
+  ],
+  "timeline": [
+    "s01"
+  ],
+  "settings": {
+    "fps": 16,
+    "shake_scale": 1.0,
+    "seed_base": 1103,
+    "technical_baseline": true,
+    "models": "off",
+    "frames": 12
+  },
+  "provenance": {},
+  "ideas": [],
+  "kept_ideas": [],
+  "proposal_path": null,
+  "problems": [],
+  "deliverable": null,
+  "history": []
+}
