@@ -1,0 +1,31 @@
+# Versions are what this project runs on (Windows, CPU only, no NVIDIA GPU).
+# Derived from the imports of the core modules (film_store, draft, story, make_film,
+# job_runner, previs, visual_org, sequence_direction, edit_planner, camera_*, looks,
+# effects, continuity, conditioning, review, taste, ui/studio ...) on 2026-11-04.
+#
+# CPU torch wheels come from PyTorch's own index:
+#   pip install torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1
+torchvision==0.20.1
+
+# imported directly
+diffusers==0.32.2
+numpy==1.26.4
+pillow==10.2.0
+opencv-python==4.11.0.86
+safetensors==0.8.0
+streamlit==1.44.1
+ollama==0.5.1
+
+# needed at runtime by diffusers' AnimateDiff / LoRA / IP-Adapter loading (not imported
+# by this repo's own modules)
+transformers==4.40.1
+peft==0.11.1
+accelerate==1.9.0
+huggingface-hub==0.25.2
+
+# tests: python -m pytest -p no:xonsh -p no:cacheprovider tests
+pytest==7.4.3
+
+# Also required, not pip-installable: an Ollama server with the writer/farm models
+# pulled (see draft.py --farms / --showrunner), and the model weights under models/.

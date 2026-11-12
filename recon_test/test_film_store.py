@@ -129,14 +129,19 @@ def main() -> int:
     check("the timeline order actually changed",
           [s["id"] for s in fs.shots_in_order(pr)],
           [shots[3]["id"], shots[1]["id"], shots[2]["id"], shots[0]["id"]])
-    # The reorder MOVES THE IN-POINTS, so the affected shots need a re-finish.
-    # That is correct and it is not a re-generate: their pixels are their own.
-    check("the state after a reorder is a cheap re-finish, not a re-render",
+    # These four shots are ONE HELD SCENE (same scene id), so the organisation
+    # conditions every later shot on the hold's anchor frame (`hold_reference` is a
+    # generation input: a shot rendered from a reference frame is different pixels).
+    # Reordering inside the hold moves the anchor, so the held shots are correctly
+    # stale -- a RE-RENDER, decided by the user ("re-render on reorder"). The cheap
+    # re-finish case is a reorder BETWEEN holds / of unheld shots, covered by the
+    # retime checks in section 5, where only the in-points move.
+    check("a reorder inside a hold moves its anchor, so the held shots re-render",
           sorted(set(fs.shot_state(pr, s) for s in fs.shots_in_order(pr))
                  - {"approved"}),
-          ["restale"])
-    check("nothing needs the model after a reorder",
-          fs.film_status(pr)["to_generate"], 0)
+          ["stale"])
+    check("and that re-render is counted and priced, not hidden",
+          fs.film_status(pr)["to_generate"], 4)
 
     print("\n2. derived staleness: no status string to contradict the disk")
     # a dedicated shot, last in the timeline so nothing upstream of it, and not
@@ -299,6 +304,8 @@ def main() -> int:
     # and the LAST shot is now dirty for a reason of its own, which is the part
     # that proves the cascade looks downstream and not upstream
     check("the last shot is dirty", states[c[2]["id"]] == "restale", True)
+    check("a re-finishable film may still be exported",
+          fs.ready_to_export(fs.load(pr5["slug"])), True)
 
     # SELF-CLEANING. Restoring a value must restore the state: a hash of the real
     # dependency does that, a bumped counter cannot.
@@ -323,8 +330,8 @@ def main() -> int:
           round(st["measured_per_shot_s"], 1), round(sum(chosen) / len(chosen), 1))
     check("every take it averaged carries a measured cost",
           all(isinstance(c, (int, float)) and c > 0 for c in chosen), True)
-    check("a re-finishable film may still be exported",
-          fs.ready_to_export(pr2), True)
+    check("a film whose hold anchor moved (re-render pending) is not exportable",
+          fs.ready_to_export(pr2), False)
     # and a generation change blocks it, which is the case that costs 10 min
     fs.update_shot(pr2, shots[0]["id"], prompt="something else entirely")
     check("a generation change blocks export", fs.ready_to_export(pr2), False)

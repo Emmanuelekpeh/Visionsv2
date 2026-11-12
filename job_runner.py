@@ -102,16 +102,66 @@ def _story_progress(line: str, prog: Dict) -> None:
                     total=int(m.group(2)),
                     last=f"farm {m.group(1)}/{m.group(2)}: {m.group(3)} thinking")
         return
+    # THE SHOWRUNNER'S REAL PROGRESS: story.chat_streamed reports tokens written so far
+    # against the cap and the measured rate, so the 10-minute silent stretch has a figure
+    m = re.search(r"showrunner attempt (\d+)/(\d+): (\d+)/(\d+) tokens, ([\d.]+) tok/s, "
+                  r"up to (\d+) min left", line)
+    if m:
+        prog.update(phase="showrunner", attempt=int(m.group(1)),
+                    attempt_total=int(m.group(2)), tokens=int(m.group(3)),
+                    token_budget=int(m.group(4)), tok_per_s=float(m.group(5)),
+                    minutes_left_max=int(m.group(6)),
+                    last=f"showrunner attempt {m.group(1)}/{m.group(2)}: "
+                         f"{m.group(3)}/{m.group(4)} tokens at {m.group(5)} tok/s")
+        return
     m = re.search(r"showrunner attempt (\d+): (\d+) shots, (\d+) story break", line)
     if m:
         prog.update(phase="showrunner", attempt=int(m.group(1)),
                     shots=int(m.group(2)), story_breaks=int(m.group(3)),
                     last=f"attempt {m.group(1)}: {m.group(2)} shots, "
                          f"{m.group(3)} story break(s)")
+    # THE COUNT HALF OF THE LOOP. A clean-but-short list is extended with coverage
+    # shots; this is the phase where the film is being brought up to the requested
+    # count, so it must not look like the silent showrunner stretch.
+    m = re.search(r"\[story\] extension (\d+)/(\d+): (\d+)/(\d+) shot", line)
+    if m:
+        prog.update(phase="extension", extension=int(m.group(1)),
+                    extension_total=int(m.group(2)), shots=int(m.group(3)),
+                    requested=int(m.group(4)),
+                    last=f"adding coverage: {m.group(3)}/{m.group(4)} shots")
+        return
+    if "feeding back the refused draft" in line:
+        prog.update(phase="showrunner",
+                    last="feeding the previous refused draft back to the writer")
+        return
+    if "[story] prompt pass: rewriting" in line:
+        prog.update(phase="prompt pass", last="rewriting prompts as single images")
+        return
+    m = re.search(r"\[story\] scene plan: (\d+) scene", line)
+    if m:
+        prog.update(phase="scene plan",
+                    last=f"planned {m.group(1)} held scene(s); writing shots")
+        return
+    if "coverage problem(s) -- re-asking" in line:
+        prog.update(phase="coverage repair",
+                    last="story holds, but no scene does -- re-asking for scenes")
+        return
+    m = re.search(r"\[story\] prompt pass: rewrote (\d+)/(\d+)", line)
+    if m:
+        prog.update(phase="prompt pass", prompts_rewritten=int(m.group(1)),
+                    prompts_total=int(m.group(2)),
+                    last=f"prompts rewritten as single images: "
+                         f"{m.group(1)}/{m.group(2)}")
+        return
     if "complete story" in line or "clean story shape" in line:
         prog.update(phase="story clean")
     if "showrunner attempt" in line and "shots," not in line:
         prog.update(phase="showrunner")
+        if "generating" in line:           # a new attempt starts again from zero
+            prog.update(tokens=0)
+            cap = re.search(r"<= (\d+) tokens", line)
+            if cap:
+                prog.update(token_budget=int(cap.group(1)))
 
 
 def _audit_progress(line: str, prog: Dict) -> None:
@@ -129,6 +179,29 @@ def _selftest_progress(line: str, prog: Dict) -> None:
                     last=f"tick {m.group(1)}/{m.group(2)}")
 
 
+def _tier_eta(prog: Dict, done: int) -> None:
+    """Price the shots LEFT per tier: their tiers come from the `[plan] tiers:` line,
+    each costed at this run's own mean for that tier, else the measured default."""
+    plan = list(prog.get("plan_tiers") or [])
+    if not plan:
+        return
+    try:
+        import film_store as _fs
+        dflt = _fs.TIER_DEFAULT_S
+    except Exception:                                      # noqa: BLE001
+        dflt = {"fast": 660.0, "full": 2900.0}
+    by_tier = prog.get("tier_seconds") or {}
+
+    def each(k):
+        v = by_tier.get(k)
+        return (sum(v) / len(v)) if v else dflt.get(k, 660.0)
+
+    left = plan[done:]
+    prog.update(eta_seconds=round(sum(each(k) for k in left), 1),
+                eta_shots=len(left),
+                current_est_s=round(each(left[0]), 1) if left else None)
+
+
 def _store_progress(line: str, prog: Dict) -> None:
     """Progress for a production render (`make_film --store`)."""
     m = re.search(r"=== FROM STORE (\S+) ===", line)
@@ -141,9 +214,17 @@ def _store_progress(line: str, prog: Dict) -> None:
                     last=f"{m.group(1)} to generate, {m.group(2)} to re-finish")
     # the model load is the longest silent stretch before the first frame, so it gets
     # a phase of its own rather than sharing one with generation
-    if "[base] " in line or "preflight:" in line:
+    # a reload in the MIDDLE of generation (the sampler tier changed) is a one-minute
+    # pause, not a new phase: it used to reset the bar to "loading the model" for the
+    # rest of the run
+    if ("[base] " in line or "preflight:" in line) \
+            and prog.get("phase") != "generating":
         prog.update(phase="loading the model",
                     last="loading the model and its motion LoRAs")
+    m = re.search(r"\[plan\] tiers: ([a-z,]+)", line)
+    if m:
+        prog.update(plan_tiers=m.group(1).split(","))
+        _tier_eta(prog, 0)
     if "=== GENERATING" in line:
         prog.update(phase="generating")
     if "=== FINISHING ===" in line:
@@ -155,16 +236,22 @@ def _store_progress(line: str, prog: Dict) -> None:
     # PER-SHOT WALL CLOCK, which the pipeline already prints. Kept as a list so the
     # UI can show a measured mean and an ETA instead of a fixed guess -- and so the
     # estimate improves as the run goes on rather than staying at 11 minutes forever.
-    m = re.search(r"^\s*(\d+)/(\d+) (\S+) +(\S+) +([\d.]+)s -> take", line)
+    m = re.search(r"^\s*(\d+)/(\d+) (\S+) +(\S+) +(?:\[(\w+)\] +)?([\d.]+)s -> take",
+                  line)
     if m:
-        secs = float(m.group(5))
+        secs = float(m.group(6))
+        tier = m.group(5) or "fast"          # a line without a tag is a fast shot
         times = list(prog.get("shot_seconds") or [])
         times.append(secs)
-        prog.update(done=int(m.group(1)), total=int(m.group(2)),
-                    shot_seconds=times,
+        by_tier = {k: list(v) for k, v in (prog.get("tier_seconds") or {}).items()}
+        by_tier.setdefault(tier, []).append(secs)
+        done = int(m.group(1))
+        prog.update(phase="generating", done=done, total=int(m.group(2)),
+                    shot_seconds=times, tier_seconds=by_tier,
                     mean_shot_seconds=round(sum(times) / len(times), 1),
                     last=f"generated {m.group(1)}/{m.group(2)} "
-                         f"({m.group(3)}, {secs:.0f}s)")
+                         f"({m.group(3)}, {tier}, {secs:.0f}s)")
+        _tier_eta(prog, done)
     m = re.search(r"^\s*(\d+)\. (\S+) +take (\S+)", line)
     if m:
         prog.update(finishing_shot=int(m.group(1)),
@@ -173,16 +260,75 @@ def _store_progress(line: str, prog: Dict) -> None:
         prog.update(phase="finished")
 
 
+def _previs_progress(line: str, prog: Dict) -> None:
+    """Progress for `previs.py` -- one still per shot, measured at the cuts."""
+    if "=== previs:" in line:
+        prog.update(phase="previs", last="preparing the still renderer")
+    m = re.search(r"still (\d+)/(\d+)", line)
+    if m:
+        prog.update(phase="stills", done=int(m.group(1)), total=int(m.group(2)),
+                    last=f"still {m.group(1)}/{m.group(2)}")
+    if "loading CLIP" in line:
+        prog.update(phase="measuring the cuts")
+    m = re.search(r"continuity \(stills\): clip ([\d.]+)", line)
+    if m:
+        prog.update(clip=float(m.group(1)))
+    if "cost:" in line and "previs vs" in line:
+        prog.update(phase="measured", last="previs report written")
+
+
 def _draft_progress(line: str, prog: Dict) -> None:
     """Progress for `draft.py` -- the ensemble, then the adoption into the store."""
+    # The showrunner generation is the long silent stretch; say so, with the
+    # attempt number, or the UI looks identical to a hung job for 10+ minutes.
+    m = re.search(r"\[story\] showrunner attempt (\d+)/(\d+): generating", line)
+    if m:
+        prog.update(phase="showrunner", attempt=int(m.group(1)),
+                    attempt_total=int(m.group(2)), tokens=0,
+                    last=f"showrunner attempt {m.group(1)}/{m.group(2)} "
+                         f"generating (10+ min on CPU)")
+        cap = re.search(r"<= (\d+) tokens", line)
+        if cap:
+            prog.update(token_budget=int(cap.group(1)))
+        return
+    m = re.search(r"\[story\] critique round (\d+)/(\d+): (\d+) shot\(s\) break "
+                  r"the story order, (\d+) flagged by the rules", line)
+    if m:
+        prog.update(phase="critique", last=f"checking the story order (round "
+                    f"{m.group(1)}/{m.group(2)}): {m.group(3)} shot(s) out of "
+                    f"order, {m.group(4)} flagged by the rules")
+        return
+    m = re.search(r"\[story\] repair shot (\d+)/(\d+) \(#([\d,]+)\)", line)
+    if m:
+        prog.update(phase="critique", done=int(m.group(1)) - 1,
+                    total=int(m.group(2)),
+                    last=f"rewriting flagged shot #{m.group(3)} "
+                         f"({m.group(1)}/{m.group(2)})")
+        return
+    if "[story] story and coverage complete" in line:     # story.py's real wording
+        prog.update(phase="validated",
+                    last="story and coverage complete; adopting the shot list")
+        return
     if "[draft]" in line:
+        m = re.search(r"\[draft\] writing loop: (\d+) attempt", line)
+        if m:
+            prog.update(phase="validated", loop_attempts=int(m.group(1)),
+                        last=f"writing loop finished ({m.group(1)} attempt(s))")
+            return
+        if "[draft] REFUSED" in line:
+            prog.update(phase="refused",
+                        last="the story gate refused this draft")
+            return
         m = re.search(r"\[draft\] wrote (\d+) shots", line)
         if m:
             prog.update(phase="adopted", shots=int(m.group(1)),
                         last=f"adopted {m.group(1)} shots into the production")
             return
+        # draft.py prints "..., N story break(s), M structure advisory(ies), K
+        # warning(s)"; the pattern used to skip the middle field and never matched
         m = re.search(r"\[draft\] proposal validated: (\d+) shots, (\d+) story "
-                      r"break\(s\), (\d+) warning", line)
+                      r"break\(s\), (?:\d+ structure advisory\(ies\), )?(\d+) "
+                      r"warning", line)
         if m:
             prog.update(phase="validated", shots=int(m.group(1)),
                         story_breaks=int(m.group(2)),
@@ -192,10 +338,77 @@ def _draft_progress(line: str, prog: Dict) -> None:
     _story_progress(line, prog)
 
 
+def _vision_args(vision) -> List[str]:
+    """`True` -> review.py's default vision model; a string -> that model; else off."""
+    if isinstance(vision, str) and vision.strip():
+        return ["--vision", vision.strip()]
+    return ["--vision"] if vision else []
+
+
+def _review_progress(line: str, prog: Dict) -> None:
+    """Progress for `review.py` -- one take at a time, then the verdict counts."""
+    m = re.search(r"\[review\] shot (\d+)/(\d+) (\S+)", line)
+    if m:
+        prog.update(phase="reviewing", done=int(m.group(1)) - 1,
+                    total=int(m.group(2)),
+                    last=f"reviewing shot {m.group(1)}/{m.group(2)} ({m.group(3)})")
+    m = re.search(r"fail (\d+) · review (\d+) · pass (\d+) · unreviewed (\d+)", line)
+    if m:
+        prog.update(phase="reviewed", done=prog.get("total"), fail=int(m.group(1)),
+                    review=int(m.group(2)), passed=int(m.group(3)),
+                    unreviewed=int(m.group(4)),
+                    last=f"{m.group(1)} fail · {m.group(2)} to look at · "
+                         f"{m.group(3)} pass · {m.group(4)} unreviewed")
+
+
+def _film_audit_progress(line: str, prog: Dict) -> None:
+    """Progress for `output_audit.py` -- the report prints once, at the end."""
+    if line.startswith("output audit:"):
+        prog.update(phase="measured", last="measuring the finished film")
+    m = re.match(r"\s*\[(warn|info)\] (\S+):", line)
+    if m:
+        key = "warnings" if m.group(1) == "warn" else "notes"
+        prog.update(**{key: int(prog.get(key) or 0) + 1})
+    if line.startswith("artifacts:"):
+        prog.update(phase="audited", last="audit written")
+
+
+def _style_progress(line: str, prog: Dict) -> None:
+    """Progress for `style_pass.py` -- one line per scene, then the file it wrote."""
+    m = re.match(r"\s+(\S+): (\S+)\s+\| ", line)
+    if m:
+        prog.update(phase="styling", scenes=int(prog.get("scenes") or 0) + 1,
+                    last=f"{m.group(1)}: {m.group(2)}")
+    if "prompts.json" in line:
+        prog.update(phase="styled", last="light and palette applied per scene")
+
+
+def _keyframe_progress(line: str, prog: Dict) -> None:
+    """Progress for `keyframe.py`: one line per still it finishes."""
+    m = re.search(r"\[keyframe\] (\S+) (c\d+|aMUSEd)(?: seed \d+)?\s*(.*?):\s*(\d+)s", line)
+    if m:
+        prog.update(phase="stills", stills=int(prog.get("stills") or 0) + 1,
+                    last=f"{m.group(1)} {m.group(2)} {m.group(3)}".strip())
+
+
+def _retime_progress(line: str, prog: Dict) -> None:
+    """Progress for `retime.py`."""
+    m = re.search(r"CV ([\d.]+) -> ([\d.]+)\s+\|\s+([\d.]+)s -> ([\d.]+)s", line)
+    if m:
+        prog.update(phase="retimed", cv_before=float(m.group(1)),
+                    cv_after=float(m.group(2)),
+                    last=f"rhythm CV {m.group(1)} -> {m.group(2)}, "
+                         f"{m.group(3)}s -> {m.group(4)}s")
+    if "dry run" in line:
+        prog.update(phase="previewed")
+
+
 TASKS: Dict[str, Dict] = {
     "draft": {
         "desc": "write a shot list AND put it in the production you are looking at",
-        "cost": "~4-7 min",
+        "cost": "~6-40 min (a scene plan, writing passes while the story is "
+                "repaired, a coverage repair when the story holds but no scene "
+                "does, coverage shots up to the count, then one-image prompts)",
         "progress": _draft_progress,
         "argv": lambda p: [sys.executable, "draft.py",
                            "--store", p["store"],
@@ -207,7 +420,23 @@ TASKS: Dict[str, Dict] = {
                              if p.get("showrunner") else [])
                           + (["--fresh"] if p.get("fresh") else [])
                           + (["--temperature", str(p["temperature"])]
-                             if p.get("temperature") is not None else []),
+                             if p.get("temperature") is not None else [])
+                          + (["--story-retries", str(p["story_retries"])]
+                             if p.get("story_retries") is not None else [])
+                          + (["--no-prompt-pass"] if p.get("no_prompt_pass")
+                             else [])
+                          + (["--prompt-pass-model", p["prompt_pass_model"]]
+                             if p.get("prompt_pass_model") else [])
+                          + (["--no-scene-plan"] if p.get("no_scene_plan")
+                             else [])
+                          + (["--no-self-critique"] if p.get("no_self_critique")
+                             else [])
+                          + (["--coverage-retries", str(p["coverage_retries"])]
+                             if p.get("coverage_retries") is not None else [])
+                          + (["--allow-broken-story"]
+                             if p.get("allow_broken_story") else [])
+                          + (["--cameras", p["cameras"]] if p.get("cameras")
+                             else []),
     },
     "story": {
         "desc": "ensemble story: idea farms, then the showrunner, re-rolling "
@@ -251,6 +480,73 @@ TASKS: Dict[str, Dict] = {
                            "--name", p.get("name") or f"{p['store']}_render",
                            "--shake", str(p.get("shake", 1.0))]
                           + (["--only", str(p["only"])] if p.get("only") else [])
+                          + (["--dry-run"] if p.get("dry_run") else []),
+    },
+    "previs": {
+        "desc": "one still per shot, measured at the cuts -- kill a bad "
+                "arrangement before the render hour",
+        "cost": "~3-4 min for 4 shots",
+        "progress": _previs_progress,
+        "argv": lambda p: [sys.executable, "previs.py",
+                           "--store", p["store"],
+                           "--name", p.get("name") or f"{p['store']}_previs"]
+                          + (["--no-condition"] if p.get("no_condition") else []),
+    },
+    "keyframes": {
+        "desc": "first-frame candidates for a shot: DreamShaper, or an aMUSEd still "
+                "re-drawn by DreamShaper at several strengths (nothing is chosen, "
+                "no take is touched)",
+        "cost": "~2-4 min per still on this CPU; an aMUSEd batch makes 3 stills "
+                "per candidate",
+        "progress": _keyframe_progress,
+        "argv": lambda p: [sys.executable, "-u", "keyframe.py",
+                           "--store", p["store"], "--shot", p["shot"],
+                           "--candidates", str(p.get("candidates", 1)),
+                           "--look", p.get("look", "plain")]
+                          + (["--looks-strengths", p["strengths"]]
+                             if p.get("strengths") else []),
+    },
+    "review": {
+        "desc": "judge the TAKES: motion, sharpness, a boxed-subject evidence sheet "
+                "per shot, and (optionally) a local vision model's verdict",
+        "cost": "seconds without a vision model; ~1 min per shot with one",
+        "progress": _review_progress,
+        "argv": lambda p: [sys.executable, "-u", "review.py",
+                           "--store", p["store"]]
+                          + _vision_args(p.get("vision"))
+                          + (["--vision-frames", str(p["vision_frames"])]
+                             if p.get("vision_frames") else []),
+    },
+    "film_audit": {
+        "desc": "audit the DELIVERED film against its prompts: prompt-to-frame "
+                "match, cut continuity, rhythm",
+        "cost": "~1-2 min (CLIP load); seconds with no_clip",
+        "progress": _film_audit_progress,
+        "argv": lambda p: [sys.executable, "-u", "output_audit.py",
+                           "--store", p["store"], "--report-only"]
+                          + (["--render", p["render"]] if p.get("render") else [])
+                          + (["--no-clip"] if p.get("no_clip") else [])
+                          + (["--stills"] if p.get("stills") else []),
+    },
+    "style": {
+        "desc": "one deliberate light and palette per scene, fog words out of the "
+                "prompts (rewrites prompts, so affected takes go stale)",
+        "cost": "seconds",
+        "progress": _style_progress,
+        "argv": lambda p: [sys.executable, "-u", "style_pass.py",
+                           "--store", p["store"]]
+                          + (["--keep-fog"] if p.get("keep_fog") else []),
+    },
+    "retime": {
+        "desc": "give the cut the measured human rhythm: accent shots shorter, "
+                "long holds on a higher RAFT factor (re-finishes, never re-shoots)",
+        "cost": "seconds",
+        "progress": _retime_progress,
+        "argv": lambda p: [sys.executable, "-u", "retime.py",
+                           "--store", p["store"]]
+                          + (["--total", str(p["total"])] if p.get("total") else [])
+                          + (["--max-upsample", str(p["max_upsample"])]
+                             if p.get("max_upsample") else [])
                           + (["--dry-run"] if p.get("dry_run") else []),
     },
     "audit": {

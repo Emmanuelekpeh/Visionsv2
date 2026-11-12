@@ -1,0 +1,330 @@
+#!/usr/bin/env python3
+"""
+keyframe.py -- an approved FIRST FRAME per shot, before the clip is animated.
+
+WHY. Measured on skydiving s05: the four-armed figure in frame 0 is in all 16 frames.
+AnimateDiff denoises the frames together and the clip barely moves, so whatever the
+sampler drew at the start IS the shot. A bad start costs the whole ~47 min render.
+A still costs a couple of minutes, so the still is made, LOOKED AT, and only an
+approved one is animated (`make_film.Generator.clip_from_still`).
+
+This is not previs. `previs.py` renders its stills with the 4-step Lightning sampler
+(the one that draws the extra limbs) and the clip does not start from them. A
+keyframe is rendered with the FULL sampler and IS the clip's first frame.
+
+    python keyframe.py --store skydiving --shot s05 --candidates 3
+    python keyframe.py --store skydiving                  # every shot, 1 candidate
+    python keyframe.py --store squid --shot s05 --look amused   # aMUSEd, then DreamShaper
+
+Stills go to  productions/<slug>/keyframes/<shot>/c<k>.png  with a contact sheet
+`sheet.png` per shot; choosing one is `fstore`'s `keyframe` field (see
+`choose`). Nothing here is judged by a metric: the sheet is for the eye.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Optional
+
+from PIL import Image, ImageDraw
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+
+import film_store as fs  # noqa: E402
+
+# a still is ONE frame, so it can afford more steps than a clip at the same cost
+KEYFRAME_STEPS = 20
+SIZE = 512
+
+# THE aMUSEd LOOK. aMUSEd-256 (a masked-token image model, not a diffusion UNet)
+# draws a 256 px still with its own composition, palette and texture; that still is
+# upscaled to 512 and re-drawn by DreamShaper at `strength`, so the first frame the
+# clip grows from carries a look DreamShaper alone does not produce. Low strength
+# keeps more of aMUSEd (and its soft, blobby detail); high strength keeps only its
+# layout and colour. Which one is good is a question for the eye -- every strength is
+# saved as its own candidate and nothing is chosen for you.
+AMUSED_REPO = "amused/amused-256"
+AMUSED_SIZE = 256
+AMUSED_STEPS = 12
+AMUSED_CFG = 10.0
+LOOK_STRENGTHS = (0.5, 0.65, 0.8)
+LOOKS = ("plain", "amused")
+
+
+def next_candidate(project: Dict, shot_id: str) -> int:
+    """The first free candidate number, so a new batch never overwrites an old one."""
+    d = keyframe_dir(project, shot_id)
+    taken = [int(p.stem[1:]) for p in d.glob("c*.png") if p.stem[1:].isdigit()] \
+        if d.exists() else []
+    return max(taken) + 1 if taken else 0
+
+
+def candidate_info(project: Dict, shot_id: str) -> List[Dict]:
+    """Every candidate still for a shot with what made it, oldest first."""
+    d = keyframe_dir(project, shot_id)
+    out = []
+    if not d.exists():
+        return out
+    for p in sorted(d.glob("c*.png"), key=lambda q: int(q.stem[1:] or 0)
+                    if q.stem[1:].isdigit() else 0):
+        meta = {}
+        j = p.with_suffix(".json")
+        if j.exists():
+            try:
+                meta = json.loads(j.read_text(encoding="utf-8"))
+            except Exception:
+                meta = {}
+        out.append({"path": p, "candidate": p.stem, **meta})
+    return out
+
+
+def _amused_stills(prompts: Dict[str, List[tuple]], threads: Optional[int]):
+    """aMUSEd text-to-image for {shot: [(seed, prompt, negative)]} -> {shot: [PIL]}.
+
+    Loaded from the local HuggingFace cache first (this machine is often offline);
+    freed before the SD stage so both never sit in RAM together."""
+    import gc
+    import torch
+    from diffusers import AmusedPipeline
+    if threads:
+        torch.set_num_threads(threads)
+    try:
+        pipe = AmusedPipeline.from_pretrained(AMUSED_REPO, local_files_only=True)
+    except Exception:
+        pipe = AmusedPipeline.from_pretrained(AMUSED_REPO)
+    pipe.set_progress_bar_config(disable=True)
+    out: Dict[str, List[Image.Image]] = {}
+    for sid, jobs in prompts.items():
+        out[sid] = []
+        for seed, prompt, neg in jobs:
+            t0 = time.time()
+            with torch.no_grad():
+                im = pipe(prompt=prompt, negative_prompt=neg,
+                          num_inference_steps=AMUSED_STEPS,
+                          guidance_scale=AMUSED_CFG, height=AMUSED_SIZE,
+                          width=AMUSED_SIZE,
+                          generator=torch.Generator("cpu").manual_seed(seed)
+                          ).images[0]
+            out[sid].append(im.convert("RGB"))
+            print(f"  [keyframe] {sid} aMUSEd seed {seed}: {time.time() - t0:.0f}s",
+                  flush=True)
+    del pipe
+    gc.collect()
+    return out
+
+
+def keyframe_dir(project: Dict, shot_id: str) -> Path:
+    return fs.dir_for(project["slug"]) / "keyframes" / shot_id
+
+
+def candidate_seed(project: Dict, shot: Dict, k: int) -> int:
+    """Candidate 0 uses the shot's own seed; later ones step from it."""
+    return int(fs.generation_inputs(project, shot)["seed"]) + int(k)
+
+
+def keyframe_plan() -> Dict:
+    """Sampler settings for a still: the FULL tier's guidance/negative, more steps."""
+    import make_film
+    plan = dict(make_film.sampling_plan("full"))
+    plan["steps"] = KEYFRAME_STEPS
+    return plan
+
+
+def _pipeline():
+    import torch
+    from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline
+    pipe = StableDiffusionPipeline.from_pretrained(
+        str(ROOT / "models" / "dreamshaper8"), torch_dtype=torch.float32)
+    pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+        pipe.scheduler.config, algorithm_type="dpmsolver++", use_karras_sigmas=True)
+    pipe.set_progress_bar_config(disable=True)
+    pipe.enable_vae_slicing()
+    return pipe, torch
+
+
+def render(project: Dict, shot_ids: List[str], candidates: int = 1,
+           threads: Optional[int] = None, look: str = "plain",
+           strengths=LOOK_STRENGTHS) -> Dict[str, List[Path]]:
+    """Render stills per shot. Returns {shot_id: [new paths]}.
+
+    look="plain":  `candidates` DreamShaper stills (full sampler).
+    look="amused": `candidates` aMUSEd stills, EACH re-drawn by DreamShaper at every
+                   strength in `strengths` -> candidates x len(strengths) files.
+    New files continue the numbering; old candidates are never overwritten.
+    """
+    if look not in LOOKS:
+        raise ValueError(f"look must be one of {LOOKS}, not {look!r}")
+    plan = keyframe_plan()
+    avoid = fs.character_avoid(project)
+    neg = f"{avoid}, {plan['neg']}" if avoid else plan["neg"]
+    shots = {sid: fs.get_shot(project, sid) for sid in shot_ids}
+    firsts = {sid: next_candidate(project, sid) for sid in shot_ids}
+
+    raw: Dict[str, List[Image.Image]] = {}
+    if look == "amused":
+        raw = _amused_stills(
+            {sid: [(candidate_seed(project, shots[sid], k), shots[sid]["prompt"], avoid)
+                   for k in range(candidates)] for sid in shot_ids}, threads)
+
+    pipe, torch = _pipeline()
+    if threads:
+        torch.set_num_threads(threads)
+    img2img = None
+    if look == "amused":
+        from diffusers import StableDiffusionImg2ImgPipeline
+        img2img = StableDiffusionImg2ImgPipeline.from_pipe(pipe)
+        img2img.set_progress_bar_config(disable=True)
+    out: Dict[str, List[Path]] = {}
+    for sid in shot_ids:
+        shot = shots[sid]
+        d = keyframe_dir(project, sid)
+        d.mkdir(parents=True, exist_ok=True)
+        out[sid] = []
+        n = firsts[sid]
+        for k in range(candidates):
+            seed = candidate_seed(project, shot, k)
+            if look == "plain":
+                variants = [(None, None)]
+            else:
+                m = raw[sid][k]
+                m.save(d / f"m{n}.png")                 # what aMUSEd itself drew
+                base = m.resize((SIZE, SIZE), Image.LANCZOS)
+                variants = [(base, float(s)) for s in strengths]
+            for base, strength in variants:
+                t0 = time.time()
+                gen = torch.Generator("cpu").manual_seed(seed)
+                with torch.no_grad():
+                    if base is None:
+                        im = pipe(prompt=shot["prompt"], negative_prompt=neg,
+                                  num_inference_steps=plan["steps"],
+                                  guidance_scale=plan["cfg"], width=SIZE, height=SIZE,
+                                  generator=gen).images[0]
+                    else:
+                        im = img2img(prompt=shot["prompt"], negative_prompt=neg,
+                                     image=base, strength=strength,
+                                     num_inference_steps=plan["steps"],
+                                     guidance_scale=plan["cfg"], generator=gen
+                                     ).images[0]
+                p = d / f"c{n}.png"
+                im.save(p)
+                (d / f"c{n}.json").write_text(json.dumps({
+                    "shot": sid, "candidate": n, "seed": seed,
+                    "prompt": shot["prompt"], "steps": plan["steps"],
+                    "cfg": plan["cfg"], "neg": neg, "look": look,
+                    "strength": strength,
+                    "amused": f"m{n}.png" if base is not None else None,
+                    "seconds": round(time.time() - t0, 1)}, indent=2),
+                    encoding="utf-8")
+                out[sid].append(p)
+                print(f"  [keyframe] {sid} c{n} seed {seed} {look}"
+                      + (f" strength {strength}" if strength else "")
+                      + f": {time.time() - t0:.0f}s", flush=True)
+                n += 1
+        sheet([c["path"] for c in candidate_info(project, sid)],
+              d / "sheet.png", sid)
+    return out
+
+
+def sheet(files: List[Path], out: Path, label: str = "") -> Path:
+    """Candidates side by side, for the eye."""
+    W = 384
+    s = Image.new("RGB", (W * len(files), W + 16), "black")
+    d = ImageDraw.Draw(s)
+    for i, f in enumerate(files):
+        s.paste(Image.open(f).convert("RGB").resize((W, W)), (i * W, 16))
+        d.text((i * W + 4, 2), f"{label} {f.stem}", fill="white")
+    s.save(out)
+    return out
+
+
+def choose(project: Dict, shot_id: str, candidate: int) -> Path:
+    """Approve one candidate: it becomes the shot's keyframe."""
+    p = keyframe_dir(project, shot_id) / f"c{int(candidate)}.png"
+    if not p.exists():
+        raise FileNotFoundError(f"{p} does not exist -- render it first")
+    fs.update_shot(project, shot_id, keyframe=str(p.relative_to(
+        fs.dir_for(project["slug"]))).replace("\\", "/"))
+    return p
+
+
+def approved(project: Dict, shot: Dict) -> Optional[Path]:
+    """The shot's approved keyframe file, or None."""
+    rel = shot.get("keyframe")
+    if not rel:
+        return None
+    p = fs.dir_for(project["slug"]) / rel
+    return p if p.exists() else None
+
+
+def animate_test(project: Dict, shot_id: str, candidate: int,
+                 strength: Optional[float]) -> int:
+    """Animate one candidate through the render's own `clip_from_still`."""
+    import make_film
+    from edit_planner import Shot
+    from previs import shots_from_store
+    shot = fs.get_shot(project, shot_id)
+    still = keyframe_dir(project, shot_id) / f"c{int(candidate)}.png"
+    if not still.exists():
+        print(f"{still} does not exist")
+        return 2
+    ids = fs._ordered_ids(project)
+    s = shots_from_store(project["slug"])[ids.index(shot_id)]
+    gen = make_film.Generator("models/dreamshaper8", loras=[])
+    seed = candidate_seed(project, shot, candidate)
+    frames, dt = gen.clip_from_still(s, seed, still, strength=strength,
+                                     avoid=fs.character_avoid(project))
+    out = ROOT / "output" / "audit" / project["slug"] / f"kf_{shot_id}_c{candidate}"
+    out.mkdir(parents=True, exist_ok=True)
+    for i, f in enumerate(frames):
+        f.save(out / f"f{i:03d}.png")
+    print(f"[keyframe] animated {shot_id} c{candidate} strength "
+          f"{strength if strength is not None else fs.KEYFRAME_STRENGTH}: "
+          f"{len(frames)} frames in {dt:.0f}s -> {out}", flush=True)
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Full-sampler first frame per shot")
+    ap.add_argument("--store", required=True)
+    ap.add_argument("--shot", help="one shot id (default: every shot)")
+    ap.add_argument("--candidates", type=int, default=1)
+    ap.add_argument("--look", choices=LOOKS, default="plain",
+                    help="plain = DreamShaper; amused = aMUSEd-256 still, then "
+                         "DreamShaper img2img at each --looks-strengths value")
+    ap.add_argument("--looks-strengths", default=",".join(str(s) for s in LOOK_STRENGTHS),
+                    help="img2img strengths for --look amused, comma separated")
+    ap.add_argument("--threads", type=int, default=None,
+                    help="torch CPU threads (lower it while a render is running)")
+    ap.add_argument("--choose", type=int, default=None,
+                    help="approve this candidate for --shot instead of rendering")
+    ap.add_argument("--animate", type=int, default=None,
+                    help="animate this candidate of --shot (a test: frames go to "
+                         "output/audit/<store>/kf_<shot>_c<N>/, no take is written)")
+    ap.add_argument("--strength", type=float, default=None,
+                    help="how far the clip may move from the still (0..1)")
+    a = ap.parse_args()
+    project = fs.load(a.store)
+    if a.animate is not None:
+        if not a.shot:
+            print("--animate needs --shot")
+            return 2
+        return animate_test(project, a.shot, a.animate, a.strength)
+    if a.choose is not None:
+        if not a.shot:
+            print("--choose needs --shot")
+            return 2
+        print(f"approved {choose(project, a.shot, a.choose)}")
+        return 0
+    ids = [a.shot] if a.shot else fs._ordered_ids(project)
+    render(project, ids, candidates=a.candidates, threads=a.threads, look=a.look,
+           strengths=tuple(float(x) for x in a.looks_strengths.split(",") if x.strip()))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

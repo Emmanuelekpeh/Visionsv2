@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 import time
@@ -34,6 +35,7 @@ from PIL import Image, ImageDraw  # noqa: E402
 from edit_planner import Shot, describe, energy_profile, plan  # noqa: E402
 from supplement import run_raft, to_image, to_tensor, warp  # noqa: E402
 import motion_loras as ml  # noqa: E402
+import conditioning as cond  # noqa: E402
 from handheld import apply_handheld, hold_frames, spec_for_shot, stretch_to  # noqa: E402
 
 torch.set_num_threads(12)
@@ -46,7 +48,38 @@ FRAMES = 16
 STEPS = 4
 SEED = 11
 FPS = 16          # after RAFT x2 of an 8fps base
-NEG = "blurry, static, still image, watermark, text, jitter, worst quality"
+NEG = ("blurry, static, still image, watermark, text, jitter, worst quality, "
+       "haze, glow, bloom, soft focus")
+# THE FULL TIER. Measured on skydiving s05 (same prompt, same seed): the 4-step
+# Lightning sampler at guidance 1.0 drew a four-armed blur; the same checkpoint with
+# the undistilled sampler (DPM++ karras, guidance 7, a real negative prompt) drew a
+# correct figure. Guidance 1.0 ignores the negative prompt entirely, so the fast
+# tier's NEG does nothing -- the full tier is where NEG_FULL works.
+FULL_CFG = 7.0
+NEG_FULL = ("extra arms, extra limbs, extra legs, deformed, mutated hands, bad "
+            "anatomy, lens flare, sun flare, light rays, blurry, watermark, text, "
+            "worst quality, low quality, jitter")
+
+
+def sampling_plan(tier: str) -> dict:
+    """Steps / guidance / negative prompt / distillation for a sampler tier.
+
+    "fast" is AnimateDiff-Lightning (4 steps, guidance 1.0, ~10 min a shot on this
+    CPU); "full" is the undistilled sampler at `film_store.FULL_STEPS`. One
+    definition, so the generator and its tests cannot disagree.
+    """
+    if tier == "full":
+        import film_store
+        return {"tier": "full", "lightning": False,
+                "steps": int(film_store.FULL_STEPS), "cfg": FULL_CFG,
+                "neg": NEG_FULL}
+    return {"tier": "fast", "lightning": True, "steps": STEPS, "cfg": 1.0,
+            "neg": NEG}
+
+# IP-Adapter conditioning strength for a held place/figure. 0.7 is the value the
+# controlled test used; higher starts to copy the reference framing, lower loses
+# the identity. Tuned, not guessed (see STUDIO_LOOP.md).
+IP_ADAPTER_SCALE = 0.7
 
 # Platform lengths, from 2026 short-form guidance.
 #
@@ -69,17 +102,24 @@ LENGTHS = {
     "custom": None,
 }
 MIN_PER_SHOT = 9.5      # measured, 4-step Lightning at 512x512, 16 frames
+SEC_PER_RAW_FRAME = 43.0  # measured; scales almost linearly with frame count
 
 
-def budget_report(target: float) -> str:
-    """Duration -> shots -> hours, before anyone commits to a render."""
-    avg = 2.5
-    n = max(1, round(target / avg))
-    hrs = n * MIN_PER_SHOT / 60.0
-    return (f"  target {target:.0f}s -> about {n} shots "
-            f"(at the rhythm curve's ~{avg}s average)\n"
-            f"  render budget: {n} x {MIN_PER_SHOT} min = "
-            f"{n * MIN_PER_SHOT:.0f} min ({hrs:.1f} h)")
+def budget_report(target: float, frames: int = FRAMES, fps: int = FPS) -> str:
+    """Duration -> shots -> hours, before anyone commits to a render.
+
+    The average hold is the motion the renderer actually supplies for `frames`,
+    not a constant: at 16 frames that is 1.94 s, so a 30 s film needs ~15 shots
+    and about 3 h, not the 12 shots / 1.9 h the old 2.5 s average implied.
+    """
+    from handheld import natural_seconds
+    avg = natural_seconds(frames, fps) * 1.05
+    n = max(1, math.ceil(target / avg))
+    mins = n * frames * SEC_PER_RAW_FRAME / 60.0
+    return (f"  target {target:.0f}s -> about {n} shots at {frames} raw frames "
+            f"({avg:.2f}s average hold, the generated motion)\n"
+            f"  render budget: {n} shots x {mins / n:.1f} min = "
+            f"{mins:.0f} min ({mins / 60:.1f} h)")
 
 # A small arc: settle -> detail -> the subject -> through it -> resolve
 SHOTS = [
@@ -201,7 +241,6 @@ def _save_verify_cache(cache: Dict) -> None:
 
 class Generator:
     """AnimateDiff renderer that can hot-swap the base checkpoint per shot.
-
     Two SD1.5-family checkpoints are supported. They are NOT held in memory at
     once: this box has 15.3 GB total and typically 3-8 GB free, and one fp32
     SD1.5 UNet plus its motion adapter is already several GB. So `ensure_base`
@@ -228,15 +267,61 @@ class Generator:
         self.ff = ml.FFBank()
         self.adapters = []
         self.effects = {}
+        self.ip_loaded = False        # IP-Adapter reference conditioning
+        self.conditioned = False      # did the last clip use a reference image?
+        self.tier = "fast"            # which sampler the loaded pipeline is set up for
         self.ensure_base(base)
 
+    # -- IP-Adapter: reference-image conditioning ---------------------------- #
+    # MEASURED NEED. Prompt anchors keep the writer's wording consistent, but
+    # AnimateDiff still generates a new face and a new bridge from the same words.
+    # The A/B in SEQUENCE_AB.md shows the failure directly: the coverage cut holds
+    # the place, then the woman's face changes between shots. IP-Adapter gives the
+    # model the actual reference frame, so a hold can stay one place and one
+    # figure. The weights are already cached locally (`h94/IP-Adapter` +
+    # `laion/CLIP-ViT-H-14`); no network is used.
+    #
+    # DIFFUSERS QUIRK: with the adapter loaded, a second call that passes
+    # `ip_adapter_image=None` crashes in the UNet (`added_cond_kwargs` is None).
+    # So the adapter is loaded for a conditioned shot and unloaded for an
+    # unconditioned one. The image encoder reload is ~15-25 s and happens once per
+    # run boundary, not per shot.
+    def ensure_ip_adapter(self) -> bool:
+        if self.ip_loaded:
+            return True
+        if not cond.enabled():
+            return False
+        try:
+            if not cond.load(self.pipe, IP_ADAPTER_SCALE):
+                print("  [hold] IP-Adapter weights not cached; rendering "
+                      "unconditioned. Place/figure consistency is prompt-only.")
+                return False
+            self.ip_loaded = True
+            print(f"  [hold] IP-Adapter loaded (scale {IP_ADAPTER_SCALE}); "
+                  f"reference frame conditions this hold")
+            return True
+        except Exception as exc:                      # noqa: BLE001
+            print(f"  [hold] IP-Adapter failed ({type(exc).__name__}: "
+                  f"{str(exc)[:80]}); rendering unconditioned")
+            self.ip_loaded = False
+            return False
+
+    def release_ip_adapter(self) -> None:
+        if not self.ip_loaded:
+            return
+        cond.unload(self.pipe)
+        self.ip_loaded = False
+
     # -- checkpoint switching ------------------------------------------------ #
-    def ensure_base(self, base: str):
-        if base == self.base and self.pipe is not None:
+    def ensure_base(self, base: str, tier: str | None = None):
+        tier = tier or self.tier
+        if base == self.base and tier == self.tier and self.pipe is not None:
             return
         if self.pipe is not None:
-            print(f"  [base] releasing {self.base}, loading {base} (~1 min)")
+            print(f"  [base] releasing {self.base}/{self.tier}, loading "
+                  f"{base}/{tier} (~1 min)")
             self.release()
+        self.tier = tier
         self._build(base)
         self.base = base
 
@@ -252,6 +337,7 @@ class Generator:
         self.ensure_base(path)
 
     def release(self):
+        self.release_ip_adapter()
         self.pipe = None
         self.ff = ml.FFBank()
         self.adapters = []
@@ -267,14 +353,22 @@ class Generator:
         kw = {"variant": "fp16"} if base == "models/sd15" else {}
         self.pipe = AnimateDiffPipeline.from_pretrained(
             base, motion_adapter=adapter, torch_dtype=torch.float32, **kw)
-        self.pipe.scheduler = EulerDiscreteScheduler.from_config(
-            self.pipe.scheduler.config, timestep_spacing="trailing")
+        plan = sampling_plan(self.tier)
+        if plan["lightning"]:
+            self.pipe.scheduler = EulerDiscreteScheduler.from_config(
+                self.pipe.scheduler.config, timestep_spacing="trailing")
+        else:
+            from diffusers import DPMSolverMultistepScheduler
+            self.pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+                self.pipe.scheduler.config, algorithm_type="dpmsolver++",
+                use_karras_sigmas=True)
         self.pipe.set_progress_bar_config(disable=True)
         self.pipe.enable_attention_slicing()
         self.pipe.enable_vae_slicing()
-        sd = load_file("models/animatediff_lightning/"
-                       "animatediff_lightning_4step_diffusers.safetensors")
-        self.pipe.unet.load_state_dict(sd, strict=False)
+        if plan["lightning"]:
+            sd = load_file("models/animatediff_lightning/"
+                           "animatediff_lightning_4step_diffusers.safetensors")
+            self.pipe.unet.load_state_dict(sd, strict=False)
 
         cat = ml.catalog()
         wanted = self.loras if self.loras is not None else [
@@ -364,17 +458,93 @@ class Generator:
     # kept for compatibility with the earlier camera-only code path
     _set = set_motion
 
-    def clip(self, shot, seed, model: str | None = None):
+    def clip(self, shot, seed, model: str | None = None, reference=None,
+             tier: str = "fast", avoid: str = ""):
+        tier = "full" if tier == "full" else "fast"
         if model:
-            self.ensure_model(model)
+            path = self.BASES.get(model, model)
+            if path not in self.BASES.values():
+                self.ensure_model(model)          # raises the explanatory error
+            self.ensure_base(path, tier)
+        else:
+            self.ensure_base(self.base, tier)
         self.set_motion(shot.camera)
+        # `reference` is a PIL frame from the run's anchor shot. It is only used
+        # when the adapter loaded; unconditioned clips unload it (diffusers quirk
+        # above), so a single-shot place is not accidentally conditioned on the
+        # previous scene.
+        self.conditioned = False
+        if reference is not None:
+            if self.ensure_ip_adapter():
+                self.conditioned = True
+        elif self.ip_loaded:
+            self.release_ip_adapter()
+        plan = sampling_plan(tier)
+        neg = plan["neg"]
+        if avoid and plan["cfg"] > 1.0:       # guidance 1.0 ignores the negative
+            neg = f"{avoid}, {neg}"
+        kwargs = dict(prompt=shot.prompt, negative_prompt=neg,
+                      num_frames=FRAMES, guidance_scale=plan["cfg"],
+                      num_inference_steps=plan["steps"], width=SIZE, height=SIZE,
+                      generator=torch.Generator("cpu").manual_seed(seed))
+        if self.conditioned:
+            kwargs["ip_adapter_image"] = reference
         t0 = time.time()
         with torch.no_grad():
-            out = self.pipe(prompt=shot.prompt, negative_prompt=NEG,
-                            num_frames=FRAMES, guidance_scale=1.0,
-                            num_inference_steps=STEPS, width=SIZE, height=SIZE,
-                            generator=torch.Generator("cpu").manual_seed(seed))
+            out = self.pipe(**kwargs)
         return [f.convert("RGB") for f in out.frames[0]], time.time() - t0
+
+    def clip_from_still(self, shot, seed, still, model: str | None = None,
+                        strength: float | None = None, avoid: str = ""):
+        """Animate FROM an approved keyframe (full tier only).
+
+        The still is repeated for every frame and noised to `strength`, then
+        denoised with the motion module: the composition (and the anatomy someone
+        approved) is the starting point instead of whatever the sampler happens to
+        draw. strength 0 would freeze the still, 1 would ignore it. The number of
+        steps actually run is int(steps * strength).
+        """
+        import film_store
+        from diffusers import AnimateDiffVideoToVideoPipeline
+        base = self.BASES.get(model, model) if model else self.base
+        self.ensure_base(base, "full")
+        self.set_motion(shot.camera)
+        strength = float(film_store.KEYFRAME_STRENGTH if strength is None else strength)
+        plan = sampling_plan("full")
+        if self.ip_loaded:
+            self.release_ip_adapter()      # the still IS the reference; one conditioning
+        self.conditioned = False
+        # `from_pipe` drops the motion UNet (diffusers 0.32.2), so assemble from the
+        # loaded parts: the SAME modules, no copy, no reload.
+        pp = self.pipe
+        v2v = AnimateDiffVideoToVideoPipeline(
+            vae=pp.vae, text_encoder=pp.text_encoder, tokenizer=pp.tokenizer,
+            unet=pp.unet, motion_adapter=pp.motion_adapter, scheduler=pp.scheduler,
+            feature_extractor=pp.feature_extractor, image_encoder=pp.image_encoder)
+        v2v.set_progress_bar_config(disable=True)
+        from PIL import Image
+        base_img = still if hasattr(still, "convert") else Image.open(still)
+        base_img = base_img.convert("RGB").resize((SIZE, SIZE))
+        t0 = time.time()
+        with torch.no_grad():
+            out = v2v(video=[base_img] * FRAMES, prompt=shot.prompt,
+                      negative_prompt=(f"{avoid}, {plan['neg']}" if avoid
+                                       else plan["neg"]),
+                      guidance_scale=plan["cfg"],
+                      num_inference_steps=plan["steps"], strength=strength,
+                      width=SIZE, height=SIZE,
+                      generator=torch.Generator("cpu").manual_seed(seed))
+        return [f.convert("RGB") for f in out.frames[0]], time.time() - t0
+
+
+def _approved_keyframe(project, record):
+    """The shot's approved keyframe file (see keyframe.py), or None."""
+    import film_store as fstore
+    rel = record.get("keyframe")
+    if not rel:
+        return None
+    p = fstore.dir_for(project["slug"]) / rel
+    return p if p.exists() else None
 
 
 def stage_dir(name: str, i: int, stage: str) -> Path:
@@ -448,11 +618,9 @@ def render(planned, clips, name="film"):
     for drawing_id, _start, length in segs:
         i = int(drawing_id.replace("shot", ""))
         src = clips[i]
-        # each source clip already has its own motion; stretch or trim to the hold
-        if len(src) >= length:
-            idx = [round(k * (len(src) - 1) / max(1, length - 1)) for k in range(length)]
-        else:
-            idx = [round(k * (len(src) - 1) / max(1, length - 1)) for k in range(length)]
+        # each source clip already has its own motion; resample (trim OR stretch --
+        # the same index map does both) to the hold
+        idx = [round(k * (len(src) - 1) / max(1, length - 1)) for k in range(length)]
         frames.extend(src[j] for j in idx)
 
     d = OUT / name
@@ -492,11 +660,45 @@ def run_store(a) -> int:
     from looks import apply_look
 
     project = fstore.load(a.store)
-    plan = fstore.export_plan(project)
+
+    def eff(p):
+        """The project AS THIS RUN WILL RENDER IT. `--frames N` overrides the
+        production's recorded frame count for this run only: the plan (which shots
+        are stale) and the take record (what hash the new take is stamped with) must
+        both be taken against N, or a 12-frame take is stamped as a 16-frame one and
+        the studio calls it current. A copy, not a mutation -- `fstore.save(project)`
+        below must not persist a one-off override into the production's settings."""
+        n = getattr(a, "frames", None)
+        if not n:
+            return p
+        q = dict(p)
+        q["settings"] = dict(p.get("settings") or {}, frames=int(n))
+        return q
+
+    plan = fstore.export_plan(eff(project))
     order = plan["order"]
     if not order:
         raise SystemExit(f"production {a.store!r} has no shots in its timeline")
     fps = plan["fps"]
+
+    # PREVIS BEFORE THE RENDER HOUR, EVEN ON THE CLI. The studio's render buttons
+    # gate on previs, but `make_film --store` (the path a terminal user takes) did
+    # not mention it -- and the first rendered `ego` film went out without anyone
+    # seeing a still per shot first. This is a WARNING, not a block: partial
+    # re-renders must stay possible. Previs is ~20-40 s per still; the render is
+    # ~12-15 min per shot.
+    if getattr(a, "previs_check", False):   # opt-in: it no longer gates anything
+        try:
+            import previs
+            gate = previs.gate(project)
+            if not gate.get("ok"):
+                reasons = "; ".join(gate.get("reasons") or [])[:300]
+                print(f"[previs] {gate.get('status')}: {reasons}")
+                print("[previs] informational only: previs stills use the 4-step "
+                      "sampler, not the render's.")
+        except Exception as exc:                     # noqa: BLE001
+            print(f"[previs] check unavailable "
+                  f"({type(exc).__name__}: {str(exc)[:100]})")
 
     # The raw frame count is a per-production SETTING, not a constant, because it is
     # the one dial that measurably buys speed: 12 frames = 510s against 16 = 695s on
@@ -510,8 +712,8 @@ def run_store(a) -> int:
     # speed-up applies where it is free and nowhere else.
     #
     # NOTE: this does NOT write the value into the project here. Nothing is mutated
-    # before the render succeeds -- the frame count is passed to the store explicitly
-    # (`frames=FRAMES`) wherever a hash is taken, so there is no window in which a
+    # before the render succeeds -- a `--frames` override reaches the plan and the
+    # take's hash through `eff(project)` (a copy), so there is no window in which a
     # half-applied setting could be read by something else.
     global FRAMES
     st_settings = project.get("settings") or {}
@@ -536,7 +738,15 @@ def run_store(a) -> int:
 
     only = ({int(x) for x in str(a.only).split(",") if x.strip()} if a.only else None)
     todo = [o for o in order if only is None or (order.index(o) + 1) in only]
-    needing_model = [o for o in todo if fstore.needs_generation(o["state"])]
+    # `--force` re-renders the selected shots even when their recorded inputs say
+    # they are current. Needed when a change is NOT a stored input for the take --
+    # e.g. rolling out hold conditioning onto takes rendered before it existed, or
+    # re-rolling a seed deliberately. Without it, the only way to force a
+    # re-render was to edit the prompt, which is a lie about the input.
+    if getattr(a, "force", False) and only:
+        needing_model = [o for o in todo]
+    else:
+        needing_model = [o for o in todo if fstore.needs_generation(o["state"])]
     refinishing = [o for o in todo if o["state"] == "restale"]
 
     print(f"=== FROM STORE {a.store} ===")
@@ -556,16 +766,71 @@ def run_store(a) -> int:
     # ---- generate the shots whose MODEL inputs moved ---------------------- #
     clips: Dict[str, list] = {}
     gen = None
+    hold_plan: Dict[int, int] = {}
+    hold_anchor_shots = set()
+    hold_ref_frames: Dict[int, object] = {}
     if needing_model:
+        try:
+            from visual_org import reference_plan
+            hold_plan = reference_plan([o["shot"] for o in order])
+            hold_anchor_shots = set(hold_plan.values())
+        except Exception as exc:                      # noqa: BLE001
+            print(f"  [hold] organisation unavailable "
+                  f"({type(exc).__name__}: {str(exc)[:70]}); rendering prompt-only")
         gen = Generator(a.base, loras=None)
         print(f"\n=== GENERATING {len(needing_model)} shot(s) ===")
+        # the tiers, in generation order, so a progress display can price what is
+        # LEFT per tier (a fast shot is ~1/4 of a full one)
+        print("  [plan] tiers: " + ",".join(
+            fstore.render_tier(o["record"]) for o in needing_model), flush=True)
+        if hold_plan:
+            print(f"  hold conditioning: {len(hold_plan)} shot(s) will be "
+                  f"conditioned on their run's anchor frame "
+                  f"(IP-Adapter {IP_ADAPTER_SCALE})")
         for n, o in enumerate(needing_model, 1):
             shot = o["shot"]
+            i = order.index(o)
+            anchor = hold_plan.get(i)
+            reference = None
+            anchor_note = ""
+            if anchor is not None:
+                reference = hold_ref_frames.get(anchor)
+                if reference is None:
+                    # the anchor may already have a take from an earlier run
+                    anchor_take = fstore.best_take(project, order[anchor]["record"])
+                    if anchor_take:
+                        paths = sorted((Path(anchor_take["_dir"]) / "frames")
+                                       .glob("f*.png"))
+                        if paths:
+                            reference = Image.open(
+                                paths[len(paths) // 2]).convert("RGB")
+                anchor_note = (f" +hold ref shot {anchor + 1}"
+                               if reference is not None else " (hold ref pending)")
             t0 = time.time()
-            frames, dt = gen.clip(shot, o["generation"]["seed"],
-                                  model=(o["generation"].get("model")
-                                         if o["generation"].get("model") not in
-                                         (None, "", "off") else None))
+            tier = fstore.render_tier(o["record"])
+            kf = _approved_keyframe(project, o["record"])
+            if kf is not None:
+                tier = "full"          # a keyframe is only ever animated by the full tier
+                print(f"  [keyframe] animating from {kf.name} "
+                      f"(strength {fstore.KEYFRAME_STRENGTH})")
+                frames, dt = gen.clip_from_still(
+                    shot, o["generation"]["seed"], kf,
+                    model=(o["generation"].get("model")
+                           if o["generation"].get("model") not in (None, "", "off")
+                           else None),
+                    avoid=o["generation"].get("avoid") or "")
+            else:
+                frames, dt = gen.clip(
+                    shot, o["generation"]["seed"],
+                    model=(o["generation"].get("model")
+                           if o["generation"].get("model") not in (None, "", "off")
+                           else None),
+                    reference=reference, tier=tier,
+                    avoid=o["generation"].get("avoid") or "")
+            if i in hold_anchor_shots:
+                hold_ref_frames[i] = frames[len(frames) // 2]
+                if i in hold_plan.values():
+                    print(f"  [hold] shot {i + 1} is the anchor frame for its run")
             # every store call below takes the shot RECORD, which `film_store._sid`
             # accepts as well as an id -- one of these used to pass a record to a
             # function that wanted an id, and it failed after the model had loaded
@@ -575,13 +840,19 @@ def run_store(a) -> int:
             frames_dir.mkdir(parents=True, exist_ok=True)
             for j, f in enumerate(frames):
                 f.save(frames_dir / f"f{j:03d}.png")
-            smooth = raft_upsample(frames)
+            smooth = raft_upsample(frames, factor=int(o["record"].get("upsample") or 2))
             rec = fstore.take_record(
-                project, o["record"], seconds=round(time.time() - t0, 1),
+                eff(project), o["record"], seconds=round(time.time() - t0, 1),
                 frames=len(smooth),
                 ladder={"raw": len(frames), "smooth": len(smooth),
                         "delivered": o["hold_frames"]},
                 take=take, model=gen.base, camera=shot.camera)
+            # THE CONDITIONING IS PART OF THE TAKE. A take rendered from a
+            # reference frame is not the same input as one rendered from prompt
+            # alone; recording it means a stale/re-use decision can see it.
+            rec["conditioned"] = bool(gen.conditioned)
+            rec["hold_reference"] = (f"shot {anchor + 1}" if anchor is not None
+                                     and gen.conditioned else None)
             fstore._write_json(tdir / "take.json", rec)
             fstore.choose_take(project, o["record"], take)
             fstore.log_history(project, act="generate", shot=o["record"]["id"],
@@ -589,8 +860,9 @@ def run_store(a) -> int:
             fstore.save(project)
             project = fstore.load(a.store)          # re-derive against the new take
             print(f"  {n}/{len(needing_model)} {o['record']['id']} "
-                  f"{shot.camera:<20} {dt:5.0f}s -> take {take} "
-                  f"({len(frames)} raw, {len(smooth)} smooth)", flush=True)
+                  f"{shot.camera:<20} [{tier}] {dt:5.0f}s -> take {take} "
+                  f"({len(frames)} raw, {len(smooth)} smooth){anchor_note}",
+                  flush=True)
 
     # ---- PARTIAL RUN: generate, land the takes, and STOP ------------------- #
     # `--only` means "these shots, and nothing else". Without this, a partial run fell
@@ -630,8 +902,27 @@ def run_store(a) -> int:
         src = [Image.open(p).convert("RGB")
                for p in sorted((Path(take["_dir"]) / "frames").glob("f*.png"))]
         hold = o["hold_frames"]
-        base = stretch_to(src, hold)
         sp = fstore.finish_inputs(project, o["record"])
+        # PROCEDURAL LONG HOLD: a per-shot RAFT factor interpolates a longer,
+        # slower clip from the SAME take, so the pacing study's 4-8 s band is a
+        # finishing decision. Default 2 keeps the existing raw-stretch path.
+        up = int(sp.get("upsample") or 2)
+        if up > 2:
+            src = raft_upsample(src, factor=up)
+        base = stretch_to(src, hold)
+        # FINISHING CAMERA. A generated camera LoRA cannot settle -- it is still
+        # travelling at the last frame (measured 2.79 px/f vs 0.43 for the
+        # procedural path). So the movement plan records the one motivated move
+        # as a finishing spec and it is applied HERE: travel, then hold, with the
+        # crop margin it needs. Static generation + finishing move is the only
+        # combination on this renderer that produces "move, settle, cut".
+        cm = sp.get("camera_move")
+        if cm:
+            from camera_path import apply_path
+            base = apply_path(base, str(cm["move"]), float(cm["amount"]),
+                              float(cm["settle"]))
+            print(f"     camera finish: {cm['move']} {cm['amount']}px, "
+                  f"settle {cm['settle']}", flush=True)
         if plan["shake_scale"] > 0:
             spec = spec_for_shot(shot.scale, shot.kind, shot.seconds,
                                  seed=int(o["generation"]["seed"]), fps=fps,
@@ -684,13 +975,28 @@ def run_store(a) -> int:
     print("\n=== ASSEMBLING ===")
     name = a.name or f"{a.store}_render"
     frames, d = render(planned, stretched, name)
+    # THE RECORD MUST BE READ LIVE, NOT FROM THE PLAN SNAPSHOT. `order` was
+    # exported BEFORE this run generated anything, so a run that generated and
+    # assembled in one process wrote `state: "unrendered"` and `take: null` for
+    # every shot it had just rendered and put in the film (the real 13-shot `ego`
+    # render did exactly this). The film was correct; its own stats file denied it.
+    shot_rows = []
+    for o in order:
+        take = fstore.best_take(project, o["record"])
+        shot_rows.append({
+            "shot": o["record"]["id"],
+            "take": (take or {}).get("take"),
+            "state": fstore.shot_state(project, o["record"]),
+            "camera": o["shot"].camera,
+            "camera_move": o["record"].get("camera_move"),
+            "scale": o["shot"].scale,
+            "hold_frames": o["hold_frames"],
+            "in_s": round(o["in_s"], 3),
+            "palette": o["palette"],
+        })
     meta = {"store": a.store, "name": name, "fps": fps,
             "total_frames": len(frames), "duration_s": round(len(frames) / fps, 2),
-            "shots": [{"shot": o["record"]["id"], "take": (o["take"] or None),
-                       "state": o["state"], "camera": o["shot"].camera,
-                       "scale": o["shot"].scale, "hold_frames": o["hold_frames"],
-                       "in_s": round(o["in_s"], 3), "palette": o["palette"]}
-                      for o in order]}
+            "shots": shot_rows}
     (d / "stats.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"  {len(frames)} frames @ {fps}fps = {len(frames)/fps:.1f}s")
 
@@ -731,13 +1037,16 @@ def main():
     ap.add_argument("--name", default="film")
     ap.add_argument("--only", default=None,
                     help="render ONLY these shots (comma list, 1-based) and stop "
-                         "before grading and assembly. Their per-shot stages are "
-                         "kept on disk, so a single shot can be re-rendered "
+                         "before grading and assembly. Their per-shot stages are "                         "kept on disk, so a single shot can be re-rendered "
                          "without touching the others")
     ap.add_argument("--assemble", action="store_true",
                     help="skip generation entirely and assemble the shots already "
                          "on disk. Generate once per shot, assemble as often as "
                          "you like -- the pool's economy, without the pool")
+    ap.add_argument("--force", action="store_true",
+                    help="with --only: re-render these shots even if their recorded "
+                         "inputs are current (for a change that is not a stored "
+                         "input, e.g. rolling out hold conditioning)")
     ap.add_argument("--from-project", default=None,
                     help="render the FROZEN plan in workspace/<name>.json instead "
                          "of recomputing the director and the planner. This is "
@@ -749,6 +1058,11 @@ def main():
                          "frozen copy to drift -- writes a NEW immutable take per "
                          "shot instead of overwriting, and re-finishes shots whose "
                          "grade/hold/shake moved without re-generating them")
+    ap.add_argument("--previs-check", action="store_true",
+                    help="print the previs (one still per shot) status before this "
+                         "render. Off by default: previs no longer gates or "
+                         "warns -- it uses the 4-step sampler, so it does not "
+                         "show what the render will be")
     ap.add_argument("--shots", default="landscape",
                     choices=["landscape", "figure", "test", "llm"],
                     help="landscape/figure/test are hand-written lists; 'llm' "
@@ -843,30 +1157,27 @@ def main():
     proposal = None      # the text-layer scorecard is skipped for a frozen plan
     looks = None
     if a.from_project:
+        # ONE RENDER PATH. The workbench used to render through its own loop, which
+        # meant it missed hold conditioning, the take ladder and the staleness
+        # hash. Materialise the frozen plan into a production and let the store
+        # path render it -- the same path the studio uses.
         project = fp.load(a.from_project)
         planned = fp.frozen_shots(project)
         if not planned:
             raise SystemExit(
                 f"project {a.from_project!r} has no frozen plan. Plan it and "
                 f"approve the plan first (the PLAN stage), then render.")
-        report = fp.frozen_report(project)
-        shots = planned
-        scenes = [s.scene for s in planned]
-        looks = project.get("grade", {}).get("looks") or None
-        if looks:
-            a.looks = "off"          # the project's palettes win; see below
-        # the baseline on/off is also a project setting, not a CLI flag: the GRADE
-        # stage owns it, and a control there must reach the render.
-        a.look_post = ("technical" if project.get("grade", {}).get("technical", True)
-                       else "off")
-        print(f"  grade: baseline {a.look_post}, "
-              f"palettes {looks if looks else '(none)'}")
-        print(f"=== FROM PROJECT {a.from_project} ===")
-        print(f"  FROZEN plan: {len(planned)} shots, approved "
-              f"{project.get('plan', {}).get('approved_at') or 'NOT APPROVED'}")
-        print(f"  rendering exactly these; the director and the planner are "
-              f"NOT re-run")
-        print(describe(planned))
+        conv = fp.materialize_store(project)
+        print(f"=== FROM PROJECT {a.from_project} -> production "
+              f"{conv['slug']} ===")
+        print(f"  {len(planned)} frozen shots; rendering through the STORE path, "
+              f"so hold conditioning, takes and stats apply")
+        a.store = conv["slug"]
+        if (a.name or "film") == "film":
+            a.name = conv["name"]
+        if not getattr(a, "frames", None):
+            a.frames = conv["frames"]
+        return run_store(a)
     target_seconds = a.seconds or LENGTHS.get(a.length)
     if project is None:
 
@@ -879,12 +1190,17 @@ def main():
             who = (f"ensemble: {len(a.farms.split(','))} farms -> {a.showrunner}"
                    if a.writers == "ensemble" else a.llm)
             print(f'=== STORY ({who}) ===\n  concept: "{concept}"')
-            # shot count is derived from the target duration, because the holds clamp
-            # and duration is therefore set by how many shots there are
+            # shot count is derived from the target duration and the RENDERER'S
+            # motion budget, because duration is set by how many shots there are
+            # and a hold cannot exceed what the model generated.
             want = None
+            _plan_frames = int(getattr(a, "frames", None) or FRAMES)
             if target_seconds:
-                want = max(4, round(target_seconds / 2.5))
-                print(f"  target {target_seconds:.0f}s -> asking for {want} shots")
+                from handheld import natural_seconds
+                avg = natural_seconds(_plan_frames, FPS) * 1.05
+                want = max(4, math.ceil(target_seconds / avg))
+                print(f"  target {target_seconds:.0f}s at {_plan_frames} raw frames "
+                      f"-> asking for {want} shots ({avg:.2f}s average hold)")
             if a.writers == "ensemble":
                 proposal = write_shots_ensemble(
                     concept,
@@ -919,24 +1235,34 @@ def main():
                                    energy_arc=not a.no_energy_arc)
             print("\n" + report.show())
 
-        planned, report = plan(shots, total=target_seconds)
+        # FRAMES is the raw-frame setting the renderer will actually use; the
+        # planner clamps holds to the motion that produces. `--frames` wins if
+        # given, as it does on the store path.
+        planned, report = plan(shots, total=target_seconds,
+                               frames=int(getattr(a, "frames", None) or FRAMES),
+                               fps=FPS)
     print("\n=== PLANNED ===")
     achieved = sum(s.seconds for s in planned)
     if target_seconds and not a.no_budget:
-        print(budget_report(target_seconds))
+        print(budget_report(target_seconds,
+                            int(getattr(a, "frames", None) or FRAMES), FPS))
         # A target duration is only reachable if there are enough shots. Holds
-        # are clamped to MAX_SHOT (3.6s), so N shots cannot exceed 3.6N seconds
-        # however the curve is scaled. Without this check the preset silently
-        # under-delivers -- 6 shots asked for 30s delivers 21.6s and says
-        # nothing, which is the same class of bug as the refused-model fallback.
-        need = max(1, round(target_seconds / 2.5))
+        # are capped by the renderer's generated motion, not by a constant, so N
+        # shots cannot exceed N * max_hold_seconds. The planner reports the same
+        # shortfall in report.notes; this is the CLI's human-readable echo.
+        from handheld import max_hold_seconds, natural_seconds
+        _frames = int(getattr(a, "frames", None) or FRAMES)
+        cap = max_hold_seconds(_frames, FPS)
+        need = math.ceil(target_seconds / cap)
         if achieved < target_seconds * 0.9:
             print(f"  !! target {target_seconds:.0f}s NOT reachable with "
-                  f"{len(planned)} shots: holds clamp at "
-                  f"{__import__('edit_planner').MAX_SHOT}s, so the ceiling is "
-                  f"{len(planned) * __import__('edit_planner').MAX_SHOT:.1f}s")
+                  f"{len(planned)} shots at {_frames} raw frames: each supplies "
+                  f"{natural_seconds(_frames, FPS):.2f}s of motion and the hold "
+                  f"ceiling is {cap:.2f}s, so the ceiling is "
+                  f"{len(planned) * cap:.1f}s")
             print(f"  !! achieved {achieved:.1f}s. Ask the writer for about "
-                  f"{need} shots, or accept a shorter piece.")
+                  f"{need} shots, raise the frame setting, or accept a shorter "
+                  f"piece.")
         else:
             print(f"  achieved {achieved:.1f}s across {len(planned)} shots")
     print(describe(planned))
@@ -1045,7 +1371,7 @@ def main():
             for j, f in enumerate(frames):
                 f.save(raw_dir / f"f{j:03d}.png")
 
-            smooth = raft_upsample(frames)
+            smooth = raft_upsample(frames, factor=getattr(s, "upsample", 2))
             # keep the per-shot stages on disk. `raw/` was already saved above;
             # these two are what make "raw -> RAFT -> shaken" inspectable per shot,
             # and what `--assemble` reads instead of regenerating.

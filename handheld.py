@@ -605,6 +605,62 @@ def hold_frames(shot, fps: int = 16) -> int:
     return max(1, round(shot.seconds * fps))
 
 
+# How far a delivered hold may exceed the generated motion before the
+# duplication is visible. Static shots can be held longer because a duplicated
+# still is still a still; a camera move duplicated is duplicated MOTION.
+MAX_STRETCH_STATIC = 1.30
+MAX_STRETCH_MOVING = 1.15
+
+
+def natural_seconds(frames: int = 16, fps: int = 16, upsample: int = 2) -> float:
+    """How much SMOOTH motion one generated shot contains, in delivered seconds.
+
+    RAFT x`upsample` of `frames` raw frames delivers
+    `frames + (frames-1)*(upsample-1)` frames. At the defaults (16 frames, 16 fps,
+    x2) that is 31 frames = 1.94 s.
+
+    `upsample` can be raised PER SHOT as a finishing decision: a 16-frame take at
+    x4 is 61 delivered frames = 3.81 s of interpolated (slow) motion, which is
+    what makes the pacing study's 4-8 s hold band reachable WITHOUT another
+    AnimateDiff render. The study itself calls this the "procedural hold" option.
+    """
+    up = max(2, int(upsample))
+    delivered = int(frames) + (int(frames) - 1) * (up - 1)
+    return delivered / float(fps)
+
+
+def max_hold_seconds(frames: int = 16, fps: int = 16, moving: bool = False,
+                     upsample: int = 2) -> float:
+    """The longest hold this renderer can deliver for this shot without judder."""
+    factor = MAX_STRETCH_MOVING if moving else MAX_STRETCH_STATIC
+    return natural_seconds(frames, fps, upsample) * factor
+
+
+def stretch_ratio(seconds: float, frames: int = 16, fps: int = 16,
+                  upsample: int = 2) -> float:
+    """Delivered hold / generated motion. 1.0 = no duplication; >1.3 = visible."""
+    up = max(2, int(upsample))
+    delivered = int(frames) + (int(frames) - 1) * (up - 1)
+    return max(1, round(float(seconds) * fps)) / max(1, delivered)
+
+
+def fit_hold_seconds(seconds: float, camera: str = "none",
+                     frames: int = 16, fps: int = 16,
+                     upsample: int = 2) -> float:
+    """Clamp a requested hold to what the renderer can deliver without judder.
+
+    Used where a proposal is ADOPTED (`film_store.shots_from_proposal`): the
+    writer's seconds were guesses, and the store path never runs the planner,
+    so without this the writer's longest guess becomes duplicated frames. A human
+    editing a shot afterwards is not clamped here -- the UI warns instead; the
+    difference is that the AI proposal must obey the machine, a person may choose.
+    """
+    cap = max_hold_seconds(frames, fps,
+                           moving=camera not in ("none", "", None),
+                           upsample=upsample)
+    return min(float(seconds), cap)
+
+
 def stretch_to(frames: Sequence[Image.Image], length: int) -> List[Image.Image]:
     """Resample a clip to `length` delivered frames by index.
 

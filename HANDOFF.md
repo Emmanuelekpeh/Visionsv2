@@ -251,6 +251,590 @@ project's oldest failure mode — there is now one, with a comment where the dup
    subsequent command, writing blank frames). The layout is verified **structurally**
    and not visually.
 
+### 0.6 THIS SESSION — showrunner measured, pacing fixed
+
+**Showrunner: keep `granite4.1:8b`.** `compare_showrunners.py` compares candidates
+on ONE concept and ONE shared idea pool (3 runs each, retries off). Granite beat
+`qwen2.5:7b` on filmcraft 70.6 vs 55.7 (mistral 50.8): jump cuts 0.67 vs 2.33 per
+film, scenes 2.67 vs 1.67 (2/3 qwen runs single-scene), self-repetition 0.05 vs
+0.14, provenance 0.94 vs 0.83. Qwen is ~50 s/attempt faster and returns valid
+JSON, but its lists are 2-4 adjacent medium shots and a looped first/last image.
+Story-break rate ties at 1.0/film, so the next quality lever is the story gate,
+not the model. Full numbers: `SHOWRUNNER_TEST.md`.
+
+**The "granite malformed JSON" was truncation.** Reproduced in the single-writer
+path: 16 shots at `num_predict=1200` → exactly 1200 completion tokens,
+`JSONDecodeError ... (13 open vs 11 close brackets) TRUNCATED`; at 3000 → 15
+shots, valid raw JSON. `story.predict_budget(n_shots)` now scales the cap
+(2000-6000) and both writer paths use it. The comma-repair layer measured **0
+uses**; it cannot fix truncation and should not be extended to try.
+
+**Pacing.** A shot contains `(2*frames-1)/fps` seconds of real motion (1.94 s at
+16 frames); a longer hold duplicates frames and plays as judder. The uncommitted
+planner curve was assigning 4.5-7 s holds (2.4-3.1x) and
+`film_store.shots_from_proposal` kept the writer's seconds untouched, so the
+store path could ship judder. Fixed: `handheld.natural_seconds` /
+`max_hold_seconds` are the one definition; `edit_planner.plan(..., frames=)`
+clamps and reports unreachable targets; the UI shows the stretch and warns;
+`pacing_audit.py` audits any production. Full analysis:
+`PACING_AND_FLOW_RESEARCH.md`.
+
+**Follow-up (same session): the product gaps from that list.**
+
+- **The store path now runs the planner at adoption**
+  (`film_store.shots_from_proposal`). R4 gives the cut a beat-shaped rhythm of
+  real generated motion, R1 repairs adjacent framing scales, the budget clamps
+  every hold, and `project["pacing"]` records writer holds → planned holds so the
+  write screen can show what happened. The writer's TEXT is kept; timing and
+  framing are paced.
+- **The story gate acts.** `draft.py::story_gate` refuses to adopt a proposal
+  whose beats still fail (`story:` breaks); `--allow-broken-story` and the UI's
+  "adopt a broken story" checkbox are the explicit override. The retry inside
+  `write_shots_ensemble` is no longer blind: `story._repair_note` hands the next
+  attempt the validator's exact complaints, the beats it produced and its
+  previous prompts.
+- Rejected drafts leave the production untouched and exit 2; the UI failure
+  banner now shows the log's last lines instead of "open the log".
+- **Camera direction reaches the render.** `camera_direction.py` decides one
+  camera per shot at adoption with four policies (`off`, `suggestions`,
+  `director`, `hybrid` default = director first, writer's suggestion where it
+  declines, both inside the director's mover cap). `draft.py --cameras` and
+  Settings → "how the cut is directed" select it; `film_store` stores the
+  decision so R2/R3/R6 act on it; the UI shows the camera count. `camera_ab.py`
+  compares policies on one production or one proposal before spending render
+  hours. Measured: on `seasoning` (13 shots) stored moves went 0 → 2, reversals
+  0, within budget; on a fresh 6-shot list hybrid/director each give 2.
+- The A/B caught two bugs before shipping: uncapped hybrid gave 3 moves in a
+  6-shot film, and `none` being a valid camera name burned the mover budget on
+  empty suggestions. Both regression-tested.
+- **151 tests pass** → **162 after the sequence grammar** (`test_camera_direction.py`,
+  `test_story_gate.py`, `test_story_structure.py`, `test_edit_planner_pacing.py`).
+  The real-store adoption path was smoke-tested end-to-end with a cached proposal.
+- **Sequence grammar (R7–R10).** A shot now carries `purpose` (establish/master/
+  insert/reaction/resolve) and `link` (open/match-action/eyeline/movement/graphic/
+  scene-cut). The brief asks for 2–3 scenes covering ONE place/action each, ≤2
+  hard stops, no interleaving, scene-opening shot longest, and moves that continue
+  in the same scene. `story.structure_problems` reports R7 (scene runs/cuts/
+  interleaving), R8 (coverage: scales, shared subject, purposes), R9 (rhythm);
+  `edit_planner.plan` repairs R10 (a move before a scene cut → none); the adoption
+  gate blocks `story:` AND `structure:` breaks; the repair retry names both.
+  `pacing_audit.py` measures organisation (scene runs/cuts, within vs across
+  overlap, same-subject share, hold sd, move→cut); `sequence_audit.py` replays the
+  grammar over the archive: 29 cached proposals show 25 R7, 43 R8, 23 R10
+  violations before counting the missing new fields. Measured on the shipped
+  productions, within-scene prompt overlap is no higher than across-scene (e.g.
+  `seasoning` 0.05 vs 0.08, 0/10 adjacent same-scene pairs share a subject) —
+  the scene labels were cosmetic.
+- **Sequence A/B rendered: coverage beats the montage.** Two 4-shot cuts of one
+  action through the real store path (`_seq_current` montage: 4 scenes, 4 x 2.0 s;
+  `_seq_coverage`: 1 scene, 2.5/1.7/1.5/2.2 s). Coverage wins cross-cut CLIP
+  (0.878 vs 0.859), luma jump (1.5 vs 2.2) and colour-histogram jump (0.362 vs
+  0.569), and by eye reads as one bridge/woman instead of four places. Caveat:
+  coverage's shot-length CV is only 0.20 (human median 0.75) -- the 16-frame
+  budget still pins holds near 2 s, so per-shot frame budgeting is the next
+  change, not more text rules. Report/tool: `SEQUENCE_AB.md`,
+  `sequence_ab.py`; artifacts `output/sequence_ab/`, `output/film/seq_*`.
+- **Visual organisation: the hold/change spine.** The pipeline had five different
+  notions of "the same place" (story scene string, model_select's motivation,
+  per-scene palette, planner R10 scene, pacing) that did not agree, so a "scene"
+  could change place/figure on every cut while the data said it held. New
+  `visual_org.py` derives **runs** (one place + one figure), diagnoses alignment
+  (`cosmetic_hold`, `undeclared_place_change`, `figure_drift`, `flat_hold`,
+  `rapid_change` intent), and owns canonical place/figure **anchors** that
+  `film_project` appends to every prompt in a run at freeze. `film_project` gains
+  an **ORGANISE** stage (story -> organise -> plan -> camera -> grade -> render ->
+  timeline) with `apply_organisation(story|hybrid|montage|continuous)` and
+  approval that refuses `break`s unless forced. `ui/studio.py` shows the strip +
+  diagnostics; `python visual_org.py --store <slug>` works on old productions.
+  Demonstrated: `_seq_coverage` within-run overlap 0.387 vs 0.207 (real hold),
+  `_seq_current` 22.5 changes/min (rapid-change intent), `seasoning` 0.043 vs
+  0.097 -> cosmetic-hold break, exactly the archive failure. Doc:
+  `VISUAL_ORGANISATION.md`; limits: anchors are text, the renderer still cannot
+  lock a face/place without image conditioning.
+- **Studio loop: hold conditioning, previs, taste.** (a) IP-Adapter reference
+  conditioning is wired into `make_film.Generator`/`run_store`: each shot in a
+  multi-shot run is conditioned on its run anchor's frame (`visual_org.
+  reference_plan`), the take records `conditioned`/`hold_reference`, and the
+  reference is part of the generation hash so a conditioned take cannot be
+  confused with a prompt-only one (`make_film --force --only N` rolls it onto
+  old takes). Measured: controlled test CLIP-to-reference **0.877 vs 0.799**;
+  rerendered the coverage close-up (the face that changed) conditioned on shot 1:
+  similarity to anchor **0.945 vs 0.832**, to shot 2 **0.933 vs 0.764**, and the
+  cream-coated stranger became the dark hooded figure. +3.8% generation cost,
+  ~20 s adapter load per run. Quirk: diffusers 0.32 crashes when the adapter is
+  loaded and a call has no image, so it is loaded/unloaded per run boundary.
+  (b) `previs.py` renders one still per shot and measures the same cut
+  continuity/pacing before the render, stored as film_project's PREVIS stage.
+  MEASURED: naive unconditioned stills did NOT predict the cut ranking (clip
+  0.891 montage vs 0.889 coverage; hist 0.694 vs 0.697) -- the still renderer's
+  style variance swamps place difference. Conditioning the held stills on their
+  anchor (mirroring the render policy) recovers 2 of 3 signals: clip 0.923 vs
+  0.891, hist 0.667 vs 0.694 (luma still disagrees), at ~185-205 s for 4 stills
+  vs ~48 min full render (14-16x cheaper).
+  (c) `taste.py` + the studio CUT-view picker record A/B choices in
+  `output/taste/labels.jsonl` with measured properties and a summary of what
+  separated pick from reject. First label stored: coverage > montage. Full write-up:
+  `STUDIO_LOOP.md`; tests `test_hold_conditioning.py`, `test_previs.py`,
+  `test_taste.py`.
+- **Integration pass: one render path, style-relative gate, shared primitives.**
+  (a) `make_film --from-project` no longer has its own generation loop: it calls
+  `film_project.materialize_store(proj)` -> `productions/fp_<name>/` -> the same
+  `run_store` the studio uses, so the process that decides holds also gets
+  conditioning, takes, stats and the staleness hash. A real-store integration test
+  (`test_render_seam.py`) asserts shot 2's generation input names shot 1 as its
+  hold reference, with no internal monkeypatching. (b) `draft.story_gate` blocks
+  only `story:` now; `structure:` is an advisory for the ORGANISE stage, because
+  the A/B showed a montage is a legitimate arrangement. (c) Palettes are owned by
+  the PLACE (`organisation.place_palettes`) and remapped on an organisation
+  rewrite, so montage <-> coverage cannot silently drop a look. (d) One
+  `conditioning.py` (IP load/scale/unload, shared by renderer and previs) and one
+  `continuity.py` (hist/luma/CLIP, shared by previs, sequence_ab and the cut
+  detector) replace duplicated copies; `sequence_planner.py` (dead) deleted.
+  **190 tests pass.** Remaining deliberate gaps at that point: the ad-hoc
+  non-store CLI path (`--shots figure/test/llm`) still has its own loop; previs is
+  not an automatic gate (it recovers 2 of 3 signals); taste had one label.
+- **Automatic sequence direction: multiple grammars per film, cameras scoped.**
+  The manual mode picker is gone. `sequence_direction.py` partitions a shot list
+  into movements (compound-aware place/figure affinity with style and atmosphere
+  stripped, beats, energy), chooses hold/montage/hybrid/continuous per movement,
+  and can return hold -> montage -> hold inside one film. `draft.py` runs it
+  automatically before camera direction and stores `project["direction"]`;
+  `scope_cameras` enforces the movement policy on `camera_direction`'s decisions
+  (montage runs still, a hold keeps at most one move, and low-energy holds settle)
+  without inventing moves. The studio shows the movements and their reasons plus
+  one "re-direct automatically" action — no mode selection. Scaling:
+  `shots_for_duration(target)` derives shot count from the measured 1.94 s/shot,
+  and the studio write view now asks for **target length** and computes the shots
+  and the render price ("longer needs more shots, not longer holds").
+  **Camera implementation v2 (the real fix).** The default path no longer
+  generates camera moves at all: a generated camera LoRA cannot settle (measured
+  still travelling 2.79 px/f at the last frame), so generation is static and the
+  movement plan records at most ONE motivated move per hold as a FINISHING spec
+  `camera_move {move, amount, settle}`. `make_film.run_store` applies it with
+  `camera_path.apply_path` between stretch and shake (verified in a real render:
+  "camera finish: tilt-down 45px, settle 0.62"), and it is part of
+  `finish_inputs`, so changing it re-finishes in seconds rather than re-generating.
+  The move is chosen from the shot's scale/purpose and the writer's suggestion
+  (wide reveal, close push, resolve pull-back); montage movements get none. The
+  old CLIP per-shot camera decision remains available only as an explicit
+  `--cameras`/`camera_mode` override. **Movements now come from the writer too**:
+  `story.SHOT_SCHEMA` has an optional `movement` id, the brief asks for 2-4
+  movements before shots, and `sequence_direction` uses the writer's ids when they
+  are contiguous instead of re-segmenting. **Previs is a gate**: `previs.gate()`
+  fingerprints the cut, treats missing/stale as its own status, and blocks a
+  render on a same-scene boundary with histogram > 0.80 or CLIP < 0.45; the studio
+  starts previs automatically when the gate closes and allows a one-shot override.
+  201 tests pass.
+- **Writer throughput: the 30-minute draft.** A real draft showed the farms done
+  in ~2.5 min, then 30+ min silent: granite4.1:8b on CPU generates at ~2.7–3
+  tok/s, and the 10-shot request used ~2000 completion tokens against Ollama's
+  4096 context, so the runner shifted context mid-generation (`n_discard 2045`)
+  and hit the cap (`truncated = 1`). The retry loop then re-asked on *advisory*
+  warnings/structure (`sb == 0 and sw == 0 and st == 0`), so an adoptable list was
+  regenerated 3-4 times at ~13 min each. Fixes: `num_ctx=6144` on every writer
+  call (`OLLAMA_NUM_CTX`), retry only on a genuine `story:` break (advisories are
+  the director's job now), a visible `showrunner attempt N/M: generating` line and
+  job progress phase, and a note when the writer returns fewer shots than
+  requested (the count is a request, not enforced). Same draft after the fix:
+  farms ~2.5 min + one showrunner attempt 487s, 0 story breaks, 6/6 prompts from
+  farm ideas, adopted in ~11 min.
+- **The writing loop: enough shots, and the writing fed back.** A real 13-shot
+  draft was REFUSED after three 6-shot attempts, all reporting the same
+  `beats go backwards (4:turn->develop)`. The retry was already naming that
+  failure and attaching the previous prompts, and it changed nothing. Three
+  causes, found in order.
+  - **A beat needs a position, not advice.** The brief said "beats never
+    backwards"; the model tags a beat from the image it just wrote, so the rule
+    was unenforceable. `story.beat_layout(n)` now names the roster (establish,
+    develop, turn, fall, resolve with shot numbers). It is passed with every ask
+    and every repair note, and `_showrunner_user` puts it ABOVE the farm ideas,
+    because the count is the brief and the ideas are raw material. The SYSTEM
+    prompt's four "six" anchors ("a film of six near-identical shots", "Six equal
+    moments", "a sixth restatement", "six variations") were pulling every reply
+    toward 6 and are now count-neutral. **Measured on the same concept, same 18
+    farm ideas, 9 shots requested, granite4.1:8b: 9/9 shots on attempt 1, shape
+    `EddddddTR`, 0 story breaks, 483 s** -- where the same request previously
+    returned 6/9 with a break on all three attempts (871 s, refused). Advisories
+    remain (2 structure, 1 story-link; the story-link warning is the documented
+    "check it by eye" lexical proxy).
+  - **The model was writing a beat the taxonomy did not have.** The real 13-shot
+    case then returned **13/13 shots on all three attempts** -- the count was
+    genuinely fixed -- but one `story:` break survived every time:
+    `beats go backwards (9:turn->develop)` / `(10:turn->develop)`, shapes
+    `EddddddTTddRR` and `EddddddTTTdRR`. That is not a mood board: establish,
+    develop, turn, then the change SETTLING into the new world, then resolve -- a
+    four-act short film, with the settling labelled 'develop' because the beat set
+    was E/d/T/R. No number of re-rolls fixes a missing word. **`fall` is now a
+    first-class beat** between 'turn' and 'resolve' (`BEATS`, marks `E d T f R`,
+    the schema enum, the brief, the roster), so the order check accepts
+    `E,d,T,f,R` while still refusing the old backwards shape. The brief also says
+    the turn is a DOOR: from the first 'turn' on, no shot may be 'develop' again
+    -- 'turn' while it happens, 'fall' while it settles, 'resolve' at the end.
+    Trade-off measured on the prior-fed rerun: feeding a refused draft back made
+    the writer rewrite from that draft instead of the scouts (provenance 0/13
+    prompts traced to a farm idea, against 13/13 on the un-primed 9-shot smoke).
+    The repair goal and the ensemble's provenance goal pull against each other and
+    want a "keep the shots that work, draw the new ones from the scouts" pass.
+    **FINAL MEASURED RUN on the real refused case** (`ego`, 13 requested, the
+    kept refusal fed back, `fall` live, `--story-retries 0`): **1 writing pass +
+    1 extension call -> 13/13 shots, shape `EddddddTTTffR`, 0 story breaks,
+    0 story-link warnings, 1137 s, ADOPTED** (the pass returned 12 shots and the
+    extension added the 13th). That is the first `ego` draft the gate has ever
+    adopted past 6 shots -- its history is now 6 -> 6 -> 13. What remains is
+    writer-level advisory (2 jump cuts, 4 scene labels, metronomic holds), which
+    adoption repairs: 16 timing/framing repairs and the movement plan scoped one
+    finishing tilt. Check the 6 advisories by eye before shooting; the gate's
+    blocking failure is gone.
+  - **A clean-but-short list had nowhere to go.** Re-rolling throws a good story
+    away, so the shortfall is closed by COVERAGE: `story.extend_shot_list` asks
+    for inserts that each name the shot they follow (`EXTEND_SCHEMA`,
+    `after: integer`) and merges them with **beat, scene, movement and camera
+    pinned to the insertion point**. An insert can only repeat the beat it lands
+    in, so an arbitrary number of added shots cannot reorder a story that already
+    passed; the final shot can never be displaced; duplicate/terse inserts and
+    inserts after the ending are dropped with a reason; a partial pass is asked
+    again. Measured on an approved 9-shot list, target 12: **+3/3 kept, 0
+    dropped, shape `EdddddddddTR`, 0 story breaks**, one call. First smoke run
+    exposed that the model wrote camera directions ("zooming out from...") into
+    the prompt; the brief now carries BAD/GOOD examples ("write the image, not
+    the camera") and the re-run came back as static images.
+    `write_shots_ensemble(extend=True)` is opt-in on purpose: the showrunner
+    comparison must keep measuring the writer's own count.
+  - **The loop survives the process.** A refused draft is written to
+    `productions/<slug>/draft_attempt.json` -- beside `project.json`, never in it,
+    so "the production was NOT changed" stays true -- and
+    `write_shots_ensemble(prior=...)` hands it to the FIRST attempt of the next
+    run as a repair brief (and forces the proposal cache open, since replaying the
+    refusal is not a loop). `draft.py` prints the whole loop on one line
+    (`[draft] writing loop: N attempt(s), M extension call(s) -> X/Y shot(s),
+    shape ...`), `job_runner` has an `extension` progress phase and a `refused`
+    phase, and the studio's write view says when a refused draft will be fed back.
+    `draft.py --story-retries 0` runs one pass only (fast, but a broken draft is
+    refused rather than repaired). Also fixed while here:
+    `sequence_direction.shots_for_duration` floors at **3** shots, not 2 -- a 4 s
+    target used to derive 2 shots, and a 2-shot film can never pass the gate
+    (establish + turn (+ fall) + resolve need at least three slots), so the
+    minimum length was guaranteed to produce a REFUSED draft.
+  - **240 tests pass**, including `tests/test_story_loop.py` (roster, the `fall`
+    beat and its gate acceptance, count-aware repair note, insert pinning/junk
+    dropping, partial-pass re-ask, real stubbed end-to-end loop, `prior` on the
+    first message, pending-draft sidecar, job-runner phases, and a draft-job test
+    that refuses, keeps the writing, feeds it to the next run, then adopts and
+    clears it) and `tests/test_prompt_shape.py` (shape check, image-clause cut,
+    leak-aware best-of, the pass wired into the loop off-by-default, no-leak of
+    field values into prompts). Smoke artifacts: `output/film/loop_smoke_result.json`,
+    `output/film/loop_smoke_extend_result.json`.
+- **The first film, audited: the story held, the prompts did not.** `ego` was
+  rendered end to end (13 takes at ~14-35 min each, a **24.38 s, 512², silent**
+  cut) and the output was audited against its own prompts -- tool:
+  `output/ego_audit/report.py`, metrics: `metrics.json`, sheets
+  `contact_film.png` / `flow_strip.png`.
+  - **Prompt → frame was weak and the cause was the writing.** CLIP
+    prompt-to-take similarity **0.300** against **0.253** for a *different*
+    shot's prompt (margin only **+0.018**); top-1 retrieval **9/13**. **12 of 13
+    prompts were two-image composites** ("A barefoot man walks across a dusty
+    city floor...; the shadow of his ego looms large against a moonlit forest"),
+    so the renderer drew one clause or the concept prior. The film ended on a
+    **blue vintage car** because the resolve prompt named "an old car" and the
+    renderer drew the car instead of the protagonist -- and its CLIP alignment was
+    *fine* (+0.05) because the prompt itself was wrong. The best-aligned shots
+    were the single-image prompts: the empty chair (+0.085 margin), the campfire
+    (+0.059), the parking lot (+0.03).
+  - **The flow: the turn lands, the film is a montage, the ending broke.** Beat
+    shape `EddddddTTTffR` and the two loudest cuts sit exactly at the turn
+    (s07→s08 luma **20.7**, s08→s09 **10.0**) with the motion peak on s08
+    (**4.37** vs ~1.8 typical). But **9/13 shots are montage runs** (12 scenes,
+    **32 cuts/min** vs human 14.5, hold **CV 0.084** vs 0.75) and there is no
+    recurring figure: only s02 is hold-conditioned; the man is naked, then
+    suited, then a face, then silhouettes. The one finishing tilt verified at
+    **−43.2 px net vs +3.2 px** on the static neighbour.
+  - **The render's own `stats.json` was lying.** It is written from the plan
+    snapshot taken before the run generated anything, so a run that generates and
+    assembles in one process recorded every shot as `unrendered` with `take:
+    null`. `make_film.py` now reads state/take **live at assembly**; the stale
+    `ego` stats (both copies) were repaired to 13/13 rendered.
+- **The prompt pass: one image, and the model was chosen by measurement.**
+  `story.prompt_problems` reports `prompt:` advisories (semicolon/second
+  sentence, >24 words, meaning words such as ego/confrontation/aftermath/
+  symbolic) and the repair brief carries them. `story.rewrite_prompts` is a
+  TEXT-ONLY pass on the approved list: same shots, beats, order and timing, a
+  per-shot best-of that only accepts a rewrite with fewer measured issues, the
+  deterministic image-clause cut for the model habit of returning
+  "image; meaning", and leak detection (a prompt carrying "camera: none" or
+  "2.0 seconds" is rejected). Measured on the real 13 approved prompts:
+  **granite4.1:8b removed the semicolon but kept the meaning (12/13 still
+  flagged), qwen2.5:7b got 9/13 clean, and mistral:latest returned 13/13 clean
+  single-image prompts in one batch call (~1.5 min)** -- so
+  `PROMPT_PASS_MODEL = "mistral:latest"`: this is instruction-following on a tiny
+  rewrite, not a writing or filmcraft task. `draft.py` runs the pass by default
+  (`--no-prompt-pass`, `--prompt-pass-model`), `job_runner` has a `prompt pass`
+  phase, and the check is ADVISORY at the gate -- a text problem must not refuse
+  a film the story gate accepted.
+- **The resolve re-shot: the audit's biggest defect fixed on the real film.** s13
+  was a car. Its prompt was replaced with a single concrete image in the fall's
+  place/figure ("a man standing alone on a rain-slicked parking lot at dawn, a
+  long shadow stretching behind him on the wet asphalt, cold grey light"), its
+  scene set to s12's and scale to medium, so the renderer's hold conditioning
+  anchored it on **s12's take** (IP-Adapter) instead of inventing a new figure.
+  Only s13 regenerated (693 s, take `t02`, `conditioned: true`,
+  `hold_reference: shot 12`); the other 12 takes stayed current; the cut
+  re-assembled to `productions/ego/renders/film` (24.38 s). Measured after:
+  s13 prompt-to-frame **0.287 → 0.329** (margin +0.025) and the **s12→s13 cut
+  CLIP 0.67 → 0.784**; the car is gone and the same suited man stands on the wet
+  road at dawn. Before/after strips: `output/ego_audit/flow_strip_before.png` vs
+  `flow_strip.png`; the edit is in the production history (`act: edit`,
+  `shot: s13`).
+- **Making those findings apply to EVERY project, not just `ego`.** The audit and
+  its pre-render version are now pipeline tools, not one-off scripts:
+  - **`output_audit.py`** -- the generic audit (`--store`, `--render`, `--no-clip`,
+    `--stills`). Read-only; writes
+    `output/audit/<slug>/{metrics.json,report.txt,contact.png,flow_strip.png}` and
+    exits 1 on any `warn`. It reproduces the `ego` findings on
+    `--store ego --render film`: prompt→frame margin **+0.011**, prompt-shape on
+    **12** prompts, metronomic **CV 0.084**, exposure jumps at s07→s08/s08→s09,
+    and the resolve's new imagery as `info` (the car). The verdict logic is pure
+    functions (`flags_from`, `cut_by_mode`, `new_words`, `hold_cv`) and unit-tested
+    (`tests/test_output_audit.py`), so the report and the exit code cannot drift.
+  - **Previs measures the PROMPT before the render.** `previs.measure` now reports
+    per-shot prompt→still alignment and margin (a still matching ANOTHER shot's
+    prompt better is flagged) and the contact sheet carries each shot's **prompt
+    under its still**. The first `ego` resolve (a car) would have been visible for
+    ~1 minute of previs stills instead of an hour of render. Gate behaviour is
+    unchanged: the numbers are informational because CLIP is a proxy and the
+    contact sheet is the arbiter.
+  - **`make_film --store` reports the previs status** before it starts (a warning,
+    not a block; `--no-previs-check` silences it). The studio render buttons
+    already gated on previs, but the CLI path did not -- and the first `ego`
+    render was a CLI render ("film" is the CLI default render name).
+  - **247 tests pass.**
+- **Coverage-first writing: plan the scenes, measure it, bind the anchors.** The
+  last structural gap: the first film was a montage of ~12 places in 13 shots, so
+  the director montaged it -- correct for the material. The writer had always been
+  told "2-3 scenes, one place and one figure each"; nothing measured it. Three
+  pieces, all on the draft path:
+  - `story.write_scene_plan` (~1 min): 2-3 places, one recurring figure, one
+    action each and a shot budget summing to the request. Normalised (2-3 scenes;
+    budgets fixed to the count) and attached ABOVE the farm ideas; if the model
+    cannot produce a usable plan the writer proceeds without one, as before.
+  - `story.coverage_problems`: the sequence director's OWN place/figure affinity
+    (`visual_org.affinity`, style/atmosphere stripped) per scene run. Flags a
+    scene label that does not hold (adjacent affinity **< 0.10**), a figure change
+    inside a scene, a missing `subject`, or a film with no 2-shot hold. `coverage:`
+    is ADVISORY at the gate (a montage is a legitimate arrangement);
+    `coverage_retries` (default **1** in `draft.py`) re-asks once when the story
+    holds but no scene does.
+  - **MEASURED, three real runs.** (a) lighthouse n=6, plan first, no anchors: the
+    plan was followed in the scene LABELS, but each prompt described a different
+    aspect with different nouns -- within-scene affinity **0.06-0.07**, 5-6
+    coverage problems, and the one repair re-ask did not fix it: a text model
+    cannot re-arrange images it has already written. (b) The fix is the pipeline's
+    OWN mechanism: canonical place/figure **ANCHORS**
+    (`visual_org.effective_prompt`), used by the workbench at freeze and never
+    applied by the store draft path. After the prompt pass, `story.anchor_plan`
+    binds every prompt to its planned scene's place+figure clause and CUTS THE FILM
+    ON THE PLANNED SCENES (2-3), so coverage passes by construction and the
+    director sees high within-scene affinity. (c) The real end-to-end draft
+    (`lighthouse`, n=6, default `draft.py` path): plan 3 scenes (2/3/1 shots);
+    attempt 1 story clean with 2 coverage problems -> repair -> 3 -> budget spent;
+    prompt pass 6/6; **anchors bound 6/6 -> 0 coverage problems**; the director
+    then chose **hold for shots 1-4 (affinity 0.44) + hybrid 5-6**, and the 6-shot
+    `EdTffR` list was adopted -- a held scene, not a montage. What remains is
+    writer-level advisory only (2 jump cuts, metronomic holds, 1 prompt).
+  - `draft.py` runs plan + repair + anchors by default (`--no-scene-plan`,
+    `--coverage-retries`); `job_runner` has `scene plan` and `coverage repair`
+    phases; adoption records `project["anchors"]` so tools re-reading the store do
+    not report the appended anchors as writer faults; **259 tests pass**
+    (`tests/test_coverage.py`, anchor exemption in `tests/test_output_audit.py`).
+    A scratch production `lighthouse` holds the measured example (no takes).
+- **THE 13-SHOT TEST (the length that failed): structure solved, images the next
+  ceiling.** Same concept, 13 requested, no render; scratch productions `ego_v2`,
+  `ego_v3`, `ego_v4` are the runs.
+  - **Coverage/holds.** old `ego`: 11 scene runs, **2 held / 9 montage** shots,
+    mean in-scene affinity 0.245. `ego_v2` (plan+anchors v1): 4 runs, 12 held / 1
+    montage, affinity 0.481, 2 figures. `ego_v3` (after two length fixes): 4 runs
+    (2/4/4/3), **13 held / 0 montage**, affinity 0.532, **1 figure**, 0 coverage
+    problems, story `EdddddTfffRRR`. The faults the first 13-shot run exposed are
+    fixed: `_normalise_scene_plan` keeps ONE figure (most common), and
+    `_assign_scenes` assigns shots to planned scenes by CONTENT under the plan's
+    order (monotone; budgets only a tie-break) instead of by the plan's shot
+    budget -- which had put courtyard prompts into the stained-glass scene.
+  - **The images, not the structure.** Previs of `ego_v3` (13 conditioned stills
+    ~12 min): cross-cut CLIP 0.92, prompt->still margin **-0.016**, luma jump 19.6,
+    stills near-duplicates of one foggy corridor. The plan's places never appeared
+    because (a) prompts inside a scene repeated one sentence, and (b) anchors were
+    APPENDED to a generic writer sentence and the image model ignored them.
+    Fixes in: `prompt_variation_problems` flags same-scene adjacent prompts with
+    stemmed overlap **>= 0.65** (a hold is coverage, not a duplicate; fed to the
+    repair note and the prompt pass is told to change angle/moment), and
+    `_front_anchored_prompt` puts the planned place/figure at the FRONT.
+  - **`ego_v4` (front anchors):** 13/13 held again (12 in holds + the resolve
+    single), 0 coverage, story `EdddddTTTTffR`; prompts now OPEN with the planned
+    places ("dimly lit room with a single window...", "...empty playground with
+    rust-covered metal structures..."). Previs: cross-cut CLIP 0.888, luma jump
+    **19.6 -> 9.2**, and the contact sheet shows THREE environments (window room /
+    rusted playground / peeling house) instead of one corridor -- the plan's places
+    reached the pixels. Caveat: the prompt->still margin is still **-0.010**, but
+    that metric is now partly invalid: every prompt in a scene shares the front
+    anchor by construction, so it trivially matches its scene-mates better. The
+    honest metric is variation BEYOND the anchor.
+  - **One real flake caught and fixed:** on `ego_v4` mistral returned 12 prompts
+    for 13 shots, so the prompt pass was skipped entirely and the writer's
+    composites shipped. `rewrite_prompts` now retries once on count-mismatch/parse
+    failure (and only then keeps the originals). **265 tests pass.**
+  - **`ego_v5`, the clean run** (retry + variation instruction + front anchors):
+    13/13 requested, story `EdddTTffffffR`, 13/13 in held runs (12 + the resolve
+    single), **0 coverage problems**, one figure; prompt pass **10/13 rewritten,
+    0 still flagged**; anchors bound 13/13 and the planned places open every
+    prompt. Variation BEYOND the front anchor (anchors stripped, adjacent
+    same-scene stemmed overlap): **0.092 with 0 pairs >= 0.65** (the v3 held film's
+    repeated text measured 0.429), so the shots inside a hold now differ. Previs:
+    cross-cut CLIP 0.902, luma jump **11.4**, three environments visible (window
+    room / moonlit park / ruined cathedral) instead of one corridor. A dangling
+    clip found here ("...cross-legged in a") is fixed: `_clip_clause` strips
+    trailing function words. **266 tests pass.** Remaining image-side weakness:
+    the stills are dark/low-contrast and the scenes share too much fog, so the
+    next decision is a style/palette pass before paying for a 13-shot render.
+  - **The style/palette pass (the user's "the unclearness is the style").** The
+    murk had two sources: text-level atmosphere (every scene's prompts shared
+    "fog/mist") and one flat grade (every scene palette 'neutral'). Both are now
+    directable:
+    - `style_pass.py` (new tool, any adopted store): strips fog/mist/haze/
+      "shrouding" from the prompts, inserts ONE concrete LIGHT clause per held
+      scene after the place/figure anchors, and sets one palette per scene from
+      `looks.ARC` (default warm-gold -> cold-steel -> amber-dusk -> cyan-night,
+      cycling). Idempotent, snapshots before/after to `output/style/<slug>/`.
+    - The PIPELINE now does this at source: `SCENE_PLAN_SCHEMA` requires `light`
+      and `palette` per scene (enum = `looks.ARC`), the plan brief says do not
+      blanket the film in fog, `_front_anchored_prompt` puts the scene's light
+      third at the front of every prompt, and `film_store.shots_from_proposal`
+      carries the plan's palettes onto the store scenes (so `make_film` grades
+      them). `previs.py` now applies each scene's palette to its still too, i.e.
+      shows the graded film rather than the raw model palette.
+    - **MEASURED before/after** (ego_v5, 13 stills each, same seeds/conditioning):
+      `output/style_ego_v5/before_contact.png` is warm/cold-but-grey and flat;
+      `output/previs/ego_v5/contact.png` has four legible looks (amber room ->
+      silver mirror -> warm dusk -> cold night). Stills luma jump 11.4 -> 11.5
+      (similar, as designed: a palette shift is stylistic, not a technical
+      exposure change), CLIP 0.902 -> 0.921. The residual softness is the
+      checkpoint's own low-contrast style, not the text or the grade -- the next
+      lever there is model/CFG, not the pipeline.
+    - **WIDENED after the first comparison** (the first arc stayed orange/blue):
+      `looks.LOOKS`/`ARC` now also ship `emerald`, `sodium`, `magenta`, `teal`,
+      `violet` (tints up to +/-20 Lab, plus an optional `hue` rotation in
+      `apply_look`), `story.SCENE_PALETTES` mirrors the new ARC, the scene-plan
+      brief requires each scene's `light` to name a concrete SOURCE and colour,
+      and `style_pass.py`'s fallback arc now spans orange/green/blue/magenta.
+      `previs`/`make_film` negatives add `haze, glow, bloom, soft focus` and the
+      "dust in the air" light clause is gone. MEASURED on the same 13 stills
+      (before / arc1 / arc2): mean chroma **2.1 / 10.9 / 14.2**, per-scene hues
+      **75 / 165 / 256 / 346 deg** (orange / green / blue / magenta) vs arc1's
+      74-77 and 256-264 only. Sharpness did NOT improve (205 -> 191 both arcs):
+      the softness is the checkpoint, not the prompt text or negative prompt.
+    - **The right fix for "big colour jumps", not a strength knob.** The render
+      itself already applies the shared technical baseline (exposure/contrast/
+      grain normalised) BEFORE the palette, so a bold palette cannot read as a
+      technical error; the remaining cross-scene difference is the edit. Previs
+      now mirrors that look stage (`render_stills` applies the same baseline, then
+      the per-scene palettes, conditioning holds on the RAW anchor), and `measure`
+      reports continuity SEPARATELY for **within a scene** (defects only) and
+      **across scene cuts** (style, not an error). Measured on the styled `ego_v5`
+      stills: **within-scene luma 1.48 / hist 0.545 / CLIP 0.899 over 9 cuts**
+      (holds are continuous), **scene cuts luma 18.7 / hist 1.0 / CLIP 0.807 over
+      3 cuts** (deliberate palette separation). Only within-scene jumps warn/
+      gate now; a palette change no longer has to be blunted to satisfy a
+      confounded single-number "luma jump". Also fixed the gate-path bug this
+      exposed: `previs --store` wrote `output/previs/<slug>/` while `gate()` read
+      `output/previs/<slug>_previs/`, so a CLI previs could never satisfy the
+      render gate; `name_for_store()` now defines the one name both use.
+      **279 tests pass.**
+- **THE FIRST REAL FILM THROUGH THE WHOLE CHAIN -- DELIVERED.** `ego_v5`, 13
+  shots, styled, rendered from the store with
+  `make_film.py --store ego_v5 --name film`. The first attempt died mid-shot 2;
+  the store resumed from the two finished takes, so only the in-flight shot was
+  lost. **Delivered: 13 shots, 399 frames, 24.94 s @ 16 fps, 938 KB**, all takes
+  `t01`, hold conditioning 9/13 at IP-Adapter 0.7, technical baseline then
+  palettes `warm-gold x4 / emerald x4 / cold-steel x4 / magenta x1`. Files:
+  `productions/ego_v5/renders/film/` (`film.mp4`, `film.gif`, `stats.json`).
+  `output_audit.py` on the delivered cut: **only one warn -- metronomic
+  (shot-length CV 0.074)**; the three luma jumps at scene cuts (15.6 / 18.6 /
+  18.0) are classified `style-cut: info` (the palette shift is the edit), the
+  prompt->frame margin is `anchored-prompts: info` (shared front anchors make it
+  structurally ambiguous), and `resolve-new-imagery` is info (magenta is the
+  palette). Remaining craft: pacing CV (the renderer's 1.94 s motion budget) and
+  the checkpoint's softness.
+- **RHYTHM: from a metronome (CV 0.074) to the measured human distribution
+  (CV 0.699, human 0.75).** The delivered film's shots all sat in 1.67-2.26 s.
+  A first fix widened R4 but still produced 2.5/1.5 alternation -- better than
+  uniform, still not what the research measured. `PACING_MEASURED_STUDY.md`
+  (700 MSR-VTT clips, 3,185 shots) says human short-form is BIMODAL:
+  <0.5s 14.0% | 0.5-1s 22.6% | 1-2s 17.8% | 2-3s **12.0%** | 3-5s 14.6% |
+  >5s 19.0%; median 1.73 s, CV 0.75. The 2-3 s band is the LEAST common one our
+  old films used for everything.
+  - R4 now assigns by ROLE into the study's bands: accents (inserts, reactions,
+    turns, close-ups) at 0.80-1.45 s, mids for other masters, HOLDS for scene
+    openings / establishes / resolves. It repairs R9 itself (scene opening
+    longest, no triple/adjacent near-equal); holds are floored to 0.01 s.
+  - The study's LONG band needed a motion budget, so the fix is a FINISHING
+    feature, not another render: `shot["upsample"]` raises the RAFT interpolation
+    factor (16 raw frames: x2 = 1.94 s, x4 = 3.81 s, x6 = 5.69 s of smooth motion
+    -- the study's "procedural hold"). `upsample` lives in `finish_inputs`, so
+    raising it re-finishes (RAFT + shake + grade) and never regenerates. Long
+    shots get x4, the resolve x6; accents stay native and are trimmed.
+  - `retime.py --store <slug> [--dry-run] [--max-upsample N]` applies this.
+  - MEASURED `ego_v5` -> `film_human` (31.81 s, 509 frames): shot lengths
+    **[4.06, 1.75, 1.00, 1.81, 4.44, 0.94, 1.25, 1.62, 4.31, 1.19, 1.56, 1.31,
+    6.56]**, CV **0.699** (human 0.75), median 1.56 s (human 1.73). Band mix:
+    0.5-1 s 7.7% (human 22.6), 1-2 s 61.5% (17.8), 2-3 s 0% (12.0), 3-5 s 23.1%
+    (14.6), >5 s 7.7% (19). Provenance of the fix is real: 0.2% near-duplicate
+    consecutive frames across 509 -- the long holds are interpolated motion, not
+    duplicated stills. `output_audit.py` on `film_human`: **no warns**, CV 0.699,
+    all flags info. `film_human` is the deliverable; `film` (uniform) and
+    `film_rhythm` (alternation) are kept for comparison.
+  - REMAINING GAP, honest: human has 36.6% under 1 s and 19% over 5 s. Our
+    accents bottom out at ~0.94 s because the takes are 16 raw frames (trimming
+    further is 4x speed); real sub-second accents need **8-frame takes** (the
+    study's documented per-shot option), and only one shot is >5 s because only
+    the resolve got x6. Those are render-cost decisions; the machinery
+    (`upsample`, per-shot frame trimming) is in place.
+  - **284 tests pass** (`tests/test_rhythm.py`, pacing tests).
+- **What stays manual, by nature.** Changing what a shot is ABOUT is an editorial
+  decision: the prompt pass may only rewrite the text, and the audit may only
+  measure the result. The s13 fix (car → the man on the wet road) was that
+  decision, and it stayed one. The coverage/montage question is now handled for
+  the default DRAFT path by the plan + anchors above; and the flat look is now
+  handled by the scene plan's light/palette + `style_pass.py`; and rhythm is now
+  the measured distribution (CV 0.699 vs human 0.75) with procedural long holds.
+  What remains is the checkpoint's own softness (model-level), IP-Adapter
+  appearance vs identity inside a hold, and the timing TAILS: human has 36.6%
+  sub-1 s accents and 19% >5 s holds; ours are ~0.94 s minimum (16-frame takes;
+  sub-second needs 8-frame takes per the study) and one >5 s hold (only the
+  resolve got x6).
+- **Pacing measured on a real corpus, not blogs.** The two commercial-blog
+  datasets in the pacing doc were removed. `pacing_study.py` is our own
+  hard-cut detector (HSV+luma spike, validated on our renders' known cuts at
+  **F1 0.992**). Run over 700 randomly sampled **MSR-VTT** human short videos
+  (171 min, 3,185 shots): **14.5 cuts/min**, ASL **3.23 s**, shot median
+  **1.73 s** (p10 0.33, p90 8.37), within-clip shot-length CV **0.75**, 36.6% of
+  shots under 1 s and 19.0% over 5 s. Our films: 23.8 cuts/min, ASL 2.21 s,
+  CV 0.17, 69.9% of shots 2–3 s, 2.7% outside 1–5 s. Human short-form is
+  BIMODAL (quick accents + long holds); ours is a spike at 2 s. Script gate now
+  also flags a metronomic whole film (CV<0.20). Full study:
+  `PACING_MEASURED_STUDY.md`; artifact: `output/pacing_study/`.
+- **Visual camera A/B: one pair rendered.** Same shot/seed/seconds, `tilt-down`
+  vs `none`, through the real store path (~12 min per take). The move reached the
+  pixels and was direction-consistent: net vertical travel **−68.9 px vs +2.8 px**,
+  frame transitions down/up **15/0 vs 6/7**. The tilt-down take also came back
+  **softer** (Laplacian var 38 vs 77), but it regenerated a different composition,
+  so that is content-confounded. Do not make camera moves the default for final
+  renders until a second pair separates the two. Full report:
+  `CAMERA_VISUAL_AB.md`, tool: `camera_ab_visual.py`, artifacts:
+  `output/camera_ab/visual/`, takes: `productions/_camera_ab/`.
+
+**Still not done (deliberate):** a second/third visual pair to settle whether
+camera-LoRA takes are consistently softer and whether pan moves are as clean as
+tilt; subject-motion LoRAs are opt-in and unvalidated as a direction candidate;
+character/subject continuity has no mechanism; renders are silent.
+
 ---
 
 Written at the end of a long session, because the context window is nearly full.
@@ -2574,3 +3158,225 @@ configuration before blaming the model.**
 Corollary: when a result looks like garbage, suspect the harness first. Check
 resolution, step count, and whether weights actually loaded (count the tensors)
 before concluding anything about the method.
+
+## SESSION CHECKPOINT: full-system test on the squid motif
+
+**Where the whole chain stands** (this is the integration run: every fix at once):
+
+1. **Draft — DONE** (`squid`, 10 shots). Scene plan 3 scenes (3/4/3): ocean floor
+   → bioluminescent jellyfish field → glowing algae bloom; one figure (diver's
+   helmet). Two writing attempts (story clean both), coverage repair fired,
+   9→10 extension, prompt pass 10/10, anchors bound 10/10, story `EddddTTffR`,
+   3 held movements. **Coverage 0**, one figure.
+2. **Integration bugs the full run caught, fixed at source**:
+   - **Palette leak**: the plan brief showed `palette: warm-gold`, and the
+     writer/prompt pass copied "<colour> palette" into **10/10 prompts**. Fixed:
+     `_scene_plan_text` no longer shows palette to the writer; `_prompt_issues`
+     now flags "grade palette" as a prompt defect; the squid store was repaired
+     (9 leaked names stripped, scene grades re-mapped rich-green / cyan-night /
+     warm-gold).
+   - **Neutral grades**: director relabelled scenes (planN → movement ids) before
+     adoption, so the label-keyed palette map missed and all store scenes fell back
+     to `neutral`. Fixed: `edit_planner.Shot` carries `palette`; `anchor_plan`
+     sets it per shot; `film_store.shots_from_proposal` grades each scene by
+     majority of its shots' planned palettes. Tests added (relabel-safe adoption,
+     palette-leak prompt check). **286 tests pass.**
+3. **Previs — DONE** (`output/previs/squid_previs/`): baseline-first then
+   per-scene palettes; **within a scene luma 1.6 / CLIP 0.889** over 7 cuts
+   (holds continuous), **scene cuts luma 9.2** over 2 cuts (grade difference, not
+   an error); shot CV 0.28 at adoption. Look is very diffuse — underwater haze +
+   the checkpoint's softness, visible in the contact sheet; the grade arc
+   (green → cyan → warm) is legible.
+4. **Retime — DONE**: study-shaped rhythm, CV **0.277 → 0.605** (human 0.75),
+   holds `4.05 / 1.23 / 1.59 / 1.36 / 4.46 / 0.94 / 1.28 / 1.62 / 4.95 / 4.55 s`,
+   RAFT x4 on the three scene openings + x6 on the resolve, R9 clean.
+5. **Render — DELIVERED BUT REJECTED ON LOOK.** `make_film.py --store squid
+   --name film` completed (10 shots, 416 frames, 26.0 s, grades rich/cyan/warm,
+   audit CV 0.605, zero technical warns) -- but the film is unusable: the
+   "diver's helmet" rendered as glowing helmet-creature heads and the squid as
+   vague masses. Root cause: prompt assembly (full anchor block fronted in every
+   shot) + plan figure was a glowing prop, not a person (both fixed above).
+   Deliverable WITHDRAWN (`project.deliverable = {}`); the render is kept on disk
+   as evidence, not as a film.
+6. **Now: probe render with rewritten prompts.** 10 prompts rewritten to name
+   `a scuba diver in a black wetsuit and round glass helmet` and `a giant squid
+   with a long mantle and eight glowing arms`, with distinct actions/framings per
+   shot (backup of the failed prompts: `output/squid_failed_prompts.json`).
+   Probing shots 1,5,9 through the REAL pipeline (`make_film --store squid --only
+   1,5,9`, job `pwsh-82`), then `probe_sheet.py` -> `output/probe/squid_probe.png`.
+   Only if those real frames show a diver and a squid does the full film render.
+7. **PROBE #1 VERDICT (`output/probe/squid_probe.png`):** s01 is a real scuba
+   diver (wetsuit, fins, mask) -- prompt assembly fix works. s05 ("giant squid
+   with a long mantle and eight glowing arms") rendered a humanoid squid-goddess,
+   and s09 ("ascends through a golden algae bloom") rendered abstract gold shapes.
+   Fix: cephalopod anatomy words ("colossal deep-sea squid, long conical body,
+   eight long tentacles"), no "arms", no "algae bloom"; plain "gold-lit water /
+   bright surface" for the ascent. s05-s10 rewritten
+   (`output/rewrite_squid_prompts2.py`), probing 5,9,10 again (job `pwsh-86`);
+   full render only after those frames pass.
+9. **CORRECTED FILM DELIVERED** (`productions/squid/renders/film/`, 10 shots,
+   416 frames, 26.0 s): contact sheet `output/audit/squid/contact.png` shows a real
+   scuba diver (s01-s04), cephalopod mantle/tentacles (s05-s08), diver ascending in
+   god rays (s09) and rising into light (s10); grades rich-green / cyan-night /
+   warm-gold; probe-verified frames `output/probe/squid_probe_final.png`.
+   Audit: **CV 0.605**, prompt->frame mean 0.315 / margin -0.001, flags are all
+   info (`anchored-prompts`, one `style-cut` s04->s05 luma 12.6, resolve imagery).
+   Deliverable set to `squid/film`; the failed helmet-creature render is
+   overwritten (prompts backed up in `output/squid_failed_prompts.json`).
+   Remaining honest limits: the look is dreamlike/soft (checkpoint), s10 renders
+   as a close underwater ascent rather than a literal above-water surface, and
+   the sub-1 s accent tail is still absent (16-frame takes).
+10. **WORKFLOW CHANGE (important):** look decisions are made ONLY on real probe
+    frames (`make_film --only` + `probe_sheet.py` / `frame_strip.py`). Previs
+    remains a continuity/prompt-alignment check, never a look gate. The 2-hour
+    squid render is the proof.
+11. **FRAME-BY-FRAME REVIEW (the real test).** `frame_strip.py --store squid
+    --render film` produced `output/inspect/squid_film/*`: a full-film every-4th
+    frame strip and EVERY frame of the longest holds. It exposed what contact
+    sheets hid: the 4-6 s RAFT "long holds" were 70+ frames of the same soft
+    image (mean consecutive diff 1.09-1.61), i.e. dead slow-motion -- the
+    procedural-hold design is REJECTED for static AI takes. `film_motion`
+    (retime `--max-upsample 2`, no interpolated holds, 16.4 s, 263 frames) brings
+    per-shot motion back up (2.16-3.00) with real frames, but the frames still
+    show the deeper issue: the model does not follow action semantics. s01
+    descends (good); s02 = diver standing facing camera with hand at chest, NOT
+    "gloved hand touches a coral branch" and no coral; s03 = diver floating
+    upright, arms out, no coral/no swimming. So the sequence is generic diver
+    poses, not the encounter. This is prompt adherence / checkpoint quality
+    (4-step dreamshaper8), not a pipeline bug: take frames are sharp (squid s01
+    sharpness 506 vs 181 for the old ego takes). The next real lever is
+    generation quality/adherence (more steps, better checkpoint, or best-of-N
+    selected by CLIP against the prompt), not more editing machinery. **Always
+    review frame_strip output before calling a film good.**
+**Full-system run summary**: the integration run exercised the writing loop
+structure (2 attempts, coverage repair, 9→10 extension), scene-plan light+palette,
+relabel-safe grade adoption, previs baseline/within-vs-across split, study rhythm +
+per-shot RAFT upsample, probe-first look gate, and audit classification. It caught
+three real bugs (palette leak into prompts; plan grades lost to relabeling;
+previs-not-a-look-gate), all fixed at source and covered by tests (286 pass).
+See the scoped PROVENANCE verdict below: prompt TEXT quality was human-authored
+for this film, so that remains the open system question.
+**PROVENANCE -- IMPORTANT, do not over-read this film as a system test of the
+WRITER.** All 10 prompts in the delivered `squid/film` were written BY THE AGENT
+BY HAND (two rewrites: `output/rewrite_squid_prompts.py`, then
+`output/rewrite_squid_prompts2.py`, then s09/s10 edited in place). The system
+supplied the concept, scene plan, beats, coverage/holds, grades, timing and every
+render/finish/audit stage -- but NOT the final prompt text. Reason: the writer's
+anchored prompts rendered helmet-creatures, and hand-rewriting was the fastest way
+to get a watchable film. Consequence: **the film validates the render/finish/
+rhythm/grade chain with human prompts; it does NOT validate that the fixed writer
+loop now produces legible prompts unaided.** That is the next test: a fresh draft
+with the new assembly + person-figure brief, inspect its prompts and probe one
+shot before rendering. If it still fails, the fix is the prompt-pass model/
+instructions or an explicit human prompt-editing gate -- not more pipeline.
+
+**Honest look caveat (delivered corrected cut)**: coherent and watchable, but
+dreamlike/soft: the squid is stylised anatomy, s10 resolves underwater rather than
+above the surface, and there is no sub-1 s accent tail. That is checkpoint
+softness + 16-frame takes, not the pipeline.
+
+**Full-system verdict (scoped correctly)**: the integration run exercised and
+validated: writing loop structure (2 attempts, coverage repair, extension),
+scene-plan light+palette, relabel-safe grade adoption, prompt assembly/leak
+checks, previs baseline/within-vs-across split, study rhythm + per-shot RAFT
+upsample, probe-first look gate, and audit classification. It caught three real
+bugs (palette names leaking into prompts; plan grades lost to relabeling;
+previs-not-a-look-gate), all fixed at source with tests (286 pass). Prompt TEXT
+quality for a new concept remains the open system question.
+
+**PREVIS IS NOT A LOOK GATE.** Measured the hard way on `squid`: previs stills
+(4-step SD15) looked murky-but-plausible; the real AnimateDiff film came back as
+glowing helmet-creature heads. They are different pipelines -- previs is valid for
+continuity, prompt alignment and "is the cut structurally sane", NOT for "will the
+film look like this". Look decisions must be made on REAL take frames:
+  1. `make_film.py --store <slug> --only 1,5,9`  (one shot per scene, ~11 min each)
+  2. `python probe_sheet.py --store <slug> --shots 1,5,9`
+     -> `output/probe/<slug>_probe.png`: three real frames per probed shot with the
+     prompt underneath. Judge/iterate on that, then render the full film.
+The previs `--expect` subject check remains as a weak automatic backstop, not the
+gate. The squid failure also exposed prompt-assembly design errors (below).
+
+**ALSO FIXED AFTER THE SQUID FAILURE (look/prompt layer):**
+- prompt assembly: place anchor SHORT at the front, the shot's action sentence
+  early, light as a TAIL; figure appended only when absent. The old code fronted
+  the full place+figure+light block, and every shot in a scene began with the same
+  ~20 words.
+- scene plan `figure` must be a PERSON/character, never a prop or a light
+  ("a diver's helmet glows" was the squid figure; the model drew a helmet head).
+- prompt pass instructed to start with ACTION + figure, keep place short, light at
+  the end, never copy a repeated anchor block.
+- prompt problems now flag grade-palette leakage ("<palette> palette" in prompt).
+
+
+---
+## 2026-11-04 audit fixes (agent b137bda2)
+Done, with tests (310 pass in `tests/`):
+- studio crash: `st.cache_data(ttl)` race -> lock-guarded `_ttl_cache` in `ui/studio.py`; `load` uncached.
+- #1 palette: `story.shot_dict`/`validate` now carry `palette` (was wiped by the re-validate after `anchor_plan`).
+- #2 anchors: `_ANCHOR_TRAILING` extended (only/against/near/...).
+- #4 take aliasing: `film_store.archive_takes` moves old takes to `takes/_archive/<stamp>/<id>/`; `draft.py` calls it before adopting (refuses if the move fails).
+- #6 false restale: `rebuild_hash` tolerates takes predating `upsample`/`camera_move` (`ADDED_FINISH_KEYS`), only while the current value is the neutral default. Real data: restale 105 -> 35 (remaining are genuine upsample/seconds changes).
+Open, needs the user's decision: #3 scene assignment (content-vs-budget; current scorer follows its documented content rule), #5 reorder-in-hold re-render (3 failing `recon_test/test_film_store.py` checks).
+Next: #7-#13, then unread modules (edit_planner, director, camera_direction, handheld, looks, grade_match, effects, continuity, conditioning, review, taste, style_pass, retime, output_audit, pacing_*).
+User decisions: legacy `film_project`/`--from-project`/`workspace/` stay untouched ("LEAVE IT").
+
+## 2026-11-04 audit fixes, part 2 (#7-#13, hygiene, second pass)
+Fixed + tested (suite: 334 tests, recon_test film_store/store_render pass):
+- Studio: thread-safe `_ttl_cache` (thumb/strip_frames), settings/effects save only when scenes changed, previs gate applies only when produce would generate.
+- film_store: `_write_json` retry + direct-write fallback (Windows PermissionError), `archive_takes`, `rebuild_hash` legacy tolerance, single take scan per shot, crc32 seeds.
+- draft: ShowrunnerFailure reported cleanly; old takes archived to `takes/_archive/<stamp>/` before adopting a new draft.
+- make_film `--frames` override is no longer persisted; job_runner progress regexes match real log lines.
+- review.signals tuple bug; output_audit uses `best_take`; sequence_ab `cut_continuity` (was shadowing module); camera_ab_visual reads `frames/`; style_pass `--keep-fog` works.
+Open (needs user decision): effects._aberration vertical shift is dead (fix changes visuals); effects chain not in rebuild_hash (UI label only); luma/CLIP thresholds differ between previs/output_audit/gate; review/output_audit/style_pass/retime/taste not wired into job_runner.TASKS.
+Known residual: draft.py/run_store write back stale snapshots at job end (mitigated by job lock + UI disabling).
+Untouched by decision: legacy film_project, --from-project, workspace/, ui_legacy. Broken & untouched: main.py (missing ui.app), distill_cnn.py (IndentationError L73).
+
+## 2026-11-04 part 3: decisions applied, studio tools, showrunner streaming/salvage
+- Decisions: `_aberration` fixed (diagonal radial fringe); effects NOT in rebuild_hash (user: no); thresholds unified in `continuity.HOLD_*` (luma 10, hist 0.80, CLIP 0.45) used by previs, previs.gate, output_audit; review/film_audit/style/retime are `job_runner.TASKS` with Studio panels (shoot: review, cut: audit, write: style+rhythm). taste was already in the CUT view.
+- `output_audit --report-only` (runner treats non-zero exit as FAILED). New tasks launch with `python -u`.
+- story.py: `chat_streamed` (real token progress, clock starts at first token) and `salvage_shots`/`parse_reply(salvage=True)` (showrunner only: a cut-off reply keeps its complete shots). job_runner parses `showrunner attempt N/M: T/B tokens, R tok/s, up to X min left`; Studio shows it as the outer bar.
+- studio "create it" refuses an existing slug (it overwrote film2/project.json once: timeline+concept lost; shots/takes/renders intact; `_fx_ui/project.json` is a near-copy, NOT restored - ask user).
+- Not done (user did not pick): lock clean shots on repair attempts. Open: `visual organisation unavailable: KeyError: 'diagnostics'` in Write view (seen on lighthouse).
+- Suite: 343 tests pass; recon_test film_store/store_render pass.
+
+## 2026-11-04 part 4: the film reads its own writing
+- story.py: prompt_flaws (rules: absence wording, figure missing from closing run), critic_flaws (mistral nominates repeats/off-concept/undrawable/stalls, bounds-checked, max 5), critique_and_repair (per-shot rewrite, kept only if no worse; rule-flagged absence falls back to _strip_absence). Runs after the prompt pass, before anchors. write_shots_ensemble(self_critique=, critic_model=); draft.py --no-self-critique/--critic-model (ON by default); unfixed rule flags become 'critic:' advisories; job_runner parses 'critique round'/'repair shot'. Cache config carries self_critique (old entries count as False).
+- Measured on real skydiving prompts (mistral, 256 s, 2 rounds): absence phrases removed, but a small model patches words rather than the story; the stalled tail (figure absent in the ending) is NOT solved by per-shot rewrites. Previs is a still-image proxy only and is not part of this loop.
+- Tests: tests/test_self_critique.py (10). Full suite 353 passed.
+
+
+- part 4b (same day): per-shot repair REPLACED by one batch call (_repair_batch: whole list, flagged shots marked >> with their problems, returns {shot: prompt}); critic (critic_read) now lists the concept's story events first and can flag out-of-order / missing-step. Round 2 only runs if the rules still flag something. Real-model check on the bad 16-shot skydiving draft (read-only, 354 s): inserted the missing leap + free-fall, fixed a landing-in-mid-air shot; round 2 had damaged shot 12 (hence the new guard). The 'skydiving' production still holds the old draft; not re-applied.
+
+
+- part 4c: order-aware self-critique. plan_events (concept ONLY, before any shot is seen) -> read_events (model locates first/last shot of each GIVEN event; ~5 answers; per-shot labels and object-per-shot were measured unusable on mistral/granite) -> order_flaws (plain code: backwards events, missing events placed in the slot between neighbours; unplaceable ones reported, never guessed) -> ONE _repair_batch call (whole list, flagged shots marked, 'MUST SHOW event n'). Keep-best: a round that leaves more problems is reverted. An unreadable reading flags nothing. Real draft check (skydiving, read-only): event order now correct; it flagged 1 shot, the repair was poor and was reverted. KNOWN MISS: a 7-8B model does not notice the plane-door shot (8) after the landing. Tests: tests/test_self_critique.py. Stale file productions/skydiving/shots/s16.json is an orphan (not in timeline) from the previous draft. 'skydiving' still holds the weak 15-shot draft from job 20261104-152753-draft (it ran BEFORE this order-aware version).
+
+
+
+## Part 5 - renderer tiers (fast vs full)
+- Root cause of the bad skydiving visuals: Lightning 4-step at guidance 1.0 (negative prompt ignored) draws extra limbs / T-poses on a figure. DreamShaper is not the problem (full sampler on it draws a correct figure). Plain SD1.5 was NOT tested properly (variant D produced noise, inconclusive). AnimateDiff v3 needs SD1.5-family bases only.
+- Step count (s05, one seed, 8 frames, `output/audit/skydiving/test_s05_CE.png`): 12 full steps = clean figure; 8 full steps = giant deformed purple wing blob. Not equal -> `FULL_STEPS = 12` (user rule: not the same quality -> do the complete one). One seed only.
+- Code: `film_store.render_tier/render_tier_tag/FULL_STEPS/GEN_NEUTRAL`, `sampler` key in `generation_inputs` (legacy takes stay current only for fast shots), per-shot `quality` override ("fast"/"full"/"auto"); `make_film.sampling_plan`, tier-aware `Generator` (rebuild ~1 min on tier switch), tier printed per shot. Tests: `tests/test_render_tier.py`; suite 371 passed.
+- Auto rule puts ALL 15 skydiving shots in full (every prompt names the jumpsuit) = ~12 h CPU at 16 frames. Not yet rendered. 16-frame motion of the full tier is unverified (the 8-frame tests barely moved).
+
+
+## Part 6 - character, keyframes, Studio surfaces
+- Skydiving full-tier re-render (s01,s04,s05,s09-s11,s14): anatomy fixed, BUT the figure changed gender (man -> woman by s11/s14) and suit colour drifted. Cause: every prompt says "a skydiver"; `anchor_plan` takes the figure from each SCENE's own plan wording. Fix: project `character` {descriptor, avoid} -> `film_store.set_character/apply_character` put the descriptor before the subject noun in every shot prompt; `avoid` is added to the FULL sampler's negative (fast = guidance 1.0 ignores negatives); `avoid` is a generation input. `draft.py --character/--avoid`; drafts reuse the project's character.
+- s04 prompt was cut off mid-phrase (writer defect) -> rewritten by hand.
+- Keyframes: `keyframe.py` (full-sampler stills, choose, `--animate` test); `make_film.Generator.clip_from_still` (video-to-video from an approved still). s05 test: figure held perfectly for 16 frames but the clip is ~static at strength 0.7 (34 min). Higher strengths untested. Previs untouched (its stills use the 4-step sampler).
+- Studio: shot view has a `render quality` select (auto/fast/full, shows tier + cost); Settings has `the character`. Keyframes are NOT in Studio yet (not proven useful). Tests: tests/test_studio_controls.py.
+- Open: green suit in green scenes (negative should help, unconfirmed); clips barely move; render job 20261106-063653-produce (all 15 stale) in progress when written.
+
+
+## Part 7 - previs gate retired
+- User: previs is not the video, so what is it for? Agreed: its stills use the 4-step sampler (the one that draws extra limbs) and the clip does not start from them. Studio `announce` no longer gates or auto-starts previs; `make_film --previs-check` is opt-in info only (the old `--no-previs-check` flag never worked: the code read `previs_check`). `previs.py`, `previs.gate()` and the optional write-view panel remain, relabelled. jynx previs (12:11 PM) showed shots 10-13 failing (blank/smeared) -- real, but unrelated to the gate decision; jynx has no character set and no takes yet.
+- Studio fixes this session: length box accepts holds < 1 s; per-tier ETA/price; character panel + self-check toggle on write view. Studio must be RESTARTED after code edits (Streamlit keeps imported modules).
+
+## Part 8 - a chosen take stands (stale semantics)
+- `hold_reference` (which take of the anchor a shot was conditioned on) no longer decides staleness: `generation_hash` substitutes the take's recorded value. It is shown as a note (`fs.hold_note`) in the shot panel. Changing an anchor's chosen take never re-shoots its descendants.
+- A take whose text/framing/subject/etc. differs from the shot now is still `stale`, but `fs.take_drift` names what differs and the shot panel offers **use this take as-is** (`fs.adopt_take`): frames untouched, the take's inputs are replaced with the current ones, the original record is kept under `adopted` in take.json. A later edit makes it stale again.
+- squid: 6 shots wanted re-shooting -> 2 (s01, s09, awaiting the adopt button). Studio must be restarted (film_store changed). Tests in tests/test_render_tier.py + tests/test_studio_controls.py; recon_test/test_store_render.py §6 updated to expect 0.
+
+## Part 9 - aMUSEd look for first frames (branch `amused-look`)
+- `keyframe.py --look amused`: aMUSEd-256 still (256 px, 12 steps, CFG 10) -> upscaled -> DreamShaper img2img at 0.5/0.65/0.8 (full sampler). Each strength is its own candidate `c<n>.png` (+json: look, strength, seed); raw aMUSEd kept as `m<n>.png`. Numbering continues, nothing overwritten.
+- Studio: shot panel "first frame" (look, count, make candidates, pick one, go back). Job task `keyframes` in job_runner. Picking one sets `shot["keyframe"]` -> full tier, shot re-shoots from that still.
+- aMUSEd weights were NOT fully cached; first run downloaded the rest (~12 files). Looks tested on squid s05 only: see output of that run; the diver in the prompt never appeared in any candidate.

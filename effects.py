@@ -380,12 +380,11 @@ def _aberration(frames, offset_px: float = 4.0, radial: bool = True,
     r = np.hypot((yy - cy) / cy, (xx - cx) / cx) / np.sqrt(2.0)
     for ch, sign in ((0, 1.0), (2, -1.0)):
         sh = r * float(offset_px) * sign
+        # radial fringe: displace along BOTH axes (a diagonal push away from / toward
+        # the centre). The vertical term used to be computed and then overwritten.
         iy = np.clip(np.round(yy + sh).astype(int), 0, H - 1)
-        ix = np.clip(np.round(xx).astype(int), 0, W - 1)
+        ix = np.clip(np.round(xx + sh).astype(int), 0, W - 1)
         out[..., ch] = a[:, iy, ix, ch]
-        ix2 = np.clip(np.round(xx + sh).astype(int), 0, W - 1)
-        iy2 = np.clip(np.round(yy).astype(int), 0, H - 1)
-        out[..., ch] = a[:, iy2, ix2, ch]
     out[..., 1] = a[..., 1]
     return to_frames(apply_mask(a, out, resolve_mask(mask, amount, a), amount))
 

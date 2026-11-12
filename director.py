@@ -461,6 +461,13 @@ def _mover_cap(n: int) -> int:
     return 2 if n <= 6 else max(2, round(n / 3))
 
 
+def mover_cap(n: int) -> int:
+    """Public alias for the same budget. `camera_direction`'s hybrid overlay must
+    count against the SAME cap the director optimises under, or the overlay can
+    quietly exceed the brief (measured: 3 moves in a 6-shot film)."""
+    return _mover_cap(n)
+
+
 def _shot_options(shot, i, scorer, cands, kind_scales, person_threshold,
                   strict_evidence):
     """History-free scores for every candidate motion on one shot.

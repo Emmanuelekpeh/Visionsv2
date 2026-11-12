@@ -30,6 +30,7 @@ validated rather than assumed.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Sequence
@@ -50,17 +51,25 @@ class Look:
     tint        (a, b) shift in Lab, i.e. green-magenta and blue-yellow
     lift        small luminance lift, applied as a curve not a level shift so
                 that exposure stays with the technical stage
+    hue         rotation of the (a, b) chroma vector in degrees. A neutral source
+                has no vector to rotate, so a look that must COLOUR a grey image
+                uses tint; hue matters for sources that already carry a cast.
     """
     name: str
     chroma: float = 1.0
     tint: tuple = (0.0, 0.0)
     lift: float = 0.0
     note: str = ""
+    hue: float = 0.0
 
 
 # A starting set. The names are the point: these are directable choices, and a
 # film picks a progression through them rather than a different checkpoint per
 # shot. Warm-to-cold across a film is a legible arc; alternating at random is not.
+# The tinted looks are deliberately stronger than the first four: measured on the
+# 13-shot style pass, a small Lab tint only nudged the muted checkpoint palette
+# (chroma 2.1 -> 10.9) inside the orange/blue band. These reach green, red,
+# violet and teal so a scene can be coloured by a real light source.
 LOOKS: Dict[str, Look] = {
     "neutral": Look("neutral", note="as generated, no palette shift"),
     "warm-gold": Look("warm-gold", chroma=1.14, tint=(2.0, 6.0), lift=1.5,
@@ -75,13 +84,24 @@ LOOKS: Dict[str, Look] = {
                        note="heavy amber, low key; the 'dread' look"),
     "cyan-night": Look("cyan-night", chroma=0.86, tint=(-3.0, -10.0), lift=-3.0,
                        note="cold cyan cast; the 'night' look"),
+    # ---- the wider range: colour, not just temperature -------------------- #
+    "emerald": Look("emerald", chroma=1.10, tint=(-16.0, 2.0), lift=-1.0,
+                    note="green cast; the 'sick / alive' look", hue=0.0),
+    "sodium": Look("sodium", chroma=1.12, tint=(14.0, 16.0), lift=-1.0,
+                   note="sodium streetlamp red-orange; the 'night street' look"),
+    "magenta": Look("magenta", chroma=1.20, tint=(20.0, -8.0), lift=0.0,
+                    note="magenta neon; the 'club / dream' look"),
+    "teal": Look("teal", chroma=0.95, tint=(-8.0, -18.0), lift=-2.0,
+                 note="teal shadow, orange skin; the 'cinema' look"),
+    "violet": Look("violet", chroma=1.05, tint=(6.0, -16.0), lift=-1.0,
+                   note="violet cast; the 'vision' look"),
 }
 
 # Which looks may follow which, if a film wants a legible arc rather than a
 # random walk. Ordered so consecutive entries are visibly but not absurdly
 # different. A film can also just name a look per scene.
-ARC = ["neutral", "warm-gold", "rich-green", "cold-steel", "amber-dusk",
-       "bleach", "cyan-night"]
+ARC = ["neutral", "warm-gold", "rich-green", "emerald", "sodium", "cold-steel",
+       "teal", "amber-dusk", "magenta", "bleach", "cyan-night", "violet"]
 
 
 def apply_look(frames: Sequence, look: str | Look,
@@ -106,6 +126,15 @@ def apply_look(frames: Sequence, look: str | Look,
         k = 1.0 + strength * (look.chroma - 1.0)
         A = (A - 128.0) * k + 128.0
         B = (B - 128.0) * k + 128.0
+
+        # rotate the chroma vector: a grey image has no vector to rotate (tint is
+        # what colours it), but a coloured source can be swung toward another hue
+        if look.hue:
+            th = math.radians(strength * look.hue)
+            ca, sb = math.cos(th), math.sin(th)
+            A2 = (A - 128.0) * ca - (B - 128.0) * sb + 128.0
+            B2 = (A - 128.0) * sb + (B - 128.0) * ca + 128.0
+            A, B = A2, B2
 
         # tint
         A = A + strength * da

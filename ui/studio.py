@@ -78,6 +78,7 @@ os.environ.setdefault("TORCH_HOME", str(ROOT / ".torch_home"))
 
 import film_store as fs                                          # noqa: E402
 import job_runner as jr                                          # noqa: E402
+import keyframe as kf                                            # noqa: E402
 
 FILMS = ROOT / "output" / "film"
 _V = tuple(int(x) for x in st.__version__.split(".")[:2] if x.isdigit())
@@ -158,12 +159,67 @@ def price(text: str) -> None:
 # reads. Everything is a file on disk, so everything is cheap and cacheable.
 # --------------------------------------------------------------------------- #
 
-@st.cache_data(show_spinner=False, ttl=4)
+def _ttl_cache(ttl: float):
+    """A thread-safe TTL cache with the `.clear()` the studio already calls.
+
+    WHY NOT `st.cache_data(ttl=...)`: the page is a 2-second fragment AND the main
+    script, running on different threads. Streamlit's TTL store (cachetools.TTLCache)
+    is not thread-safe, and an entry expiring between one thread's membership test
+    and its read raises `KeyError: '<hash>'` out of `thumb()` -- which crashed the
+    shoot view. One lock around lookup and store removes the race.
+    """
+    import functools
+    import threading
+
+    def deco(fn):
+        lock = threading.Lock()
+        store: Dict = {}
+
+        @functools.wraps(fn)
+        def wrapped(*args, **kw):
+            key = (args, tuple(sorted(kw.items())))
+            now = time.time()
+            with lock:
+                hit = store.get(key)
+                if hit is not None and now - hit[0] <= ttl:
+                    return hit[1]
+            value = fn(*args, **kw)          # compute outside the lock
+            with lock:
+                store[key] = (time.time(), value)
+                if len(store) > 512:         # bound memory: drop the oldest half
+                    for k in sorted(store, key=lambda k: store[k][0])[:256]:
+                        store.pop(k, None)
+            return value
+
+        def clear() -> None:
+            with lock:
+                store.clear()
+
+        wrapped.clear = clear
+        return wrapped
+    return deco
+
+
+def _snap(project: Dict) -> str:
+    """The project as it would be written, for 'did this pass change anything'.
+
+    The page re-runs every 2 s. A view that saves unconditionally rewrites
+    project.json from a snapshot loaded moments earlier, which can overwrite what a
+    running job (draft / produce) saved in between."""
+    return json.dumps({k: v for k, v in project.items() if not k.startswith("_")},
+                      sort_keys=True, default=str)
+
+
 def load(slug: str) -> Dict:
+    """The production, read fresh. A small JSON file: not worth a cache, and a cache
+    here was one more thing the fragment and the main script raced on."""
     return fs.load(slug)
 
 
-@st.cache_data(show_spinner=False, ttl=4)
+load.clear = lambda: None          # kept: callers invalidate it after a write
+
+
+@_ttl_cache(ttl=4)
 def thumb(take_dir: Optional[str], size: int = 320):
     """One frame, for a thumbnail. Its own function with its own signature -- a
     cached list-returning function shared with a single-frame call is how a list
@@ -181,7 +237,7 @@ def thumb(take_dir: Optional[str], size: int = 320):
         return None
 
 
-@st.cache_data(show_spinner=False, ttl=4)
+@_ttl_cache(ttl=4)
 def strip_frames(take_dir: str, n: int = 4, size: int = 210) -> List:
     """A few frames of a take, for the viewer. Four is enough to see whether the
     motion is real; more is a filmstrip nobody reads."""
@@ -206,6 +262,12 @@ def strip_frames(take_dir: str, n: int = 4, size: int = 210) -> List:
 # --------------------------------------------------------------------------- #
 
 def announce(task: str, **params) -> bool:
+    # NO PREVIS GATE. It used to block every render until a previs passed, and it
+    # auto-started one. Previs draws its stills with the 4-step sampler, so it does
+    # not show what the render will be (the full sampler and the video are different
+    # pixels), and the clip does not start from its stills. A check that cannot
+    # predict the result must not block it. Studio has no previs at all now (the
+    # user does not want it); `previs.py` stays on disk, unused by Studio.
     try:
         jr.start(task, **params)
         return True
@@ -281,13 +343,27 @@ def progress_facts(job: Dict) -> Dict:
         # `story.py` now announces each farm; this turns that into a real bar.
         outer = (min(1.0, (done or 0) / total),
                  f"{(done or 0)}/{total} scouts")
+    elif phase == "showrunner" and pr.get("token_budget") and state == jr.RUNNING:
+        # The showrunner's reply is STREAMED, so this is a real count: tokens written
+        # against the cap. The cap is a ceiling (a model that finishes earlier stops
+        # earlier), so the label says "up to", not "left".
+        tok, cap = int(pr.get("tokens") or 0), int(pr["token_budget"])
+        attempt = (f" · attempt {pr['attempt']}/{pr['attempt_total']}"
+                   if pr.get("attempt") and pr.get("attempt_total") else "")
+        rate = f" · {pr['tok_per_s']:.1f} tok/s" if pr.get("tok_per_s") else ""
+        left = (f" · up to {pr['minutes_left_max']} min left"
+                if tok and pr.get("minutes_left_max") is not None else "")
+        outer = (min(1.0, tok / cap) if cap else 0.0,
+                 f"{tok}/{cap} tokens{rate}{left}{attempt}")
 
     # the INNER bar: this phase against a cost -- measured when the run has produced
     # a completed shot, a labelled estimate when it has not.
     measured = pr.get("mean_shot_seconds")
     est = None
     if phase == "generating":
-        est = measured or 660.0                 # 11 min, the researched default
+        # the CURRENT shot's own tier price when the run knows it (a fast shot is
+        # ~1/4 of a full one), else the run's mean, else 11 min
+        est = pr.get("current_est_s") or measured or 660.0
     elif phase == "loading the model":
         est = 240.0
     elif phase == "finishing":
@@ -301,7 +377,10 @@ def progress_facts(job: Dict) -> Dict:
         inner = (min(0.99, elapsed / est), elapsed, est, bool(measured))
 
     eta = tail = None
-    if state == jr.RUNNING and phase == "generating" and total and measured \
+    if state == jr.RUNNING and phase == "generating" and total \
+            and done is not None and pr.get("eta_seconds") is not None:
+        eta = (int(pr.get("eta_shots") or 0), float(pr["eta_seconds"]))
+    elif state == jr.RUNNING and phase == "generating" and total and measured \
             and done is not None:
         left = max(0, total - done)
         eta = (left, left * float(measured))
@@ -423,6 +502,41 @@ def _cached_proposal_for(concept: str) -> Optional[Path]:
     return max(hits, key=lambda p: p.stat().st_mtime)
 
 
+def _pending_draft_for(project: Dict, concept: str) -> Optional[Dict]:
+    """A refused draft from the last run, if it belongs to this concept.
+
+    The write view has to say the loop has somewhere to continue from BEFORE the
+    button is pressed. Otherwise "press write new ideas" reads as "start over",
+    and the whole point of keeping the refused writing is invisible.
+    """
+    try:
+        p = fs.dir_for(project["slug"]) / "draft_attempt.json"
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if (data.get("concept") or "").strip().lower() != (concept or "").strip().lower():
+        return None
+    if not data.get("shots"):
+        return None
+    return data
+
+
+def _ago_text(at: str) -> str:
+    """`_ago` for a timestamp string instead of a file's mtime."""
+    try:
+        secs = max(0.0, time.time() - time.mktime(
+            time.strptime(str(at), "%Y-%m-%d %H:%M:%S")))
+    except Exception:
+        return ""
+    if secs < 90:
+        return "just now"
+    if secs < 5400:
+        return f"{secs / 60:.0f} min ago"
+    if secs < 172800:
+        return f"{secs / 3600:.0f} h ago"
+    return f"{secs / 86400:.0f} days ago"
+
+
 def _ago(p: Path) -> str:
     secs = max(0, time.time() - p.stat().st_mtime)
     if secs < 90:
@@ -506,15 +620,38 @@ def completion_banner(project: Dict, job: Optional[Dict] = None) -> None:
                    + (f"  ·  {job.get('finished', '')[11:16]}"
                       if job.get("finished") else ""))
     elif state == jr.FAILED and _job_fresh(job):
+        # A refusal is a DECISION, not a crash: the story gate exits 2 on purpose,
+        # and the reason is in the log's last lines. Show them here so the user
+        # does not have to hunt through a file to learn what to do next.
+        tail = _log_tail(job)
         st.error(f"**{job.get('task')} FAILED** (exit {job.get('returncode')}). "
-                 f"Nothing was lost — the takes already on disk are untouched. "
-                 f"Open *the log* in the sidebar to see why.")
+                 f"Nothing was lost — the takes already on disk are untouched."
+                 + (f"\n\n```\n{tail}\n```" if tail else
+                    " Open *the log* in the sidebar to see why."))
     elif state == jr.STOPPED and _job_fresh(job):
         st.warning(f"**{job.get('task')} was stopped.** Kept whatever had already "
                    f"landed on disk.")
     elif state == jr.LOST and _job_fresh(job):
         st.warning(f"**{job.get('task')} was lost** — the supervisor went away without "
                    f"finishing. {job.get('message') or ''}")
+
+
+def _log_tail(job: Dict, n: int = 6) -> str:
+    """The last few meaningful lines of a failed job's log, for the banner.
+
+    A story-gate refusal exits 2 and prints what failed and what to do next; the
+    log is the only place that lives, and "open the log" was a scavenger hunt.
+    Each line is trimmed so a traceback does not paste 40 lines into the page.
+    """
+    jid = job.get("id")
+    if not jid:
+        return ""
+    try:
+        text = jr.log_path(jid).read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return ""
+    lines = [l.rstrip() for l in text.splitlines() if l.strip()]
+    return "\n".join(l[-160:] for l in lines[-n:])
 
 
 def _what_it_made(job: Dict) -> str:
@@ -537,6 +674,23 @@ def _what_it_made(job: Dict) -> str:
                 else "the shot list was written")
     if task == "story":
         return "the shot list was written"
+    if task == "review":
+        if pr.get("fail") is not None:
+            return (f"{pr['fail']} fail · {pr.get('review', 0)} to look at · "
+                    f"{pr.get('passed', 0)} pass · {pr.get('unreviewed', 0)} "
+                    f"unreviewed — open *review the takes* in the shoot view")
+        return "the takes were reviewed"
+    if task == "film_audit":
+        return (f"{pr.get('warnings', 0)} warning(s), {pr.get('notes', 0)} note(s) — "
+                f"open *audit the delivered film* in the cut view")
+    if task == "style":
+        return (f"light and palette set for {pr['scenes']} scene(s); the prompts "
+                f"changed, so those takes are stale" if pr.get("scenes")
+                else "the style pass ran")
+    if task == "retime":
+        return (f"rhythm CV {pr['cv_before']} → {pr['cv_after']}; long holds will "
+                f"re-finish on the next export" if pr.get("cv_after") is not None
+                else "the cut was retimed")
     return "finished"
 
 
@@ -553,8 +707,12 @@ def shoot_all_button(project: Dict, key: str = "shoot_all") -> None:
         st.success("Every shot has a take. Nothing to shoot — the film is ready to cut.")
         return
     if stt["to_generate"]:
-        est = (f" about {stt['est_generate_s'] / 60:.0f} min"
-               if stt["est_generate_s"] else " roughly 45 min for 4 shots")
+        tiers = stt.get("est_by_tier") or {}
+        est = (" about " + _hms(stt["est_generate_s"])
+               + " (" + " + ".join(
+                   f"{v['shots']} {k} × ~{v['each_s'] / 60:.0f} min"
+                   + ("" if v["measured"] else " est.") for k, v in tiers.items())
+               + ")") if stt["est_generate_s"] else " roughly 45 min for 4 shots"
         price(f"{stt['to_generate']} shot(s) need generating{est}, plus seconds each "
               f"to grade. One job: the model loads once instead of {stt['to_generate']} "
               f"times.")
@@ -566,6 +724,43 @@ def shoot_all_button(project: Dict, key: str = "shoot_all") -> None:
                  + ")", type="primary", key=key, disabled=busy(), **FULL):
         if announce("produce", store=project["slug"]):
             st.rerun()
+
+
+def character_panel(project: Dict) -> None:
+    """Who the figure is, once, for every shot (also used by new drafts)."""
+    st.caption("Every shot's prompt is written separately, so without this each shot "
+               "draws a NEW person: the skydiver started as a man and ended as a "
+               "woman. One word here goes in front of the figure in every shot "
+               "(\"male\" → \"a male skydiver\"), and the words to avoid go in the "
+               "full-quality sampler's negative prompt. New drafts use it too.")
+    ch = project.get("character") or {}
+    with st.form("character_form"):
+        cc = st.columns([1, 3])
+        desc = cc[0].text_input("who", value=ch.get("descriptor", ""),
+                                placeholder="male",
+                                help="one adjective or short phrase, put in front of "
+                                     "the figure's noun in every shot")
+        avoid = cc[1].text_input("never draw", value=ch.get("avoid", ""),
+                                 placeholder="woman, female, long hair",
+                                 help="goes in the negative prompt. Only full-quality "
+                                      "shots obey it (fast shots ignore negatives)")
+        if st.form_submit_button("apply to every shot"):
+            if desc.strip():
+                n = fs.set_character(project, desc, avoid)
+                st.cache_data.clear()
+                st.session_state["character_msg"] = (
+                    f"{n} shot prompt(s) rewritten. Those shots will be re-shot; "
+                    f"shots that never name the figure were left alone.")
+            else:
+                project.pop("character", None)
+                fs.drop_stale_cache(project)
+                fs.save(project)
+                st.cache_data.clear()
+                st.session_state["character_msg"] = (
+                    "character cleared. Prompts already rewritten stay as they are.")
+            st.rerun()
+    if st.session_state.get("character_msg"):
+        st.info(st.session_state.pop("character_msg"))
 
 
 def view_write(project: Dict) -> None:
@@ -580,26 +775,61 @@ def view_write(project: Dict) -> None:
                            placeholder="what it is about, in the plainest words you "
                                        "have")
 
-    c = st.columns([1, 1, 3])
-    n_shots = c[0].number_input("shots", 2, 24,
-                                max(2, min(24, len(rows) or 4)), 1,
-                                help="SHOT COUNT IS THE BUDGET")
-    # the price, in the only unit that matters on this machine
-    price(f"{n_shots} shots ≈ {n_shots * 11} min of rendering. "
-          f"4 shots is about 45 minutes.")
+    # LENGTH FIRST, SHOTS DERIVED. The renderer supplies (2*frames-1)/fps seconds
+    # of real motion per shot, so the only honest way to make a longer film is
+    # more shots -- never longer holds. The studio asks for the target and does
+    # the arithmetic, including the render price.
+    import sequence_direction as sd
+    _stg = project.get("settings") or {}
+    _frames = int(_stg.get("frames") or 16)
+    _fps = int(_stg.get("fps") or 16)
+    _natural = (2 * _frames - 1) / _fps
+    _cur_len = (sum(fs.hold_frames(s) for s in rows) / _fps) if rows else 30.0
+    c = st.columns([1, 1, 2, 2])
+    target_s = c[0].number_input("target length (s)", 4, 120,
+                                 int(round(max(4, min(120, _cur_len)))), 2,
+                                 help="filmed seconds. The shot count is derived "
+                                      "from the renderer's real motion budget.")
+    est = sd.estimate(target_s, _frames, _fps)
+    n_shots = est["shots"]
+    price(f"target {target_s}s → {n_shots} shots ≈ "
+          f"{est['planned_seconds']:.0f}s planned · "
+          f"{est['render_minutes']:.0f} min of rendering if every shot is fast, "
+          f"up to ~{n_shots * fs.TIER_DEFAULT_S['full'] / 60:.0f} min if every "
+          f"shot is full quality (medium and close shots are) "
+          f"({n_shots} × {_natural:.2f}s of generated motion). "
+          f"Longer needs more shots, not longer holds.")
     fresh = c[1].checkbox("write new ideas", value=True,
-                          help="ON: the writers run again from scratch (4-7 min), "
-                               "and you get a genuinely different shot list. OFF: "
-                               "if a proposal for this concept is already on disk "
-                               "you get that one back, unchanged, in seconds.")
+                          help="ON: the writers run again. They plan 2-3 held "
+                               "scenes first (one place + one figure each), repair "
+                               "a refused draft, extend a short list to the "
+                               "requested count, re-ask once if the story holds "
+                               "but no scene does, and rewrite every prompt as ONE "
+                               "concrete image (a few minutes to ~40 min on CPU). "
+                               "OFF: if a proposal for this concept is already on "
+                               "disk you get that one back, unchanged, in seconds.")
+    adopt_broken = c[2].checkbox("adopt a broken story", value=False,
+                                 help="OFF by default. A draft whose beats go "
+                                      "backwards is REFUSED, so the production is "
+                                      "left untouched and the refused writing is "
+                                      "kept for the next run to repair. Tick this to "
+                                      "keep the list anyway.")
 
     # THE THING THAT MADE A RE-RUN LOOK LIKE IT DID NOTHING. The writers' output is
     # cached by concept, so pressing the button twice with the same concept returns
     # the SAME proposal, word for word, in a second or two. Nothing on the old page
     # said so, so a cached hit was indistinguishable from a fresh run. If a proposal
     # for this concept is already on disk, say so before the button, not after.
+    pending = _pending_draft_for(project, concept) if concept.strip() else None
     prior = _cached_proposal_for(concept) if concept.strip() else None
-    if prior and not fresh:
+    if pending:
+        price(f"the last draft of this concept was <b>refused</b> "
+              f"({len(pending.get('shots') or [])} shots, shape "
+              f"{pending.get('story_shape') or '?'}, "
+              f"{_ago_text(pending.get('at'))}). Pressing the button feeds that "
+              f"writing back to the loop and repairs it, instead of starting from "
+              f"nothing.")
+    elif prior and not fresh:
         price(f"a proposal for this concept is already on disk "
               f"({prior.stat().st_size // 1024} KB, written {_ago(prior)}). With "
               f"<b>write new ideas</b> off you will get that one back — the same "
@@ -607,15 +837,28 @@ def view_write(project: Dict) -> None:
     elif prior:
         price("a proposal for this concept is already on disk; <b>write new "
               "ideas</b> is on, so the writers run again and you get a different "
-              "list (4-7 min).")
+              "list (the loop can take a few minutes to ~35 min on CPU: writing "
+              "passes, coverage, then a prompt pass).")
     else:
         price("no proposal for this concept yet, so the writers will run either "
               "way.")
 
+    selfcheck = st.checkbox(
+        "let it re-read its own shot list and fix it", value=True,
+        help="After writing, the draft is checked for a story that goes backwards, "
+             "absence wording (\"no people\") and the figure missing from the "
+             "ending, and the flagged shots are repaired in ONE call that sees the "
+             "whole list. Off = faster, no repair.")
+    with st.expander("who is the figure? (keeps one person across every shot)",
+                     expanded=bool(project.get("character"))):
+        character_panel(project)
+
     if st.button("write the shot list", type="primary", key="draft_btn",
                  disabled=busy() or not concept.strip()):
         if announce("draft", store=project["slug"], concept=concept.strip(),
-                    n_shots=int(n_shots), fresh=bool(fresh)):
+                    n_shots=int(n_shots), fresh=bool(fresh),
+                    allow_broken_story=bool(adopt_broken),
+                    no_self_critique=not selfcheck):
             project["concept"] = concept.strip()
             fs.save(project)
             st.cache_data.clear()
@@ -625,8 +868,9 @@ def view_write(project: Dict) -> None:
 
     if not rows:
         st.info("No shot list yet. Write the concept above and press the button; it "
-                "takes 4-7 minutes and runs in the background, so you can leave this "
-                "page open and it will fill in.")
+                "runs in the background (a few minutes, longer if the story needs "
+                "repair passes), so you can leave this page open and it will fill "
+                "in.")
         return
 
     st.divider()
@@ -639,6 +883,123 @@ def view_write(project: Dict) -> None:
         # one line of prose, so it gets the measure.
         prose("the writer's own note: " + "; ".join(project["problems"]))
         st.markdown('<div class="studio-prose"></div>', unsafe_allow_html=True)
+    # what adoption did to the writer's timing. The store keeps the writer's text
+    # and re-times the cut to the renderer, so this line is the difference between
+    # what the model asked for and what will be shot.
+    pace = project.get("pacing") or {}
+    if pace.get("planned_holds"):
+        writer_h = " ".join(f"{float(x):g}" for x in pace.get("writer_holds") or [])
+        planned_h = " ".join(f"{float(x):g}" for x in pace["planned_holds"])
+        price(f"the cut was auto-paced at adoption: "
+              f"{len(pace.get('changes') or [])} timing/framing repair(s), built "
+              f"from {float(pace.get('natural_s') or 0):.2f}s of generated motion "
+              f"per shot. Holds {writer_h}s → {planned_h}s. "
+              f"{int(pace.get('movers') or 0)} moving shot(s).")
+    if pace.get("notes"):
+        prose("pacing notes: " + "; ".join(pace["notes"]))
+
+    # --- visual organisation: the hold/change spine ------------------------- #
+    # Where does this film hold one place and figure, and where does it change?
+    # This is the one picture that answers it: place bars, figure, and the cuts
+    # that mean a change. It is read-only here; the rearrangement lives in
+    # `visual_org.py --suggest` and the workbench's ORGANISE stage.
+    try:
+        import visual_org as vo
+        runs = vo.organise(rows)
+        org = vo.diagnose(rows, runs, mode="auto")
+        png = Path("output") / "visual_org" / f"{project['slug']}.png"
+        vo.strip_png(rows, runs, org["mode"], png, title=project["slug"])
+        st.markdown("**visual organisation** · hold or change")
+        st.image(str(png))
+        st.caption(
+            f"{org['stats']['holds']} held place(s), "
+            f"{org['stats']['singles']} single-shot change(s), "
+            f"{org['stats']['changes']} change(s) "
+            f"({org['stats']['changes_per_min']}/min) · within-run prompt "
+            f"overlap {org['inside_overlap']} vs {org['across_overlap']} across "
+            f"runs · mode **{org['mode']}**")
+        for it in org["diagnostics"][:6]:
+            line = f"{it['code']}: {it['message']}"
+            if it["level"] == "break":
+                st.error(line)
+            elif it["level"] == "warn":
+                st.warning(line)
+            else:
+                st.info(line)
+    except Exception as exc:                      # noqa: BLE001
+        st.caption(f"visual organisation unavailable: {type(exc).__name__}: {exc}")
+
+    # --- organisation controls: rearrange and anchor, in the studio ---------- #
+    try:
+        import visual_org as vo2
+        import sequence_direction as sd2
+        with st.expander("organisation · what the director chose"):
+            st.caption("Automatic. The film is split into movements and each one "
+                       "gets the grammar it needs: hold a place/figure for a beat, "
+                       "or change fast through a montage run. One film can use "
+                       "several. Camera moves are scoped to the movements that can "
+                       "carry them.")
+            direction = project.get("direction") or {}
+            movements = direction.get("movements") or []
+            if movements:
+                for m in movements:
+                    shots_m = m.get("shots") or []
+                    st.markdown(
+                        f"`shots {shots_m[0]}-{shots_m[-1]}` **{m.get('mode')}** · "
+                        f"beat {m.get('beat')} · camera ≤{m.get('camera_budget')} · "
+                        f"{m.get('why')}")
+                for note in direction.get("notes") or []:
+                    st.caption(note)
+            else:
+                st.caption("No direction stored yet. The next draft creates one, "
+                           "or press re-direct to plan this shot list now.")
+            if st.button("re-direct automatically", disabled=busy(),
+                         key=f"redirect_{project['slug']}"):
+                d = sd2.direct_project(project)
+                summary = " · ".join(f"{len(m.indices)}x{m.mode}"
+                                     for m in d.movements[:6])
+                st.success(f"re-directed: {summary}")
+                st.cache_data.clear()
+                st.rerun()
+            st.divider()
+            st.caption("Anchors are the words every shot in a hold gets told, so the "
+                       "renderer hears the same place/figure on every cut. Baking "
+                       "them rewrites the prompt (and correctly stales the take).")
+            runs2 = vo2.organise(rows)
+            orgp = project.setdefault("organisation", {})
+            saved_places = dict(orgp.get("places") or {})
+            saved_figures = dict(orgp.get("figures") or {})
+            places, figures = {}, {}
+            seen_places, seen_figures = set(), set()
+            for r in runs2:
+                if r.place not in seen_places:
+                    seen_places.add(r.place)
+                    places[r.place] = st.text_input(
+                        f"place {r.place} · visual description",
+                        value=saved_places.get(r.place, ""),
+                        key=f"anchor_place_{project['slug']}_{r.place}")
+                if r.figure and r.figure not in seen_figures:
+                    seen_figures.add(r.figure)
+                    figures[r.figure] = st.text_input(
+                        f"figure {r.figure} · appearance",
+                        value=saved_figures.get(r.figure, ""),
+                        key=f"anchor_fig_{project['slug']}_{r.figure}")
+            if st.button("bake anchors into prompts", disabled=busy(),
+                         key=f"anchor_apply_{project['slug']}"):
+                orgp["places"] = {k: v.strip() for k, v in places.items() if v.strip()}
+                orgp["figures"] = {k: v.strip() for k, v in figures.items() if v.strip()}
+                fs.save(project)
+                n = vo2.apply_anchors_to_store(project)
+                st.success(f"anchors written into {n} prompt(s) · those takes are "
+                           f"now stale, which is correct")
+                st.rerun()
+    except Exception as exc:                      # noqa: BLE001
+        st.caption(f"organisation controls unavailable: {type(exc).__name__}: {exc}")
+
+    try:
+        finish_panel(project)
+    except Exception as exc:                      # noqa: BLE001
+        st.caption(f"style/rhythm unavailable: {type(exc).__name__}: {exc}")
 
     # The list, and nothing else. This is the artifact; everything that produced it
     # is machinery. The scouts' 18 ideas are in Settings for the one time in ten you
@@ -702,23 +1063,204 @@ def film_strip(project: Dict, sel: str) -> None:
             # first thing to break in a terminal, a log, or a screenshot.
             if st.button(("* " if here else "") + str(i + 1),
                          key=f"strip_{s['id']}",
-                         help=f"{s['id']} · {STATE_WORD[state]}", **FULL):
+                         help=f"{s['id']} · {STATE_WORD[state]} · renders "
+                              f"{fs.render_tier(s)}", **FULL):
                 st.session_state["shot"] = s["id"]
                 st.rerun()
             st.markdown(
                 f'<div class="studio-cell" style="border:none;padding:0;opacity:'
                 f'{"1" if here else ".62"}">{STATE_MARK[state]} {t:.1f}s → '
                 f'{t + hold / _fps(project):.1f}s<br>'
-                f'<span>{STATE_WORD[state]}</span></div>',
+                f'<span>{STATE_WORD[state]} · {fs.render_tier(s)}</span></div>',
                 unsafe_allow_html=True)
         t += hold / _fps(project)
+    film_stt = fs.film_status(project)       # once: it scans every shot's takes
     price(f"{len(rows)} shots · {t:.2f}s total · "
-          f"{fs.film_status(project)['to_generate']} to shoot · "
-          f"{fs.film_status(project)['to_refinish']} to re-grade")
+          f"{film_stt['to_generate']} to shoot · "
+          f"{film_stt['to_refinish']} to re-grade")
 
 
 def _fps(project: Dict) -> int:
     return int((project.get("settings") or {}).get("fps") or 16)
+
+
+# --------------------------------------------------------------------------- #
+# the quality tools, read back: take review, film audit, style, rhythm
+# --------------------------------------------------------------------------- #
+#
+# `review`, `output_audit`, `style_pass` and `retime` were standalone CLIs whose
+# results nothing read. They are jobs now (job_runner.TASKS), so the one-job-at-a-time
+# lock also keeps them from writing a store while a render does. The functions below
+# are the READ side and hold no Streamlit calls, so the numbers they report are testable.
+
+def review_facts(project: Dict) -> Dict:
+    """The take review as data: gate status, reasons, and the per-shot rows.
+
+    `status` is review.gate's own word (missing / unreadable / stale / failed / ok);
+    the rows come from the same review.json, so the page cannot disagree with the gate.
+    """
+    import json as _json
+    import review
+    gate = review.gate(project)
+    rows: List[Dict] = []
+    path = fs.dir_for(project["slug"]) / "review.json"
+    if path.exists():
+        try:
+            rows = _json.loads(path.read_text(encoding="utf-8")).get("rows") or []
+        except Exception:                              # noqa: BLE001
+            rows = []
+    return {"status": gate.get("status"), "ok": bool(gate.get("ok")),
+            "reasons": list(gate.get("reasons") or []), "rows": rows}
+
+
+def audit_facts(project: Dict) -> Dict:
+    """The delivered-film audit as data, and whether it describes the CURRENT film.
+
+    output_audit writes metrics.json and has no fingerprint, so staleness is the file
+    clock: an audit older than the film it audited is reported as such, not trusted.
+    """
+    import json as _json
+    slug = project["slug"]
+    out = Path("output") / "audit" / slug
+    path = out / "metrics.json"
+    if not path.exists():
+        return {"exists": False}
+    try:
+        metrics = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:                           # noqa: BLE001
+        return {"exists": False, "error": f"{type(exc).__name__}"}
+    rec = project.get("deliverable") or {}
+    mp4 = (fs.renders_dir(slug) / rec["render"] / "film.mp4") if rec.get("render") \
+        else None
+    stale = bool(mp4 and mp4.exists() and mp4.stat().st_mtime > path.stat().st_mtime)
+    return {"exists": True, "stale": stale, "flags": metrics.get("flags") or [],
+            "render": metrics.get("render"),
+            "hold_cv": (metrics.get("flow") or {}).get("hold_cv"),
+            "total_s": (metrics.get("flow") or {}).get("total_s"),
+            "mean_margin": (metrics.get("alignment") or {}).get("mean_margin"),
+            "contact": (out / "contact.png") if (out / "contact.png").exists() else None,
+            "strip": (out / "flow_strip.png") if (out / "flow_strip.png").exists()
+            else None}
+
+
+def review_panel(project: Dict) -> None:
+    """Take review: run it, read the verdicts, record a person's verdict."""
+    import review
+    slug = project["slug"]
+    facts = review_facts(project)
+    with st.expander(f"review the takes · {facts['status']}"):
+        st.caption("Judges the TAKES, not the shot list: motion, sharpness and a "
+                   "boxed-subject evidence sheet per shot. The numbers flag where to "
+                   "look; they are not a verdict. A verdict is the model's (if you "
+                   "ask for it) or yours, recorded below.")
+        c = st.columns([1, 1, 3])
+        use_vision = c[1].checkbox("ask the vision model", value=False,
+                                   key=f"rv_vision_{slug}",
+                                   help=f"{review.DEFAULT_VISION} on the CPU: about a "
+                                        "minute per shot, and it is wrong often enough "
+                                        "that its answer is recorded but not trusted.")
+        if c[0].button("review takes", disabled=busy(), key=f"rv_run_{slug}"):
+            if announce("review", store=slug, vision=bool(use_vision)):
+                st.rerun()
+        if facts["status"] == "ok":
+            st.success("review gate: ok")
+        elif facts["status"] in ("missing", "stale", "unreadable"):
+            st.info(f"review gate: {facts['status']} — "
+                    + "; ".join(facts["reasons"]))
+        else:
+            for r in facts["reasons"]:
+                st.warning(r)
+        rows = [r for r in facts["rows"] if r.get("take")]
+        if not rows:
+            return
+        ids = [r["shot"] for r in rows]
+        pick = st.selectbox(
+            "shot", ids, key=f"rv_shot_{slug}",
+            format_func=lambda sid: next(
+                f"{sid} · {r.get('take')} · {r.get('verdict')}"
+                for r in rows if r["shot"] == sid))
+        row = next(r for r in rows if r["shot"] == pick)
+        sig = (row.get("signals") or {}).get("flags") or []
+        st.caption(f"sharpness {row.get('sharpness')} · motion {row.get('mean_diff')}"
+                   + (" · " + "; ".join(sig) if sig else "")
+                   + (f" · recorded by {row['verdict_by']}"
+                      if row.get("verdict_by") else ""))
+        ev = row.get("evidence")
+        if ev and Path(ev).exists():
+            st.image(str(ev))
+        why = st.text_input("why (optional)", key=f"rv_why_{slug}_{pick}")
+        v = st.columns(3)
+        for col, verdict in zip(v, ("pass", "review", "fail")):
+            if col.button(f"mark {verdict}", key=f"rv_{verdict}_{slug}_{pick}"):
+                review.set_verdict(slug, pick, row.get("take"), verdict, why)
+                st.rerun()
+
+
+def audit_panel(project: Dict) -> None:
+    """Delivered-film audit: run it, read the flags and the contact sheet."""
+    slug = project["slug"]
+    facts = audit_facts(project)
+    with st.expander("audit the delivered film"):
+        st.caption("Measures the FINISHED pictures against the prompts that made "
+                   "them: does each frame match its own shot's prompt, how big are "
+                   "the cuts, is the rhythm a metronome. Read-only.")
+        c = st.columns([1, 1, 3])
+        no_clip = c[1].checkbox("skip CLIP (faster)", value=False,
+                                key=f"au_noclip_{slug}")
+        if c[0].button("audit the film", disabled=busy() or not (
+                project.get("deliverable") or {}).get("render"), key=f"au_run_{slug}",
+                help="needs an exported film"):
+            if announce("film_audit", store=slug, no_clip=bool(no_clip)):
+                st.rerun()
+        if not facts["exists"]:
+            st.caption("no audit yet" + ("" if (project.get("deliverable") or {})
+                                         .get("render") else " — export the film first"))
+            return
+        if facts["stale"]:
+            st.warning("this audit is OLDER than the film on disk — run it again "
+                       "before trusting it")
+        st.caption(f"render {facts['render']} · {facts['total_s']}s · shot-length CV "
+                   f"{facts['hold_cv']}"
+                   + (f" · prompt→frame margin {facts['mean_margin']:+.3f}"
+                      if facts["mean_margin"] is not None else ""))
+        for f in facts["flags"]:
+            line = f"{f['code']}: {f['message']}"
+            (st.warning if f["level"] == "warn" else st.info)(line)
+        if not facts["flags"]:
+            st.success("no flags")
+        for key in ("contact", "strip"):
+            if facts[key]:
+                st.image(str(facts[key]))
+
+
+def finish_panel(project: Dict) -> None:
+    """Style (light + palette per scene) and rhythm (retime) -- both rewrite the plan."""
+    slug = project["slug"]
+    with st.expander("light, palette and rhythm"):
+        st.caption("Two passes over an adopted shot list. Both change what is "
+                   "rendered, so the takes they touch show as stale — which is "
+                   "correct.")
+        st.markdown("**style** · one light and palette per scene, fog words out")
+        keep_fog = st.checkbox("keep fog/mist/haze words", value=False,
+                               key=f"st_fog_{slug}")
+        if st.button("apply the style pass", disabled=busy(), key=f"st_run_{slug}"):
+            if announce("style", store=slug, keep_fog=bool(keep_fog)):
+                st.rerun()
+        st.divider()
+        st.markdown("**rhythm** · the measured human cut: a fast band, a long band")
+        try:
+            import retime
+            pv = retime.apply(slug, dry_run=True)
+            st.caption(f"shot-length CV {pv['before_cv']} → {pv['after_cv']} · "
+                       f"{pv['before_total']}s → {pv['after_total']}s · long holds "
+                       f"re-finish with RAFT x4-x6 (no re-shoot)")
+            st.code("\n".join(f"{sid:<6} {b:>5.2f}s → {a:>5.2f}s  RAFT x{u}"
+                              for sid, b, a, u in pv["holds"]), language=None)
+        except Exception as exc:                       # noqa: BLE001
+            st.caption(f"rhythm preview unavailable: {type(exc).__name__}: {exc}")
+        if st.button("apply the rhythm", disabled=busy(), key=f"rt_run_{slug}"):
+            if announce("retime", store=slug):
+                st.rerun()
 
 
 def view_shoot(project: Dict) -> None:
@@ -746,6 +1288,79 @@ def view_shoot(project: Dict) -> None:
     film_strip(project, sel)
     st.divider()
     shot_detail(project, sel)
+    st.divider()
+    try:
+        review_panel(project)
+    except Exception as exc:                      # noqa: BLE001
+        st.caption(f"take review unavailable: {type(exc).__name__}: {exc}")
+
+
+def first_frame_panel(project: Dict, shot_id: str, shot: Dict) -> None:
+    """The shot's first frame: make candidates, LOOK at them, pick one.
+
+    A chosen still becomes frame 0 of the clip (full sampler, video-to-video from the
+    still), so choosing re-shoots the shot -- said on the button, not discovered later.
+    Making candidates writes only into keyframes/ and touches no take."""
+    cands = kf.candidate_info(project, shot_id)
+    cur = shot.get("keyframe")
+    with st.expander("first frame" + (" · one chosen" if cur else ""),
+                     expanded=bool(cur)):
+        st.caption(
+            "A bad first frame is in every frame of the clip, so it is worth "
+            "choosing it before the ~50 min render. The aMUSEd look draws a 256 px "
+            "still with a different composition and texture, then DreamShaper "
+            "re-draws it at three strengths: low keeps more of aMUSEd (and its "
+            "soft detail), high keeps its layout and colour only.")
+        c = st.columns([2, 1, 1])
+        look = c[0].radio("look", list(kf.LOOKS), horizontal=True,
+                          key=f"kf_look_{shot_id}",
+                          format_func=lambda v: {"plain": "DreamShaper",
+                                                 "amused": "aMUSEd, then DreamShaper"}[v])
+        n = int(c[1].number_input("stills to draw", 1, 4, 1, key=f"kf_n_{shot_id}"))
+        per = len(kf.LOOK_STRENGTHS) if look == "amused" else 1
+        c[2].caption(f"makes {n * per} candidate(s), ≈{n * per * 2}–{n * per * 4} min")
+        if st.button("make candidates", key=f"kf_make_{shot_id}", disabled=busy()):
+            if announce("keyframes", store=project["slug"], shot=shot_id,
+                        candidates=n, look=look,
+                        strengths=",".join(str(s) for s in kf.LOOK_STRENGTHS)):
+                st.rerun()
+        if cur:
+            kp = kf.approved(project, shot)
+            if kp:
+                st.image(str(kp), caption=f"chosen first frame · {cur}", width=256)
+            if st.button("go back to no first frame", key=f"kf_clear_{shot_id}",
+                         help="the stills stay on disk; the shot renders from text "
+                              "again (and re-shoots, since its inputs change)"):
+                fs.update_shot(project, shot_id, keyframe=None)
+                fs.save(project)
+                st.cache_data.clear()
+                st.rerun()
+        if not cands:
+            st.caption("no candidates yet")
+            return
+        show = cands[-6:]
+        cols = st.columns(len(show))
+        for col, ci in zip(cols, show):
+            col.image(str(ci["path"]), width="stretch" if _V >= (1, 49) else None)
+            what = ("DreamShaper" if ci.get("look") in (None, "plain") else
+                    f"aMUSEd → DS {ci.get('strength')}")
+            col.caption(f"{ci['candidate']} · {what}")
+            chosen_this = cur and cur.endswith(f"{ci['candidate']}.png")
+            if col.button("chosen" if chosen_this else "use as first frame",
+                          key=f"kf_use_{shot_id}_{ci['candidate']}",
+                          disabled=bool(chosen_this),
+                          help="the shot will render FULL from this still and "
+                               "re-shoot"):
+                kf.choose(project, shot_id, int(ci["candidate"][1:]))
+                fs.save(project)
+                st.cache_data.clear()
+                st.rerun()
+        raws = sorted(kf.keyframe_dir(project, shot_id).glob("m*.png"))[-3:]
+        if raws:
+            with st.expander("what aMUSEd drew by itself (256 px, before DreamShaper)"):
+                rc = st.columns(len(raws))
+                for col, rp in zip(rc, raws):
+                    col.image(str(rp), caption=rp.stem)
 
 
 def shot_detail(project: Dict, shot_id: str) -> None:
@@ -779,9 +1394,26 @@ def shot_detail(project: Dict, shot_id: str) -> None:
     scale = c[1].selectbox("framing", fs.SCALES,
                            index=fs.SCALES.index(shot["scale"])
                            if shot.get("scale") in fs.SCALES else 2)
-    seconds = c[2].number_input("length", 1.0, 8.0,
-                                float(shot.get("seconds") or 2.5), 0.1,
-                                help=f"holds {fs.hold_frames(shot)} frames")
+    # The slider is the DELIVERED hold; the source supplies only
+    # (2*frames-1) frames. Show both, and say when the difference is visible:
+    # make_film.render duplicates frames to fill a longer hold.
+    _fps_here = _fps(project)
+    _frames_here = int((project.get("settings") or {}).get("frames") or 16)
+    _source_frames = 2 * _frames_here - 1
+    _natural = _source_frames / _fps_here
+    _hold_now = round(float(shot.get("seconds") or 2.5) * _fps_here)
+    _stretch_now = _hold_now / max(1, _source_frames)
+    _warn = (" — WILL JUDDER: duplicated frames" if _stretch_now > 1.30 else
+             f" — smooth (≤{1.30 * _natural:.1f}s)")
+    # The auto-pacer can write a hold under 1 s (skydiving s06 = 0.94). A hard 1.0
+    # minimum made Streamlit RAISE on those shots and the whole page died, so the
+    # floor follows the shot: you can still lengthen it, and a short one still opens.
+    _len_now = float(shot.get("seconds") or 2.5)
+    seconds = c[2].number_input("length", min(1.0, _len_now), max(8.0, _len_now),
+                                _len_now, 0.1,
+                                help=f"holds {_hold_now} of the {_source_frames} "
+                                     f"generated frames = {_stretch_now:.2f}×"
+                                     f"{_warn}. Source motion is {_natural:.2f}s.")
     beat = c[3].selectbox("beat", ["establish", "develop", "turn", "resolve"],
                           index=["establish", "develop", "turn", "resolve"]
                           .index(shot.get("beat"))
@@ -800,6 +1432,39 @@ def shot_detail(project: Dict, shot_id: str) -> None:
     if shot.get("camera_suggestion"):
         st.caption(f"the writer suggested **{shot['camera_suggestion']}** here. "
                    f"{camera} is what will be shot.")
+    if shot.get("purpose") or shot.get("link"):
+        # the sequence grammar, visible in the cut: what this shot does in its
+        # scene and how it is justified from the previous one.
+        st.caption(f"coverage: **{shot.get('purpose') or '?'}** · link to previous: "
+                   f"**{shot.get('link') or '?'}** · scene "
+                   f"**{shot.get('scene') or '?'}**")
+
+    # --- render quality: fast (Lightning) or full ---------------------------- #
+    # The tier decides the sampler, so it decides whether the figure comes out right:
+    # fast is ~10 min and draws extra limbs on a close figure; full is ~50 min and
+    # does not. `auto` picks by framing (wide = fast, closer = full).
+    tier_now = fs.render_tier(shot)
+    q_opts = ["auto", "fast", "full"]
+    q_cur = str(shot.get("quality") or "auto").lower()
+    q_cur = q_cur if q_cur in q_opts else "auto"
+    qc = st.columns([1, 3])
+    q_pick = qc[0].selectbox(
+        "render quality", q_opts, index=q_opts.index(q_cur), key=f"quality_{shot_id}",
+        help="auto = fast for wide / extreme-wide framing, full for medium and "
+             "closer. Override it when a wide shot draws a big figure, or a close "
+             "shot is only scenery.")
+    qc[1].caption(
+        f"this shot renders **{tier_now}**"
+        + (" (chosen by its framing)" if q_cur == "auto" else " (set by you)")
+        + (" · ≈10 min on this CPU, 4 steps; a figure here can get extra limbs"
+           if tier_now == "fast" else
+           f" · ≈50 min on this CPU, {fs.FULL_STEPS} steps")
+        + " · changing it re-shoots the shot")
+    if q_pick != q_cur:
+        fs.update_shot(project, shot_id, quality=q_pick)
+        fs.save(project)
+        st.cache_data.clear()
+        st.rerun()
 
     # --- the prompt, which is the real work -------------------------------- #
     with st.form(f"prompt_{shot_id}"):
@@ -811,6 +1476,8 @@ def shot_detail(project: Dict, shot_id: str) -> None:
             st.cache_data.clear()
             st.rerun()
 
+    first_frame_panel(project, shot_id, shot)
+
     # --- the take ---------------------------------------------------------- #
     st.divider()
     if chosen:
@@ -819,10 +1486,30 @@ def shot_detail(project: Dict, shot_id: str) -> None:
             cols = st.columns(len(frames), gap="small")
             for col, img in zip(cols, frames):
                 col.image(img)
-        st.caption(f"take {chosen['take']} · {chosen['frames_on_disk']} frames · "
+        _made = fs.take_tier(chosen)
+        st.caption(f"take {chosen['take']} · made {_made}"
+                   + (" (4-step; a close figure can have extra limbs)"
+                      if _made == "fast" else "") + f" · "
+                   f"{chosen['frames_on_disk']} frames · "
                    f"shot in {chosen.get('seconds')}s on "
                    f"{str(chosen.get('at', ''))[:16]}"
                    + (" · locked" if chosen.get("approved") else ""))
+        _note = fs.hold_note(project, shot, chosen)
+        if _note:
+            st.caption("note: this take was " + _note)
+        _drift = fs.take_drift(project, shot, chosen) if state == "stale" else []
+        if _drift:
+            st.warning(
+                "This take was made from an older **" + "**, **".join(_drift) +
+                "** than the shot says now, so Studio wants to re-shoot it.")
+            if st.button("use this take as-is", key=f"adopt_{shot_id}",
+                         help="keeps the take you chose and treats it as current "
+                              "for the shot's present text. Nothing re-shoots; what "
+                              "it was really made from stays recorded on the take."):
+                fs.adopt_take(project, shot_id)
+                fs.save(project)
+                st.cache_data.clear()
+                st.rerun()
     else:
         st.markdown(
             '<div class="studio-cell" style="padding:2.2rem;text-align:center">'
@@ -832,8 +1519,9 @@ def shot_detail(project: Dict, shot_id: str) -> None:
     stt = fs.film_status(project)
     needs_model = state in ("unrendered", "stale")
     if needs_model:
+        frames_setting = int((project.get("settings") or {}).get("frames") or 16)
         mins = (stt["est_generate_s"] / 60) if stt["est_generate_s"] else 11
-        price(f"shooting this renders 16 frames at 512², RAFT-upsamples and shakes "
+        price(f"shooting this renders {frames_setting} frames at 512², RAFT-upsamples and shakes "
               f"them: <b>≈{mins:.0f} min</b> on this CPU"
               + (f" (measured from {len(takes)} take(s))" if takes else
                  " (no measurement yet — the estimate is the researched default)"))
@@ -1009,6 +1697,17 @@ def view_cut(project: Dict) -> None:
             st.warning(f"the record points at `{mp4}`, which is not on disk. The store "
                        f"still has every take, so a re-export regenerates nothing.")
 
+    # ADVISORY, NOT A GATE: a failed take review is shown here because this is where the
+    # film is about to be cut, but it never blocks an export (a verdict is a person's
+    # or a model's opinion of a take; the export only cuts what is on disk).
+    try:
+        rv = review_facts(project)
+        if rv["status"] == "failed":
+            st.warning("take review flagged: " + " | ".join(rv["reasons"][:3])
+                       + " — see *review the takes* in the shoot view.")
+    except Exception:                                  # noqa: BLE001
+        pass
+
     st.divider()
     can = fs.ready_to_export(project)
     price("Export reads the takes from disk, grades them, and cuts them. It does not "
@@ -1031,6 +1730,57 @@ def view_cut(project: Dict) -> None:
                 f"<span style='opacity:.6;font-size:.86em'>{s.get('prompt','')}</span>",
                 unsafe_allow_html=True)
             t += hold / _fps(project)
+
+    try:
+        audit_panel(project)
+    except Exception as exc:                      # noqa: BLE001
+        st.caption(f"film audit unavailable: {type(exc).__name__}: {exc}")
+
+    # --- taste capture ------------------------------------------------------ #
+    # Every A/B in this project ended with "watch it and decide", and the decision
+    # was thrown away. This is the one-click version: pick two delivered cuts,
+    # say which read better, and the row is stored with its measured properties.
+    st.divider()
+    st.markdown("## taste · which cut read better?")
+    try:
+        import taste
+        films = taste.available_films()
+    except Exception as exc:                      # noqa: BLE001
+        films = []
+        st.caption(f"taste capture unavailable: {type(exc).__name__}: {exc}")
+    if len(films) < 2:
+        st.caption("Shoot two cuts (or two productions) and this records which one "
+                   "you preferred, with the measured difference.")
+    else:
+        labels = [f["label"] for f in films]
+        sel = st.columns(2)
+        ia = sel[0].selectbox("cut A", range(len(films)),
+                              format_func=lambda i: labels[i],
+                              key=f"taste_a_{project['slug']}")
+        ib = sel[1].selectbox("cut B", range(len(films)), index=1,
+                              format_func=lambda i: labels[i],
+                              key=f"taste_b_{project['slug']}")
+        if ia == ib:
+            st.caption("choose two different cuts")
+        else:
+            v = st.columns(2)
+            v[0].video(films[ia]["path"])
+            v[1].video(films[ib]["path"])
+            note = st.text_input("why? (optional, one line)",
+                                 key=f"taste_note_{project['slug']}")
+            pick = None
+            b = st.columns(3)
+            if b[0].button("A was better", key=f"taste_pa_{project['slug']}"):
+                pick = "a"
+            if b[1].button("B was better", key=f"taste_pb_{project['slug']}"):
+                pick = "b"
+            if b[2].button("too close to call", key=f"taste_pt_{project['slug']}"):
+                pick = "tie"
+            if pick:
+                taste.record(films[ia]["path"], films[ib]["path"], pick, note,
+                             tags=[project.get("concept", "")[:24]])
+                st.success("recorded — the studio now has one more labelled cut.")
+        st.caption(taste.format_summary(taste.summary()))
 
 
 # --------------------------------------------------------------------------- #
@@ -1055,8 +1805,10 @@ def view_effects(project: Dict) -> None:
                    "has to be an image first.")
         return
     from ui.effects_panel import effects_panel
+    before = _snap(project)
     effects_panel(project)
-    fs.save(project)
+    if _snap(project) != before:           # the panel saves its own edits; this is a
+        fs.save(project)                   # net, not a 2-second rewrite of the file
 
 
 def view_settings(project: Dict) -> None:
@@ -1067,17 +1819,17 @@ def view_settings(project: Dict) -> None:
     rule("how the film is rendered")
     c = st.columns(4)
     stg = project.get("settings") or {}
-    # The frames dial, as a setting rather than a constant. 16 is the default and the
-    # one to keep: AnimateDiff's motion module was trained on 16-frame windows, and a
-    # film rendered at 12 came back still. 12 is offered because it is 27% faster and
-    # may suit a shot that is meant to be near-static, but it is not the default.
+    # Raw frames per shot. AnimateDiff was trained on 16-frame windows, but higher
+    # counts work for longer durations. Each raw frame becomes ~2 after RAFT x2.
+    # At 16 FPS delivery: 16 frames = ~1.9s, 24 frames = ~2.9s, 32 frames = ~3.9s
     frames = c[0].selectbox(
-        "raw frames per shot", [16, 12, 8], index=[16, 12, 8].index(
+        "raw frames per shot", [8, 12, 16, 24, 32], 
+        index=[8, 12, 16, 24, 32].index(
             int(stg.get("frames") or 16)) if int(stg.get("frames") or 16) in
-        (16, 12, 8) else 0,
-        help="before RAFT x2. KEEP 16 unless the shot is meant to be near-static: the "
-             "motion module was trained on 16-frame windows and 12 can read as a still "
-             "frame. 12 is 27% faster; 8 was rejected on measured motion quality")
+        (8, 12, 16, 24, 32) else 2,  # default to 16 (index 2)
+        help="Raw frames before RAFT x2. 16 is the researched default. Higher = longer "
+             "shots (24 frames ≈ 3s, 32 frames ≈ 4s per shot after interpolation). "
+             "Lower = faster but less motion.")
     shake = c[1].slider("camera shake", 0.0, 3.0, float(stg.get("shake_scale", 1.0)),
                         0.05, help="1.0 is the researched default. Whole film.")
     baseline = c[2].checkbox("match exposure across shots",
@@ -1098,10 +1850,38 @@ def view_settings(project: Dict) -> None:
         st.cache_data.clear()
         st.rerun()
 
+    rule("how the cut is directed")
+    # The store used to freeze every shot at camera 'none', so the writer's
+    # suggestion and the continuity rules never reached a render. This chooses the
+    # policy for the NEXT shot list; existing shots keep their stored camera.
+    from camera_direction import DEFAULT_MODE, MODES
+    cur_mode = str(stg.get("camera_mode") or DEFAULT_MODE)
+    if cur_mode not in MODES:
+        cur_mode = DEFAULT_MODE
+    c = st.columns([2, 2])
+    cam_mode = c[0].selectbox(
+        "camera moves for new drafts", list(MODES), index=MODES.index(cur_mode),
+        help="off = every shot still (the old behaviour, kept for A/B). "
+             "suggestions = the writer's own suggestion, continuity-repaired. "
+             "director = director.choose() from CLIP fit, hints and continuity. "
+             "hybrid = director first, the writer's suggestion where the director "
+             "declines. A broken beat order is still refused separately.")
+    c[1].caption("affects the next shot list you write; re-draft to apply. "
+                 "Editing a shot's movement by hand always wins.")
+    if cam_mode != cur_mode:
+        project.setdefault("settings", {})["camera_mode"] = cam_mode
+        fs.save(project)
+        st.cache_data.clear()
+        st.rerun()
+
+    rule("the character")
+    character_panel(project)
+
     rule("scenes and colour")
     st.caption("One palette per scene. Changing a palette re-grades that scene's "
                "shots during the cut — seconds, not minutes.")
     from looks import ARC
+    before_scenes = _snap(project)
     for sc in fs.sync_scenes(project):
         c = st.columns([2, 2])
         n = sum(1 for s in fs.shots_in_order(project)
@@ -1116,7 +1896,8 @@ def view_settings(project: Dict) -> None:
             fs.save(project)
             st.cache_data.clear()
             st.rerun()
-    fs.save(project)
+    if _snap(project) != before_scenes:    # sync_scenes normalised something
+        fs.save(project)
 
     # ---- effects: the surface, after the grade ----------------------------- #
     # MOVED to its own view (`view_effects`). It lives here still as a one-line pointer
@@ -1252,7 +2033,15 @@ def main() -> None:
             if st.session_state.get("new"):
                 nm = st.text_input("name", "film2", key="new_name")
                 cn = st.text_input("concept", "", key="new_concept")
-                if st.button("create it", key="create_new"):
+                # `new_project` + `save` REPLACE project.json. Creating "film2" while a
+                # film2 existed silently wiped its timeline and concept (its shots and
+                # takes stayed on disk, orphaned), so an existing name is refused.
+                _taken = fs.dir_for(fs.slugify(nm.strip())) / "project.json"
+                if nm.strip() and _taken.exists():
+                    st.error(f"'{fs.slugify(nm.strip())}' already exists — pick it "
+                             f"in the production list, or choose another name.")
+                if st.button("create it", key="create_new",
+                             disabled=(not nm.strip()) or _taken.exists()):
                     pr = fs.new_project(nm.strip(), cn.strip())
                     fs.save(pr)
                     st.session_state["slug"] = pr["slug"]

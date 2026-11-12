@@ -157,7 +157,9 @@ def main() -> int:
             self.base = base
             self.adapters = []
 
-        def clip(self, shot, seed, model=None):
+        def clip(self, shot, seed, model=None, reference=None, **_kw):
+            # same signature as make_film.Generator.clip (hold conditioning)
+            self.conditioned = reference is not None
             calls["generated"] += 1
             return ([_Im.new("RGB", (64, 64), (30 + 8 * i, 60, 120))
                      for i in range(mf.FRAMES)], 0.01)
@@ -230,10 +232,50 @@ def main() -> int:
           len(takes[made[1]["id"]]), 1)
     check("no film was assembled from an incomplete set",
           (ROOT / "output" / "film" / PARTIAL / "film.mp4").exists(), False)
-    check("and the film reports what is still missing",
+    # The three shots are ONE hold (scene sc1). The middle take was recorded while
+    # its anchor (shot 1) had no take; shot 1 has now been shot, so the middle shot's
+    # hold_reference changed. That is PROVENANCE, not a render input: the user's take
+    # stands and nothing needs re-shooting (it used to count as 1 to re-generate).
+    check("a changed anchor take does not ask for a re-shoot",
           fs.film_status(pr)["to_generate"], 0)
 
-    print("\nall store-render checks passed")
+    print("\n7. `--frames` is stamped on the take it produced, and not persisted")
+    # Audit #9. `--frames 12` made the renderer generate 12 frames, but the take was
+    # stamped with the production's own setting (16), so the studio called a 12-frame
+    # take current for a 16-frame film. The override must reach the plan and the
+    # take's hash -- and must NOT be saved into the production's settings.
+    OVR = "_store_frames_override_test"
+    shutil.rmtree(fs.dir_for(OVR), ignore_errors=True)
+    pr = fs.new_project(OVR, "frames override")
+    pr["slug"] = OVR
+    fs.save(pr)
+    fs.add_shot(pr, prompt="a shot rendered at an overridden frame count",
+                camera="none", seconds=2.0, scene="sc1")
+    fs.save(pr)
+    recorded_before = (fs.load(OVR).get("settings") or {}).get("frames")
+    mf.Generator = FakeGenerator
+    mf.raft_upsample = lambda frames, factor=2, flow_size=256: list(frames) * 2
+    real_frames = mf.FRAMES
+    try:
+        a = argparse.Namespace(store=OVR, name=OVR, base="models/dreamshaper8",
+                               only=None, dry_run=False, shake=1.0, frames=12)
+        rc = mf.run_store(a)
+    finally:
+        mf.Generator, mf.raft_upsample = real_gen, real_raft
+        mf.FRAMES = real_frames
+    check("the override run returned 0", rc, 0)
+    pr = fs.load(OVR)
+    take = fs.list_takes(pr, fs.shots_in_order(pr)[0])[-1]
+    check("the take was generated at 12 raw frames", take["ladder"]["raw"], 12)
+    check("and its generation inputs say 12, not the production's setting",
+          take["generation"]["frames"], 12)
+    check("the one-off override was not persisted into the production",
+          (pr.get("settings") or {}).get("frames"), recorded_before)
+    shutil.rmtree(fs.dir_for(OVR), ignore_errors=True)
+    shutil.rmtree(ROOT / "output" / "film" / OVR, ignore_errors=True)
+
+    print("\nall store-render checks passed" if not FAILS
+          else f"\n{len(FAILS)} store-render check(s) FAILED: {FAILS}")
     for s in (SLUG, FRESH, PARTIAL):
         shutil.rmtree(fs.dir_for(s), ignore_errors=True)
         shutil.rmtree(ROOT / "output" / "film" / s, ignore_errors=True)
