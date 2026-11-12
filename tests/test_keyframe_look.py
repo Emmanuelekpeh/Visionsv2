@@ -103,3 +103,92 @@ def test_amused_prompt_puts_the_subject_clause_first():
     assert kf.amused_prompt("A male skydiver, fog", "a skydiver") == "A male skydiver, fog"
     assert kf.amused_prompt("a vast field, mist", "a skydiver") == "a vast field, mist"
     assert kf.amused_prompt("tags, a skydiver", "") == "tags, a skydiver"
+
+
+def test_ip_animation_passes_the_still_as_reference_and_refuses_when_unconditioned(
+        tmp_path, monkeypatch):
+    import make_film
+    p, sid = proj_two(tmp_path, monkeypatch)
+    _cand(p, sid, 0, look="amused")
+    seen = {}
+
+    class Fake:
+        def __init__(self, *a, **k):
+            self.conditioned = seen.get("cond", True)
+
+        def clip(self, shot, seed, model=None, reference=None, tier="fast", avoid="",
+                 anchor=None, ramp=None):
+            seen.update(reference=reference, tier=tier, avoid=avoid, anchor=anchor,
+                        ramp=ramp)
+            return [Image.new("RGB", (8, 8))] * 2, 1.0
+
+    monkeypatch.setattr(make_film, "Generator", Fake)
+    monkeypatch.setattr(kf, "ROOT", tmp_path)
+    assert kf.animate_test(p, sid, 0, None, mode="ip", ip_scale=0.9) == 0
+    assert seen["tier"] == "full" and seen["reference"].size == (32, 32)
+    assert make_film.IP_ADAPTER_SCALE == 0.9
+    assert (tmp_path / "output" / "audit" / p["slug"] / f"kf_{sid}_c0_ip"
+            / "f000.png").exists()
+    seen["cond"] = False                      # adapter failed to load
+    assert kf.animate_test(p, sid, 0, None, mode="ip") == 3
+    seen.update(cond=True)
+    assert kf.animate_test(p, sid, 0, None, mode="ramp", ramp=(1.0, 0.4)) == 0
+    assert seen["reference"] is None and seen["anchor"].size == (32, 32)
+    assert seen["ramp"] == (1.0, 0.4)
+    assert kf.animate_test(p, sid, 0, None, mode="ip+ramp") == 0
+    assert seen["reference"] is not None and seen["anchor"] is not None
+    with pytest.raises(ValueError):
+        kf.animate_test(p, sid, 0, None, mode="bogus")
+
+
+def proj_two(tmp_path, monkeypatch):
+    monkeypatch.setattr(fs, "PRODUCTIONS", tmp_path)
+    p = fs.new_project("ipt", "a diver")
+    fs.save(p)
+    fs.add_shot(p, prompt="a diver leaps", scale="medium", subject="a diver",
+                scene="sc1")
+    fs.save(p)
+    return p, p["timeline"][0]
+
+
+
+def test_anchor_callback_pins_frame0_and_leaves_the_free_frames_alone():
+    import torch
+    import make_film
+    from diffusers import DPMSolverMultistepScheduler
+
+    class Dist:
+        def __init__(self, m):
+            self.mean = m
+
+    class Out:
+        def __init__(self, m):
+            self.latent_dist = Dist(m)
+
+    class FakeVae:
+        class config:
+            scaling_factor = 1.0
+
+        def encode(self, x):                      # a constant latent, easy to check
+            return Out(torch.full((1, 4, 64, 64), 0.5))
+
+    sch = DPMSolverMultistepScheduler()
+    sch.set_timesteps(6)
+
+    class Pipe:
+        scheduler = sch
+
+    cb = make_film.anchor_callback(FakeVae(), Image.new("RGB", (64, 64)),
+                                   (1.0, 0.5), seed=3)
+    lat = torch.randn(1, 4, 8, 64, 64)
+    before = lat.clone()
+    out = cb(Pipe, 0, sch.timesteps[0], {"latents": lat})["latents"]
+    z0 = torch.full((1, 4, 64, 64), 0.5)
+    eps = torch.randn(z0.shape, generator=torch.Generator("cpu").manual_seed(3 + 7919))
+    known = sch.add_noise(z0, eps, sch.timesteps[1].reshape(1))
+    assert torch.allclose(out[:, :, 0], known, atol=1e-5)                 # pinned
+    assert torch.allclose(out[:, :, 1], 0.5 * known + 0.5 * before[:, :, 1], atol=1e-5)
+    assert torch.equal(out[:, :, 2:], before[:, :, 2:])                   # free
+    last = cb(Pipe, len(sch.timesteps) - 1, sch.timesteps[-1],
+              {"latents": torch.randn(1, 4, 8, 64, 64)})["latents"]
+    assert torch.allclose(last[:, :, 0], z0)           # clean still after the last step

@@ -3385,3 +3385,12 @@ Untouched by decision: legacy film_project, --from-project, workspace/, ui_legac
 - aMUSEd-256 uses a CLIP text encoder, 77 tokens; our prompts are 26-46 tokens, so length is not the issue. Order and the negative are.
 - A raw+avoid-negative: good figures on s10/s12, no figure on s01. B raw, no negative: s10 became a snail-like body, s12 got a green suit. C subject-first, no negative: figure on s01 but washed out. D subject-first + avoid negative: best on all five. D is the default (`keyframe.amused_prompt`, avoid list from `fs.character_avoid`); the exact prompt is stored on each candidate's json (`amused_prompt`).
 - Sheets: output/audit/amused_humans/matrix.png (A,B,C rows) and matrix_D.png. DreamShaper stage on human shots not yet run.
+
+### Part 9c - animating a chosen still (skydiving s01 c1, all runs same seed, full tier, ~43-48 min each)
+`keyframe.py --animate 1 --mode {v2v,ip,ramp,ip+ramp}`; frames to output/audit/skydiving/kf_s01_c1[_ip|_ramp|_ipramp]/, sheet compare.png.
+- v2v (strength 0.7, `clip_from_still`): figure held through 16 frames, almost no motion (step diff 3.6). Cause: input = 16 identical frames and the first 4 of 12 (high-noise, motion-deciding) steps are skipped.
+- ip (IP-Adapter 0.7, from noise): moves (step 7.6) but composition drifts to a fisheye window view, frame 0 is not the still, a doubled body appears mid-clip.
+- ramp `(1,0.6,0.3,0.1)` (`make_film.anchor_callback`): frame 0 == still (err 1.7), frame 3 still the diver, from frame ~6 a hard cut to an empty mountain slope. The anchor ends too abruptly; the model cannot bridge the gap.
+- ip+ramp: same hard cut, then a fisheye view with 2-3 divers. Not usable.
+- Not tried: a long soft ramp (e.g. 1 -> 0.35 across all frames), v2v strength 0.85-0.9, and v2v on an input that already moves (the still with a slow zoom/pan, `camera_path.apply_path`) -- the cause of the static clip is identical input frames.
+- "step diff" is not comparable across rows when a clip contains a scene cut.

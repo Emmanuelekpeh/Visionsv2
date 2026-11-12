@@ -81,6 +81,12 @@ def sampling_plan(tier: str) -> dict:
 # the identity. Tuned, not guessed (see STUDIO_LOOP.md).
 IP_ADAPTER_SCALE = 0.7
 
+# THE FIRST-FRAME ANCHOR RAMP (see `anchor_callback`). Per-frame weight of the approved
+# still that is re-imposed after every denoising step: frame 0 is pinned to it, the next
+# frames are held progressively looser, everything after is free so AnimateDiff invents
+# the motion from the full noise schedule. UNTUNED -- a starting point to look at.
+ANCHOR_RAMP = (1.0, 0.6, 0.3, 0.1)
+
 # Platform lengths, from 2026 short-form guidance.
 #
 # The completion curve is the thing to design against: a 15s video is watched to
@@ -459,7 +465,7 @@ class Generator:
     _set = set_motion
 
     def clip(self, shot, seed, model: str | None = None, reference=None,
-             tier: str = "fast", avoid: str = ""):
+             tier: str = "fast", avoid: str = "", anchor=None, ramp=None):
         tier = "full" if tier == "full" else "fast"
         if model:
             path = self.BASES.get(model, model)
@@ -489,6 +495,12 @@ class Generator:
                       generator=torch.Generator("cpu").manual_seed(seed))
         if self.conditioned:
             kwargs["ip_adapter_image"] = reference
+        if anchor is not None:
+            # first-frame anchor: independent of the IP-Adapter reference, so the two
+            # can be used alone or together
+            kwargs["callback_on_step_end"] = anchor_callback(
+                self.pipe.vae, anchor, ANCHOR_RAMP if ramp is None else ramp, seed)
+            kwargs["callback_on_step_end_tensor_inputs"] = ["latents"]
         t0 = time.time()
         with torch.no_grad():
             out = self.pipe(**kwargs)
@@ -535,6 +547,37 @@ class Generator:
                       width=SIZE, height=SIZE,
                       generator=torch.Generator("cpu").manual_seed(seed))
         return [f.convert("RGB") for f in out.frames[0]], time.time() - t0
+
+
+def anchor_callback(vae, still, ramp, seed):
+    """A `callback_on_step_end` that keeps the first frames close to an approved still.
+
+    After each step the pipeline's latents are [1, 4, F, h, w]. For frame k with
+    weight w_k > 0 the latent becomes  w_k * known + (1 - w_k) * latent,  where `known`
+    is the still's own latent noised to the level of the NEXT timestep (the clean
+    latent after the last step). Frames beyond the ramp are never touched, so the clip
+    is not started from identical frames the way video-to-video is: the high-noise
+    steps, where the motion is decided, run on pure noise for all of them.
+    """
+    img = still.convert("RGB").resize((SIZE, SIZE))
+    x = torch.from_numpy(np.asarray(img, dtype=np.float32) / 127.5 - 1.0)
+    x = x.permute(2, 0, 1)[None]
+    with torch.no_grad():
+        z0 = vae.encode(x).latent_dist.mean * vae.config.scaling_factor
+    eps = torch.randn(z0.shape, generator=torch.Generator("cpu").manual_seed(seed + 7919))
+    ramp = tuple(float(w) for w in ramp)
+
+    def cb(pipe, i, t, kw):
+        lat = kw["latents"]
+        steps = pipe.scheduler.timesteps
+        known = (pipe.scheduler.add_noise(z0, eps, steps[i + 1].reshape(1))
+                 if i + 1 < len(steps) else z0)
+        for k, w in enumerate(ramp[:lat.shape[2]]):
+            if w > 0:
+                lat[:, :, k] = w * known + (1.0 - w) * lat[:, :, k]
+        kw["latents"] = lat
+        return kw
+    return cb
 
 
 def _approved_keyframe(project, record):

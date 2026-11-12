@@ -289,12 +289,31 @@ def approved(project: Dict, shot: Dict) -> Optional[Path]:
     return p if p.exists() else None
 
 
+ANIMATE_MODES = ("v2v", "ip", "ramp", "ip+ramp")
+
+
 def animate_test(project: Dict, shot_id: str, candidate: int,
-                 strength: Optional[float]) -> int:
-    """Animate one candidate through the render's own `clip_from_still`."""
+                 strength: Optional[float], mode: str = "v2v",
+                 ip_scale: Optional[float] = None,
+                 ramp: Optional[tuple] = None) -> int:
+    """Animate one candidate through the render's own generator. No take is written.
+
+    v2v      `clip_from_still`: the still repeated, noised to `strength`. Measured on
+             skydiving s01: the figure held, the clip barely moved (it starts after the
+             high-noise steps that decide motion).
+    ip       generate FROM NOISE (full schedule) with the still as an IP-Adapter
+             reference, which carries look, suit and figure; pose may drift.
+    ramp     generate from noise but re-impose the still on the first frames after
+             every step (`make_film.anchor_callback`): frame 0 is the still, later
+             frames are freer.
+    ip+ramp  both.
+    The IP modes refuse to run if the adapter did not load: an unconditioned clip
+    would pass for a result it is not.
+    """
     import make_film
-    from edit_planner import Shot
     from previs import shots_from_store
+    if mode not in ANIMATE_MODES:
+        raise ValueError(f"mode must be one of {ANIMATE_MODES}, not {mode!r}")
     shot = fs.get_shot(project, shot_id)
     still = keyframe_dir(project, shot_id) / f"c{int(candidate)}.png"
     if not still.exists():
@@ -304,14 +323,35 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
     s = shots_from_store(project["slug"])[ids.index(shot_id)]
     gen = make_film.Generator("models/dreamshaper8", loras=[])
     seed = candidate_seed(project, shot, candidate)
-    frames, dt = gen.clip_from_still(s, seed, still, strength=strength,
-                                     avoid=fs.character_avoid(project))
-    out = ROOT / "output" / "audit" / project["slug"] / f"kf_{shot_id}_c{candidate}"
+    avoid = fs.character_avoid(project)
+    use_ip, use_ramp = "ip" in mode, "ramp" in mode
+    if mode == "v2v":
+        frames, dt = gen.clip_from_still(s, seed, still, strength=strength,
+                                         avoid=avoid)
+        label = ("v2v strength "
+                 f"{strength if strength is not None else fs.KEYFRAME_STRENGTH}")
+        suffix = "" if strength is None else f"_s{int(round(strength * 100))}"
+    else:
+        if ip_scale is not None:
+            make_film.IP_ADAPTER_SCALE = float(ip_scale)
+        img = Image.open(still).convert("RGB")
+        frames, dt = gen.clip(s, seed, reference=img if use_ip else None,
+                              tier="full", avoid=avoid,
+                              anchor=img if use_ramp else None, ramp=ramp)
+        if use_ip and not gen.conditioned:
+            print("[keyframe] the IP-Adapter did not load, so this clip is NOT "
+                  "conditioned on the still; discarding it")
+            return 3
+        label = " + ".join(
+            ([f"ip-adapter scale {make_film.IP_ADAPTER_SCALE}"] if use_ip else [])
+            + ([f"ramp {tuple(ramp or make_film.ANCHOR_RAMP)}"] if use_ramp else []))
+        suffix = "_" + mode.replace("+", "")
+    out = (ROOT / "output" / "audit" / project["slug"]
+           / f"kf_{shot_id}_c{candidate}{suffix}")
     out.mkdir(parents=True, exist_ok=True)
     for i, f in enumerate(frames):
         f.save(out / f"f{i:03d}.png")
-    print(f"[keyframe] animated {shot_id} c{candidate} strength "
-          f"{strength if strength is not None else fs.KEYFRAME_STRENGTH}: "
+    print(f"[keyframe] animated {shot_id} c{candidate} {label}: "
           f"{len(frames)} frames in {dt:.0f}s -> {out}", flush=True)
     return 0
 
@@ -333,6 +373,14 @@ def main() -> int:
     ap.add_argument("--animate", type=int, default=None,
                     help="animate this candidate of --shot (a test: frames go to "
                          "output/audit/<store>/kf_<shot>_c<N>/, no take is written)")
+    ap.add_argument("--mode", choices=ANIMATE_MODES, default="v2v",
+                    help="--animate: v2v = start from the still; ip = from noise with "
+                         "the still as an IP-Adapter reference; ramp = from noise with "
+                         "the still pinned on the first frames; ip+ramp = both")
+    ap.add_argument("--ramp", default=None,
+                    help="--mode ramp: per-frame still weights, e.g. 1,0.6,0.3,0.1")
+    ap.add_argument("--ip-scale", type=float, default=None,
+                    help="--mode ip: reference strength (default: the film's 0.7)")
     ap.add_argument("--strength", type=float, default=None,
                     help="how far the clip may move from the still (0..1)")
     a = ap.parse_args()
@@ -341,7 +389,10 @@ def main() -> int:
         if not a.shot:
             print("--animate needs --shot")
             return 2
-        return animate_test(project, a.shot, a.animate, a.strength)
+        return animate_test(project, a.shot, a.animate, a.strength, mode=a.mode,
+                            ip_scale=a.ip_scale,
+                            ramp=(tuple(float(x) for x in a.ramp.split(","))
+                                  if a.ramp else None))
     if a.choose is not None:
         if not a.shot:
             print("--choose needs --shot")
