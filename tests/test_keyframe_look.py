@@ -91,3 +91,15 @@ def test_studio_panel_lists_candidates_and_choosing_one_sets_the_keyframe(proj):
     use[1].click().run()
     assert not at.exception
     assert fs.get_shot(fs.load(p["slug"]), sid)["keyframe"].endswith("c1.png")
+
+
+def test_amused_prompt_puts_the_subject_clause_first():
+    p = "mountain ridge mid-afternoon wind gusts up, A male skydiver in orange jumps, sun"
+    out = kf.amused_prompt(p, "a skydiver")
+    assert out.startswith("A male skydiver in orange jumps")
+    assert out.endswith("mountain ridge mid-afternoon wind gusts up")   # moved, not dropped
+    assert sorted(out.split(", ")) == sorted(p.split(", "))
+    # already first, never named, or no subject: unchanged
+    assert kf.amused_prompt("A male skydiver, fog", "a skydiver") == "A male skydiver, fog"
+    assert kf.amused_prompt("a vast field, mist", "a skydiver") == "a vast field, mist"
+    assert kf.amused_prompt("tags, a skydiver", "") == "tags, a skydiver"

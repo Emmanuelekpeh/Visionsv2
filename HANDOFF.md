@@ -3380,3 +3380,8 @@ Untouched by decision: legacy film_project, --from-project, workspace/, ui_legac
 - `keyframe.py --look amused`: aMUSEd-256 still (256 px, 12 steps, CFG 10) -> upscaled -> DreamShaper img2img at 0.5/0.65/0.8 (full sampler). Each strength is its own candidate `c<n>.png` (+json: look, strength, seed); raw aMUSEd kept as `m<n>.png`. Numbering continues, nothing overwritten.
 - Studio: shot panel "first frame" (look, count, make candidates, pick one, go back). Job task `keyframes` in job_runner. Picking one sets `shot["keyframe"]` -> full tier, shot re-shoots from that still.
 - aMUSEd weights were NOT fully cached; first run downloaded the rest (~12 files). Looks tested on squid s05 only: see output of that run; the diver in the prompt never appeared in any candidate.
+
+### Part 9b - how prompts reach aMUSEd (measured, skydiving s01/s04/s05/s10/s12, aMUSEd only, same seeds)
+- aMUSEd-256 uses a CLIP text encoder, 77 tokens; our prompts are 26-46 tokens, so length is not the issue. Order and the negative are.
+- A raw+avoid-negative: good figures on s10/s12, no figure on s01. B raw, no negative: s10 became a snail-like body, s12 got a green suit. C subject-first, no negative: figure on s01 but washed out. D subject-first + avoid negative: best on all five. D is the default (`keyframe.amused_prompt`, avoid list from `fs.character_avoid`); the exact prompt is stored on each candidate's json (`amused_prompt`).
+- Sheets: output/audit/amused_humans/matrix.png (A,B,C rows) and matrix_D.png. DreamShaper stage on human shots not yet run.

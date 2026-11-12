@@ -52,8 +52,32 @@ AMUSED_REPO = "amused/amused-256"
 AMUSED_SIZE = 256
 AMUSED_STEPS = 12
 AMUSED_CFG = 10.0
+# Measured on five skydiving shots (same seeds, aMUSEd only): the character's avoid list
+# as the NEGATIVE is what keeps the figure's suit and anatomy right (without it s10
+# became a long snail-like body and s12 a green suit), and subject-first ordering
+# (`amused_prompt`) is what put a figure in s01. Both are on by default.
 LOOK_STRENGTHS = (0.5, 0.65, 0.8)
 LOOKS = ("plain", "amused")
+
+
+def amused_prompt(prompt: str, subject: str = "") -> str:
+    """The shot prompt re-ordered for aMUSEd: the clause that NAMES THE SUBJECT first.
+
+    Story prompts often open with scene tags ("mountain ridge mid-afternoon wind gusts
+    up, A male skydiver ..."). aMUSEd draws a 16x16 grid of tokens from one CLIP
+    embedding, and CLIP weights early words most, so a figure named late gets few of
+    them. The tags are moved to the END, not dropped. A prompt that already starts
+    with its subject, or never names it, is returned unchanged.
+    """
+    parts = [x.strip() for x in prompt.split(",") if x.strip()]
+    words = (subject or "").lower().replace("-", " ").split()
+    key = words[-1] if words else ""
+    if not key or len(parts) < 2:
+        return prompt.strip()
+    at = next((i for i, x in enumerate(parts) if key in x.lower()), None)
+    if not at:                                   # None (never named) or 0 (already first)
+        return prompt.strip()
+    return ", ".join(parts[at:] + parts[:at])
 
 
 def next_candidate(project: Dict, shot_id: str) -> int:
@@ -168,8 +192,9 @@ def render(project: Dict, shot_ids: List[str], candidates: int = 1,
     raw: Dict[str, List[Image.Image]] = {}
     if look == "amused":
         raw = _amused_stills(
-            {sid: [(candidate_seed(project, shots[sid], k), shots[sid]["prompt"], avoid)
-                   for k in range(candidates)] for sid in shot_ids}, threads)
+            {sid: [(candidate_seed(project, shots[sid], k),
+                    amused_prompt(shots[sid]["prompt"], shots[sid].get("subject", "")),
+                    avoid) for k in range(candidates)] for sid in shot_ids}, threads)
 
     pipe, torch = _pipeline()
     if threads:
@@ -218,6 +243,9 @@ def render(project: Dict, shot_ids: List[str], candidates: int = 1,
                     "cfg": plan["cfg"], "neg": neg, "look": look,
                     "strength": strength,
                     "amused": f"m{n}.png" if base is not None else None,
+                    "amused_prompt": (amused_prompt(shot["prompt"],
+                                                    shot.get("subject", ""))
+                                      if base is not None else None),
                     "seconds": round(time.time() - t0, 1)}, indent=2),
                     encoding="utf-8")
                 out[sid].append(p)
