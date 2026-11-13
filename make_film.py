@@ -535,11 +535,15 @@ class Generator:
             feature_extractor=pp.feature_extractor, image_encoder=pp.image_encoder)
         v2v.set_progress_bar_config(disable=True)
         from PIL import Image
-        base_img = still if hasattr(still, "convert") else Image.open(still)
-        base_img = base_img.convert("RGB").resize((SIZE, SIZE))
+        if isinstance(still, (list, tuple)):
+            # a MOVING input: one frame per output frame (see keyframe --mode move)
+            video = [f.convert("RGB").resize((SIZE, SIZE)) for f in still]
+        else:
+            base_img = still if hasattr(still, "convert") else Image.open(still)
+            video = [base_img.convert("RGB").resize((SIZE, SIZE))] * FRAMES
         t0 = time.time()
         with torch.no_grad():
-            out = v2v(video=[base_img] * FRAMES, prompt=shot.prompt,
+            out = v2v(video=video, prompt=shot.prompt,
                       negative_prompt=(f"{avoid}, {plan['neg']}" if avoid
                                        else plan["neg"]),
                       guidance_scale=plan["cfg"],

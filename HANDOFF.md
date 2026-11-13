@@ -3394,3 +3394,4 @@ Untouched by decision: legacy film_project, --from-project, workspace/, ui_legac
 - ip+ramp: same hard cut, then a fisheye view with 2-3 divers. Not usable.
 - Not tried: a long soft ramp (e.g. 1 -> 0.35 across all frames), v2v strength 0.85-0.9, and v2v on an input that already moves (the still with a slow zoom/pan, `camera_path.apply_path`) -- the cause of the static clip is identical input frames.
 - "step diff" is not comparable across rows when a clip contains a scene cut.
+- `--mode move --move zoom-in` (v2v strength 0.7 on the still with a 10% push-in, `camera_path.apply_path`, no settle): figure held, no cut, no doubling; ~87% of the input camera move survived (f0-f15 23 vs input 26). The diver's OWN motion is still minimal. Finished mp4: output/audit/skydiving/kf_s01_c1_move/finished.mp4. 33 min.

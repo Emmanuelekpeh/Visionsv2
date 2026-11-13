@@ -192,3 +192,36 @@ def test_anchor_callback_pins_frame0_and_leaves_the_free_frames_alone():
     last = cb(Pipe, len(sch.timesteps) - 1, sch.timesteps[-1],
               {"latents": torch.randn(1, 4, 8, 64, 64)})["latents"]
     assert torch.allclose(last[:, :, 0], z0)           # clean still after the last step
+
+
+def test_move_mode_hands_video_to_video_a_moving_input(tmp_path, monkeypatch):
+    import numpy as np
+    import make_film
+    p, sid = proj_two(tmp_path, monkeypatch)
+    d = kf.keyframe_dir(p, sid)
+    d.mkdir(parents=True, exist_ok=True)
+    rng = np.random.default_rng(0)
+    still = Image.fromarray((rng.random((64, 64, 3)) * 255).astype("uint8"))
+    still.save(d / "c0.png")
+    seen = {}
+
+    class Fake:
+        def __init__(self, *a, **k):
+            pass
+
+        def clip_from_still(self, shot, seed, src, strength=None, avoid=""):
+            seen["src"] = src
+            return [Image.new("RGB", (8, 8))] * 2, 1.0
+
+    monkeypatch.setattr(make_film, "Generator", Fake)
+    monkeypatch.setattr(kf, "ROOT", tmp_path)
+    assert kf.animate_test(p, sid, 0, None, mode="move", move="zoom-in") == 0
+    src = seen["src"]
+    assert isinstance(src, list) and len(src) == make_film.FRAMES
+    a = [np.asarray(f, dtype=np.float32) for f in src]
+    assert np.abs(a[0] - a[-1]).mean() > 5            # the input really moves
+    assert all(np.abs(a[i] - a[i + 1]).mean() > 0 for i in range(len(a) - 1))
+    ref = np.asarray(still.resize(src[0].size), dtype=np.float32)
+    assert np.abs(ref - a[0]).mean() < np.abs(ref - a[-1]).mean()   # frame 0 nearest
+    assert (tmp_path / "output" / "audit" / p["slug"] / f"kf_{sid}_c0_move"
+            / "f000.png").exists()

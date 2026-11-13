@@ -289,13 +289,14 @@ def approved(project: Dict, shot: Dict) -> Optional[Path]:
     return p if p.exists() else None
 
 
-ANIMATE_MODES = ("v2v", "ip", "ramp", "ip+ramp")
+ANIMATE_MODES = ("v2v", "move", "ip", "ramp", "ip+ramp")
 
 
 def animate_test(project: Dict, shot_id: str, candidate: int,
                  strength: Optional[float], mode: str = "v2v",
                  ip_scale: Optional[float] = None,
-                 ramp: Optional[tuple] = None) -> int:
+                 ramp: Optional[tuple] = None, move: str = "zoom-in",
+                 move_amount: float = 0.0) -> int:
     """Animate one candidate through the render's own generator. No take is written.
 
     v2v      `clip_from_still`: the still repeated, noised to `strength`. Measured on
@@ -303,6 +304,10 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
              high-noise steps that decide motion).
     ip       generate FROM NOISE (full schedule) with the still as an IP-Adapter
              reference, which carries look, suit and figure; pose may drift.
+    move     video-to-video on an input that ALREADY MOVES: the still given a slow
+             camera path (`camera_path.apply_path`, no hold), so the temporal layers
+             are handed real motion to keep instead of 16 identical frames. The
+             motion is the camera's; the subject's own motion is up to the model.
     ramp     generate from noise but re-impose the still on the first frames after
              every step (`make_film.anchor_callback`): frame 0 is the still, later
              frames are freer.
@@ -325,12 +330,20 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
     seed = candidate_seed(project, shot, candidate)
     avoid = fs.character_avoid(project)
     use_ip, use_ramp = "ip" in mode, "ramp" in mode
-    if mode == "v2v":
-        frames, dt = gen.clip_from_still(s, seed, still, strength=strength,
+    if mode in ("v2v", "move"):
+        src = still
+        if mode == "move":
+            from camera_path import apply_path
+            img = Image.open(still).convert("RGB").resize((make_film.SIZE,) * 2)
+            src = apply_path([img] * make_film.FRAMES, move, float(move_amount),
+                             settle=1.0)
+        frames, dt = gen.clip_from_still(s, seed, src, strength=strength,
                                          avoid=avoid)
-        label = ("v2v strength "
+        label = ((f"move {move} {move_amount} + " if mode == "move" else "") +
+                 "v2v strength "
                  f"{strength if strength is not None else fs.KEYFRAME_STRENGTH}")
-        suffix = "" if strength is None else f"_s{int(round(strength * 100))}"
+        suffix = ("_move" if mode == "move" else "") + (
+            "" if strength is None else f"_s{int(round(strength * 100))}")
     else:
         if ip_scale is not None:
             make_film.IP_ADAPTER_SCALE = float(ip_scale)
@@ -377,6 +390,11 @@ def main() -> int:
                     help="--animate: v2v = start from the still; ip = from noise with "
                          "the still as an IP-Adapter reference; ramp = from noise with "
                          "the still pinned on the first frames; ip+ramp = both")
+    ap.add_argument("--move", default="zoom-in",
+                    help="--mode move: a camera_path move (zoom-in, zoom-out, pan-left, "
+                         "pan-right, tilt-up, tilt-down)")
+    ap.add_argument("--move-amount", type=float, default=0.0,
+                    help="--mode move: travel in px for pans/tilts (0 for a zoom)")
     ap.add_argument("--ramp", default=None,
                     help="--mode ramp: per-frame still weights, e.g. 1,0.6,0.3,0.1")
     ap.add_argument("--ip-scale", type=float, default=None,
@@ -390,7 +408,8 @@ def main() -> int:
             print("--animate needs --shot")
             return 2
         return animate_test(project, a.shot, a.animate, a.strength, mode=a.mode,
-                            ip_scale=a.ip_scale,
+                            ip_scale=a.ip_scale, move=a.move,
+                            move_amount=a.move_amount,
                             ramp=(tuple(float(x) for x in a.ramp.split(","))
                                   if a.ramp else None))
     if a.choose is not None:
