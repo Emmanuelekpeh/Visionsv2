@@ -357,7 +357,8 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
                  strength: Optional[float], mode: str = "v2v",
                  ip_scale: Optional[float] = None,
                  ramp: Optional[tuple] = None, move: str = "zoom-in",
-                 move_amount: float = 0.0, svd: Optional[Dict] = None) -> int:
+                 move_amount: float = 0.0, svd: Optional[Dict] = None,
+                 avoid_extra: str = "") -> int:
     """Animate one candidate through the render's own generator. No take is written.
 
     v2v      `clip_from_still`: the still repeated, noised to `strength`. Measured on
@@ -392,6 +393,8 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
     gen = make_film.Generator("models/dreamshaper8", loras=[])
     seed = candidate_seed(project, shot, candidate)
     avoid = fs.character_avoid(project)
+    if avoid_extra:                       # extra negatives for THIS test only
+        avoid = f"{avoid}, {avoid_extra}" if avoid else avoid_extra
     use_ip, use_ramp = "ip" in mode, "ramp" in mode
     if mode in ("v2v", "move"):
         src = still
@@ -421,7 +424,7 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
         label = " + ".join(
             ([f"ip-adapter scale {make_film.IP_ADAPTER_SCALE}"] if use_ip else [])
             + ([f"ramp {tuple(ramp or make_film.ANCHOR_RAMP)}"] if use_ramp else []))
-        suffix = "_" + mode.replace("+", "")
+        suffix = "_" + mode.replace("+", "") + ("_x" if avoid_extra else "")
     out = (ROOT / "output" / "audit" / project["slug"]
            / f"kf_{shot_id}_c{candidate}{suffix}")
     out.mkdir(parents=True, exist_ok=True)
@@ -461,6 +464,9 @@ def main() -> int:
                          "followed (SVD default is 0.02)")
     ap.add_argument("--crop-y", type=int, default=150,
                     help="--mode svd: top of the 512x288 window cut from the still")
+    ap.add_argument("--avoid-extra", default="",
+                    help="--animate: extra negative-prompt words for this test only, "
+                         "e.g. 'two people, duplicate'")
     ap.add_argument("--move", default="zoom-in",
                     help="--mode move: a camera_path move (zoom-in, zoom-out, pan-left, "
                          "pan-right, tilt-up, tilt-down)")
@@ -481,6 +487,7 @@ def main() -> int:
         return animate_test(project, a.shot, a.animate, a.strength, mode=a.mode,
                             ip_scale=a.ip_scale, move=a.move,
                             move_amount=a.move_amount,
+                            avoid_extra=a.avoid_extra,
                             svd={"motion_bucket": a.motion_bucket,
                                  "noise_aug": a.noise_aug, "crop_y": a.crop_y},
                             ramp=(tuple(float(x) for x in a.ramp.split(","))

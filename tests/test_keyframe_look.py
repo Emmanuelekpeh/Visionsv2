@@ -129,6 +129,11 @@ def test_ip_animation_passes_the_still_as_reference_and_refuses_when_uncondition
     assert make_film.IP_ADAPTER_SCALE == 0.9
     assert (tmp_path / "output" / "audit" / p["slug"] / f"kf_{sid}_c0_ip"
             / "f000.png").exists()
+    assert kf.animate_test(p, sid, 0, None, mode="ip",
+                           avoid_extra="two people, duplicate") == 0
+    assert "two people, duplicate" in seen["avoid"]
+    assert (tmp_path / "output" / "audit" / p["slug"] / f"kf_{sid}_c0_ip_x"
+            / "f000.png").exists()
     seen["cond"] = False                      # adapter failed to load
     assert kf.animate_test(p, sid, 0, None, mode="ip") == 3
     seen.update(cond=True)
