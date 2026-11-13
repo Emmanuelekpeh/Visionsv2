@@ -289,14 +289,75 @@ def approved(project: Dict, shot: Dict) -> Optional[Path]:
     return p if p.exists() else None
 
 
-ANIMATE_MODES = ("v2v", "move", "ip", "ramp", "ip+ramp")
+ANIMATE_MODES = ("v2v", "move", "ip", "ramp", "ip+ramp", "svd")
+
+
+SVD_SIZE = (512, 288)          # width, height: what was measured on this machine
+SVD_FRAMES = 14
+
+
+def _svd_pipeline():
+    import torch
+    from diffusers import StableVideoDiffusionPipeline
+    pipe = StableVideoDiffusionPipeline.from_pretrained(
+        str(ROOT / "models" / "svd_xt"), torch_dtype=torch.float32, variant="fp16")
+    pipe.set_progress_bar_config(disable=True)
+    pipe.enable_attention_slicing()
+    try:
+        pipe.enable_vae_slicing()
+    except Exception:
+        pass
+    return pipe
+
+
+def svd_animate(project: Dict, shot_id: str, candidate: int, motion_bucket: int = 200,
+                noise_aug: float = 0.1, crop_y: int = 150, steps: int = 25) -> int:
+    """Stable Video Diffusion XT on the chosen still (a real image-to-video model).
+
+    The earlier SVD measurement (HANDOFF section 3) used the defaults, motion bucket
+    127 and noise augmentation 0.02, and found almost no motion. Both knobs trade
+    fidelity for motion: a higher bucket asks for more movement, a higher noise
+    augmentation loosens how tightly the still is followed. The 512x512 still is
+    cropped to 512x288 at `crop_y` (SVD wants a wide frame); no take is written.
+    """
+    import torch
+    shot = fs.get_shot(project, shot_id)
+    still = keyframe_dir(project, shot_id) / f"c{int(candidate)}.png"
+    if not still.exists():
+        print(f"{still} does not exist")
+        return 2
+    w, h = SVD_SIZE
+    img = Image.open(still).convert("RGB")
+    crop_y = max(0, min(int(crop_y), img.height - int(img.width * h / w)))
+    img = img.crop((0, crop_y, img.width, crop_y + round(img.width * h / w))).resize(
+        (w, h), Image.LANCZOS)
+    pipe = _svd_pipeline()
+    t0 = time.time()
+    with torch.no_grad():
+        out = pipe(img, num_frames=SVD_FRAMES, decode_chunk_size=2, height=h, width=w,
+                   num_inference_steps=int(steps), min_guidance_scale=1.0,
+                   max_guidance_scale=3.0, motion_bucket_id=int(motion_bucket),
+                   noise_aug_strength=float(noise_aug), fps=7,
+                   generator=torch.Generator("cpu").manual_seed(
+                       candidate_seed(project, shot, candidate)))
+    dt = time.time() - t0
+    d = (ROOT / "output" / "audit" / project["slug"]
+         / f"kf_{shot_id}_c{candidate}_svd_m{int(motion_bucket)}")
+    d.mkdir(parents=True, exist_ok=True)
+    img.save(d / "input.png")
+    for i, fr in enumerate(out.frames[0]):
+        fr.convert("RGB").save(d / f"f{i:03d}.png")
+    print(f"[keyframe] animated {shot_id} c{candidate} svd bucket {motion_bucket} "
+          f"noise_aug {noise_aug}: {len(out.frames[0])} frames in {dt:.0f}s -> {d}",
+          flush=True)
+    return 0
 
 
 def animate_test(project: Dict, shot_id: str, candidate: int,
                  strength: Optional[float], mode: str = "v2v",
                  ip_scale: Optional[float] = None,
                  ramp: Optional[tuple] = None, move: str = "zoom-in",
-                 move_amount: float = 0.0) -> int:
+                 move_amount: float = 0.0, svd: Optional[Dict] = None) -> int:
     """Animate one candidate through the render's own generator. No take is written.
 
     v2v      `clip_from_still`: the still repeated, noised to `strength`. Measured on
@@ -315,10 +376,12 @@ def animate_test(project: Dict, shot_id: str, candidate: int,
     The IP modes refuse to run if the adapter did not load: an unconditioned clip
     would pass for a result it is not.
     """
-    import make_film
-    from previs import shots_from_store
     if mode not in ANIMATE_MODES:
         raise ValueError(f"mode must be one of {ANIMATE_MODES}, not {mode!r}")
+    if mode == "svd":
+        return svd_animate(project, shot_id, candidate, **(svd or {}))
+    import make_film
+    from previs import shots_from_store
     shot = fs.get_shot(project, shot_id)
     still = keyframe_dir(project, shot_id) / f"c{int(candidate)}.png"
     if not still.exists():
@@ -390,6 +453,14 @@ def main() -> int:
                     help="--animate: v2v = start from the still; ip = from noise with "
                          "the still as an IP-Adapter reference; ramp = from noise with "
                          "the still pinned on the first frames; ip+ramp = both")
+    ap.add_argument("--motion-bucket", type=int, default=200,
+                    help="--mode svd: 0..255, higher asks for more movement (default "
+                         "SVD value is 127)")
+    ap.add_argument("--noise-aug", type=float, default=0.1,
+                    help="--mode svd: higher loosens how tightly the still is "
+                         "followed (SVD default is 0.02)")
+    ap.add_argument("--crop-y", type=int, default=150,
+                    help="--mode svd: top of the 512x288 window cut from the still")
     ap.add_argument("--move", default="zoom-in",
                     help="--mode move: a camera_path move (zoom-in, zoom-out, pan-left, "
                          "pan-right, tilt-up, tilt-down)")
@@ -410,6 +481,8 @@ def main() -> int:
         return animate_test(project, a.shot, a.animate, a.strength, mode=a.mode,
                             ip_scale=a.ip_scale, move=a.move,
                             move_amount=a.move_amount,
+                            svd={"motion_bucket": a.motion_bucket,
+                                 "noise_aug": a.noise_aug, "crop_y": a.crop_y},
                             ramp=(tuple(float(x) for x in a.ramp.split(","))
                                   if a.ramp else None))
     if a.choose is not None:

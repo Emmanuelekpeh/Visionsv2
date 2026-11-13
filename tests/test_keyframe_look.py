@@ -225,3 +225,31 @@ def test_move_mode_hands_video_to_video_a_moving_input(tmp_path, monkeypatch):
     assert np.abs(ref - a[0]).mean() < np.abs(ref - a[-1]).mean()   # frame 0 nearest
     assert (tmp_path / "output" / "audit" / p["slug"] / f"kf_{sid}_c0_move"
             / "f000.png").exists()
+
+
+def test_svd_mode_crops_the_still_and_passes_the_motion_knobs(tmp_path, monkeypatch):
+    p, sid = proj_two(tmp_path, monkeypatch)
+    d = kf.keyframe_dir(p, sid)
+    d.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (512, 512), (10, 20, 30)).save(d / "c0.png")
+    seen = {}
+
+    class FakePipe:
+        def __call__(self, img, **kw):
+            seen["size"] = img.size
+            seen.update(kw)
+            class R:
+                frames = [[Image.new("RGB", (512, 288))] * 3]
+            return R
+
+    monkeypatch.setattr(kf, "_svd_pipeline", lambda: FakePipe())
+    monkeypatch.setattr(kf, "ROOT", tmp_path)
+    assert kf.animate_test(p, sid, 0, None, mode="svd",
+                           svd={"motion_bucket": 230, "noise_aug": 0.15,
+                                "crop_y": 100}) == 0
+    assert seen["size"] == (512, 288)
+    assert seen["motion_bucket_id"] == 230 and seen["noise_aug_strength"] == 0.15
+    assert seen["num_frames"] == kf.SVD_FRAMES
+    out = tmp_path / "output" / "audit" / p["slug"] / f"kf_{sid}_c0_svd_m230"
+    assert (out / "f002.png").exists() and (out / "input.png").exists()
+    assert kf.animate_test(p, sid, 9, None, mode="svd") == 2        # no such candidate
